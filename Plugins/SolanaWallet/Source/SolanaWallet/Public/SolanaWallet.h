@@ -11,9 +11,7 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
-	void StartActivity(const FString& Action, const FString& Uri);
-	void RunTest();
-
-protected:
-	void InitJNI() const;
+	//void StartActivity(const FString& Action, const FString& Uri);
+//protected:
+	//void InitJNI() const;
 };

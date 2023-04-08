@@ -25,7 +25,6 @@ void UWallet::Initialize()
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 
 	WalletClass = FAndroidApplication::FindJavaClassGlobalRef(GetClassName());
-	//jclass WalletClass = Env->FindClass("com/solanamobile/seedvault/Wallet");
 	check(WalletClass);
 
 	WalletCreateSeedMethod = Env->GetStaticMethodID(WalletClass, "createSeed", "(I)Landroid/content/Intent;");
@@ -36,11 +35,11 @@ void UWallet::Initialize()
 #endif
 }
 
-FIntent UWallet::CreateSeed(int32 Purpose)
+FIntent UWallet::CreateSeed(EWalletContractV1 Purpose)
 {
 #if PLATFORM_ANDROID && USE_ANDROID_JNI
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	return FIntent(Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, Purpose));
+	return FIntent(Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose));
 #else
 	return FIntent();
 #endif	

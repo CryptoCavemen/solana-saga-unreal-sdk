@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SolanaWallet.h"
-
 #include "Wallet.h"
 
+/*
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidJava.h"
@@ -31,17 +31,19 @@ jclass UriClass = nullptr;
 jmethodID UriParseMethod = nullptr;
 
 #endif
-
+*/
 
 void FSolanaWalletModule::StartupModule()
 {
-	InitJNI();
+	UWallet::Initialize();
+	//InitJNI();
 }
 
 void FSolanaWalletModule::ShutdownModule()
 {
 }
 
+/*
 void FSolanaWalletModule::StartActivity(const FString& Action, const FString& Uri)
 {	
 #if PLATFORM_ANDROID
@@ -69,31 +71,11 @@ void FSolanaWalletModule::StartActivity(const FString& Action, const FString& Ur
 #endif
 }
 
-void FSolanaWalletModule::RunTest()
-{
-#if PLATFORM_ANDROID	
-	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	check(Env);
-
-	jclass WalletClass = FAndroidApplication::FindJavaClass("com/solanamobile/seedvault/Wallet");
-	check(WalletClass);
-	
-	//jclass WalletClass = Env->FindClass("com/solanamobile/seedvault/Wallet");
-	//check(WalletClass);
-
-	jmethodID WalletCreateSeedMethod = Env->GetStaticMethodID(WalletClass, "createSeed", "(I)Landroid/content/Intent;");
-	check(WalletCreateSeedMethod);
-
-	int32 Value = 0;
-	Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, Value);
-#endif
-}
 
 void FSolanaWalletModule::InitJNI() const
 {
-#if PLATFORM_ANDROID
-	FWallet::Initialize();
-		
+
+#if PLATFORM_ANDROID		
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 	check(Env);
 
@@ -106,9 +88,10 @@ void FSolanaWalletModule::InitJNI() const
 	IntentSetDataMethod = Env->GetMethodID(IntentClass, "setData", "(Landroid/net/Uri;)Landroid/content/Intent;");
 
 	UriClass = Env->FindClass("android/net/Uri");
-	UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
+	UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;"); 
 #endif
 }
+*/
 
 #undef LOCTEXT_NAMESPACE
 	

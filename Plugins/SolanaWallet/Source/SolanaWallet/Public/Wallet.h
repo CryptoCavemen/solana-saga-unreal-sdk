@@ -38,6 +38,12 @@ struct FIntent
 	}
 };
 
+UENUM(BlueprintType)
+enum class EWalletContractV1 : uint8
+{
+	PURPOSE_SIGN_SOLANA_TRANSACTION = 0,
+};
+
 /**
  * Wrapper for com/solanamobile/seedvault/Wallet.java. 
  */
@@ -52,7 +58,7 @@ public:
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	static FIntent CreateSeed(int32 Purpose);
+	static FIntent CreateSeed(EWalletContractV1 Purpose);
 	UFUNCTION(BlueprintCallable)
 	static int64 OnCreateSeedResult(int32 ResultCode, FIntent Intent);
 };

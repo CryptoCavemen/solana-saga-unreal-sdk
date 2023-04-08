@@ -14,5 +14,5 @@ void UTestUserWidget::OnButtonClicked()
 	//SolanaWallet.StartActivity(Action, Uri);
 	//SolanaWallet.RunTest();
 	
-	UWallet::CreateSeed(0);
+	UWallet::CreateSeed(EWalletContractV1::PURPOSE_SIGN_SOLANA_TRANSACTION);
 }
