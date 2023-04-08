@@ -27,15 +27,8 @@ struct FIntent
 	FIntent(void* InJObject) : JObject(InJObject) {}
 #endif
 
-	FIntent()
-	{
-		JObject = nullptr;
-	}
-	
-	FIntent(const FIntent& Other)
-	{
-		JObject = Other.JObject;
-	}
+	FIntent() : JObject(nullptr) {}
+	FIntent(const FIntent& Other) : JObject(Other.JObject) {}
 };
 
 UENUM(BlueprintType)
