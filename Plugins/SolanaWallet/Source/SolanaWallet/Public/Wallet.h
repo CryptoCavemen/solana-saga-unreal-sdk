@@ -3,10 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#if PLATFORM_ANDROID && USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 #include "Android/AndroidJNI.h"
 #endif
-
 #include "Defines.h"
 #include "Wallet.generated.h"
 
@@ -15,7 +14,7 @@ struct FIntent
 {
 	GENERATED_BODY()
 
-#if PLATFORM_ANDROID && USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 	jobject JObject;
 	FIntent(jobject InJObject) : JObject(InJObject) {}
 #else
@@ -39,14 +38,13 @@ enum class EWalletContractV1 : uint8
 UCLASS()
 class SOLANAWALLET_API UWallet : public UBlueprintFunctionLibrary
 {
+	friend class FSolanaWalletModule;
 	GENERATED_BODY()
-public:
+protected:
 	static const char* GetClassName();
 	/** initialize java objects and cache them for further usage. called when the module is loaded */
 	static void Initialize();
-protected:
 	static void StartActivityForResult(FIntent Intent, int32 RequestCode);
-	
 public:
 	UFUNCTION(BlueprintCallable)
 	static FIntent CreateSeed(EWalletContractV1 Purpose);
