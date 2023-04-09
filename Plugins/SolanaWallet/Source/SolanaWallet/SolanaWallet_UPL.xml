@@ -4,129 +4,98 @@
 	<!-- init section is always evaluated once per architecture -->
 	<init>
 		<log text="SolanaWallet init"/>
-		<!-- currently supports all architectures -->
-		<setBool result="bSupported" value="true"/>
-		<if condition="bSupported">
-			<true>
-			</true>
-			<false>
-				<log text="SolanaWallet not supported for this architecture, disabled."/>
-			</false>
-		</if>
 	</init>
 
 	<!-- optional updates applied to AndroidManifest.xml -->
 	<androidManifestUpdates>
-		<if condition="bSupported">
-			<true>
-			</true>
-		</if>
 	</androidManifestUpdates>
 
 	<!-- optional additions to proguard -->
 	<proguardAdditions>
 		<insert>
 -keep class com.solanamobile.seedvault.** { *; }
+-keep class com.solanamobile.unreal.** { *; }
 		</insert>
 	</proguardAdditions>
 
 	<prebuildCopies>
-		<if condition="bSupported">
-			<true>
-				<copyDir src="$S(PluginDir)/java" dst="$S(BuildDir)/src" />
-			</true>
-		</if>		
+		<copyDir src="$S(PluginDir)/java" dst="$S(BuildDir)/src" />
 	</prebuildCopies>
 	
 	<!-- optional additions to the GameActivity imports in GameActivity.java -->
 	<gameActivityImportAdditions>
-		<if condition="bSupported">
-			<true>
+		<insert>
 // SolanaWallet imports
-import com.solanamobile.seedvault.Wallet
-import com.solanamobile.seedvault.WalletContractV1				
-			</true>
-		</if>
+import com.solanamobile.seedvault.Wallet;
+import com.solanamobile.seedvault.WalletContractV1;
+import com.solanamobile.unreal.WalletJavaHelper;
+		</insert>
 	</gameActivityImportAdditions>
 
 	<!-- optional additions to the GameActivity class in GameActivity.java -->
 	<gameActivityClassAdditions>
-		<if condition="bSupported">
-			<true>
-	companion object { 
-		private val TAG = GameActivity::class.simpleName
-		private const val REQUEST_AUTHORIZE_SEED_ACCESS = 0
-		private const val REQUEST_CREATE_NEW_SEED = 1
-		private const val REQUEST_IMPORT_EXISTING_SEED = 2
-		private const val REQUEST_SIGN_TRANSACTIONS = 3
-		private const val REQUEST_SIGN_MESSAGES = 4
-		private const val REQUEST_GET_PUBLIC_KEYS = 5
-		private const val KEY_PENDING_EVENT = "pendingEvent"
-	}				
-			</true>
-		</if>
+		<insert>
+	private static final int REQUEST_AUTHORIZE_SEED_ACCESS = 0;
+	private static final int REQUEST_CREATE_NEW_SEED = 1;
+	private static final int REQUEST_IMPORT_EXISTING_SEED = 2;
+	private static final int REQUEST_SIGN_TRANSACTIONS = 3;
+	private static final int REQUEST_SIGN_MESSAGES = 4;
+	private static final int REQUEST_GET_PUBLIC_KEYS = 5;
+	private static final String KEY_PENDING_EVENT = "pendingEvent";
+			
+		</insert>
 	</gameActivityClassAdditions>
 
-	<!-- optional additions to GameActivity onCreate in GameActivity.java
+	<!-- optional additions to GameActivity onCreate in GameActivity.java -->
 	<gameActivityOnCreateAdditions>
-	</gameActivityOnCreateAdditions>
-	-->
+		<insert>
+		</insert>
+	</gameActivityOnCreateAdditions>	
 
-	<!-- optional additions to GameActivity onDestroy in GameActivity.java
+	<!-- optional additions to GameActivity onDestroy in GameActivity.java -->
 	<gameActivityOnDestroyAdditions>
-	</gameActivityOnDestroyAdditions>
-	-->
+		<insert>
+		</insert>
+	</gameActivityOnDestroyAdditions>	
 
 	<!-- optional additions to GameActivity onStop in GameActivity.java -->
 	<gameActivityOnStopAdditions>
-		<if condition="bSupported">
-			<true>
-				<insert>
-				</insert>
-			</true>
-		</if>
+		<insert>
+		</insert>
 	</gameActivityOnStopAdditions>
 	
 	
 	<!-- optional additions to GameActivity onPause in GameActivity.java -->
 	<gameActivityOnPauseAdditions>
-		<if condition="bSupported">
-			<true>
-				<insert>
-				</insert>
-			</true>
-		</if>
+		<insert>
+		</insert>
 	</gameActivityOnPauseAdditions>
 	
 	<!-- optional additions to GameActivity onResume in GameActivity.java -->
 	<gameActivityOnResumeAdditions>
-		<if condition="bSupported">
-			<true>
-				<insert>
-				</insert>
-			</true>
-		</if>
+		<insert>
+		</insert>
 	</gameActivityOnResumeAdditions>
 	
 	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
 	<gameActivityOnActivityResultAdditions>
-		<if condition="bSupported">
-			<true>
-				<insert>
-	// Begin SolanaWallet onActivityResult
-	if (requestCode == REQUEST_AUTHORIZE_SEED_ACCESS)
-	{
-		try {
-			val authToken = Wallet.onAuthorizeSeedResult(resultCode, data)
-			Log.d(TAG, "Seed authorized, AuthToken=$authToken")
-		} catch (e: Wallet.ActionFailedException) {
-			Log.e(TAG, "Seed authorization failed", e)
-		}
-	} 
-	// End SolanaWallet onActivityResult
-				</insert>
-			</true>
-		</if>
+		<insert>
+		// Begin SolanaWallet onActivityResult
+		if (requestCode == REQUEST_CREATE_NEW_SEED) 
+		{
+			try 
+			{
+				long authToken = Wallet.onCreateSeedResult(resultCode, data);
+				Log.debug("Seed created, AuthToken=$authToken");
+				WalletJavaHelper.onCreateSeed(authToken);				
+			} 
+			catch (Wallet.ActionFailedException e) 
+			{
+				Log.error("Seed creation failed", e);
+			}
+		} 
+		// End SolanaWallet onActivityResult
+		</insert>
 	</gameActivityOnActivityResultAdditions>
 	
 	<!-- optional libraries to load in GameActivity.java before libUE4.so -->

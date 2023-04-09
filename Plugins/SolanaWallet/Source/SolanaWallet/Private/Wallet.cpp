@@ -3,8 +3,10 @@
 
 #include "Wallet.h"
 
-#if PLATFORM_ANDROID && USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
+#include "Android/AndroidPlatform.h"
+#include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJava.h"
 #include "Android/AndroidJNI.h"
 
@@ -14,7 +16,6 @@ jmethodID ActivityStartActivityForResultMethod = nullptr;
 
 static jclass WalletClass;
 static jmethodID WalletCreateSeedMethod;
-static jmethodID WalletOnCreateSeedResult;
 
 #endif
 
@@ -36,7 +37,7 @@ const char* UWallet::GetClassName()
 
 void UWallet::Initialize()
 {
-#if PLATFORM_ANDROID && USE_ANDROID_JNI	
+#if PLATFORM_ANDROID	
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 
 	ActivityClass = Env->GetObjectClass(FAndroidApplication::GetGameActivityThis());
@@ -50,39 +51,33 @@ void UWallet::Initialize()
 	check(WalletClass);
 	WalletCreateSeedMethod = Env->GetStaticMethodID(WalletClass, "createSeed", "(I)Landroid/content/Intent;");
 	check(WalletCreateSeedMethod);
-	WalletOnCreateSeedResult = Env->GetStaticMethodID(WalletClass, "onCreateSeedResult", "(ILandroid/content/Intent;)I");
-	check(WalletOnCreateSeedResult);
 #endif
 }
 
 void UWallet::StartActivityForResult(FIntent Intent, int32 RequestCode)
 {
-#if PLATFORM_ANDROID && USE_ANDROID_JNI	
+#if PLATFORM_ANDROID	
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 	Env->CallVoidMethod(FAndroidApplication::GetGameActivityThis(), ActivityStartActivityForResultMethod, Intent.JObject, RequestCode);
+	AndroidJavaEnv::CheckJavaException();
 #endif
 }
 
 FIntent UWallet::CreateSeed(EWalletContractV1 Purpose)
 {
-#if PLATFORM_ANDROID && USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	FIntent Intent(Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose));
+	FIntent Intent = Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose);
+	AndroidJavaEnv::CheckJavaException();
 	if (Intent.JObject)
-		StartActivityForResult(Intent, (int32)EActivityRequestCode::REQUEST_AUTHORIZE_SEED_ACCESS);
+		StartActivityForResult(Intent, (int32)EActivityRequestCode::REQUEST_CREATE_NEW_SEED);
 	return Intent;
 #else
 	return FIntent();
 #endif	
 }
 
-int64 UWallet::OnCreateSeedResult(int32 ResultCode, FIntent Intent)
+void UWallet::OnCreateSeed(int64 AuthToken)
 {
-#if PLATFORM_ANDROID && USE_ANDROID_JNI
-	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	jlong Value = Env->CallStaticLongMethod(WalletClass, WalletOnCreateSeedResult, ResultCode, Intent.JObject);
-	return Value; 
-#else
-	return -1;
-#endif
+	UE_LOG(LogTemp, Log, TEXT("OnCreateSeed(): AuthToken = %lld"), AuthToken);	
 }
