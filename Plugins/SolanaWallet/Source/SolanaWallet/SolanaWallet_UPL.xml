@@ -42,6 +42,9 @@
 	<gameActivityImportAdditions>
 		<if condition="bSupported">
 			<true>
+// SolanaWallet imports
+import com.solanamobile.seedvault.Wallet
+import com.solanamobile.seedvault.WalletContractV1				
 			</true>
 		</if>
 	</gameActivityImportAdditions>
@@ -50,6 +53,16 @@
 	<gameActivityClassAdditions>
 		<if condition="bSupported">
 			<true>
+	companion object { 
+		private val TAG = GameActivity::class.simpleName
+		private const val REQUEST_AUTHORIZE_SEED_ACCESS = 0
+		private const val REQUEST_CREATE_NEW_SEED = 1
+		private const val REQUEST_IMPORT_EXISTING_SEED = 2
+		private const val REQUEST_SIGN_TRANSACTIONS = 3
+		private const val REQUEST_SIGN_MESSAGES = 4
+		private const val REQUEST_GET_PUBLIC_KEYS = 5
+		private const val KEY_PENDING_EVENT = "pendingEvent"
+	}				
 			</true>
 		</if>
 	</gameActivityClassAdditions>
@@ -73,8 +86,8 @@
 			</true>
 		</if>
 	</gameActivityOnStopAdditions>
-
-
+	
+	
 	<!-- optional additions to GameActivity onPause in GameActivity.java -->
 	<gameActivityOnPauseAdditions>
 		<if condition="bSupported">
@@ -84,7 +97,7 @@
 			</true>
 		</if>
 	</gameActivityOnPauseAdditions>
-
+	
 	<!-- optional additions to GameActivity onResume in GameActivity.java -->
 	<gameActivityOnResumeAdditions>
 		<if condition="bSupported">
@@ -94,12 +107,28 @@
 			</true>
 		</if>
 	</gameActivityOnResumeAdditions>
-
-	<!-- optional additions to GameActivity onActivityResult in GameActivity.java
+	
+	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
 	<gameActivityOnActivityResultAdditions>
+		<if condition="bSupported">
+			<true>
+				<insert>
+	// Begin SolanaWallet onActivityResult
+	if (requestCode == REQUEST_AUTHORIZE_SEED_ACCESS)
+	{
+		try {
+			val authToken = Wallet.onAuthorizeSeedResult(resultCode, data)
+			Log.d(TAG, "Seed authorized, AuthToken=$authToken")
+		} catch (e: Wallet.ActionFailedException) {
+			Log.e(TAG, "Seed authorization failed", e)
+		}
+	} 
+	// End SolanaWallet onActivityResult
+				</insert>
+			</true>
+		</if>
 	</gameActivityOnActivityResultAdditions>
-	-->
-
+	
 	<!-- optional libraries to load in GameActivity.java before libUE4.so -->
 	<soLoadLibrary>
 	</soLoadLibrary>

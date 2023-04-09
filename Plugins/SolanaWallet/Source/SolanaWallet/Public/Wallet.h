@@ -48,6 +48,8 @@ public:
 	static const char* GetClassName();
 	/** initialize java objects and cache them for further usage. called when the module is loaded */
 	static void Initialize();
+protected:
+	static void StartActivityForResult(FIntent Intent, int32 RequestCode);
 	
 public:
 	UFUNCTION(BlueprintCallable)
