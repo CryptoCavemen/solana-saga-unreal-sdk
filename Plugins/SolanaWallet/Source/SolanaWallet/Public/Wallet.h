@@ -9,11 +9,8 @@
 #include "Defines.h"
 #include "Wallet.generated.h"
 
-USTRUCT(BlueprintType)
 struct FIntent
 {
-	GENERATED_BODY()
-
 #if PLATFORM_ANDROID
 	jobject JObject;
 	FIntent(jobject InJObject) : JObject(InJObject) {}
@@ -47,6 +44,6 @@ protected:
 	static void StartActivityForResult(FIntent Intent, int32 RequestCode);
 public:
 	UFUNCTION(BlueprintCallable)
-	static FIntent CreateSeed(EWalletContractV1 Purpose);
-	static void OnCreateSeed(int64 AuthToken);
+	static void CreateSeed(EWalletContractV1 Purpose = EWalletContractV1::PURPOSE_SIGN_SOLANA_TRANSACTION);
+	static void OnCreateSeed(bool bSuccess, int64 AuthToken);
 };

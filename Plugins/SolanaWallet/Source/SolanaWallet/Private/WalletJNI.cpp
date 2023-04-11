@@ -11,9 +11,9 @@
 extern "C"
 {
 	// Functions that are called on Android lifecycle events.
-	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeed(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeed(JNIEnv* LocalJNIEnv, jobject LocalThis, jboolean bSuccess, jlong AuthToken)
 	{
-		UWallet::OnCreateSeed(AuthToken);
+		UWallet::OnCreateSeed(bSuccess, AuthToken);
 	}
 }
 

@@ -51,13 +51,13 @@ import com.solanamobile.unreal.WalletJavaHelper;
 	<gameActivityOnCreateAdditions>
 		<insert>
 		</insert>
-	</gameActivityOnCreateAdditions>	
+	</gameActivityOnCreateAdditions>
 
 	<!-- optional additions to GameActivity onDestroy in GameActivity.java -->
 	<gameActivityOnDestroyAdditions>
 		<insert>
 		</insert>
-	</gameActivityOnDestroyAdditions>	
+	</gameActivityOnDestroyAdditions>
 
 	<!-- optional additions to GameActivity onStop in GameActivity.java -->
 	<gameActivityOnStopAdditions>
@@ -88,11 +88,12 @@ import com.solanamobile.unreal.WalletJavaHelper;
 			{
 				long authToken = Wallet.onCreateSeedResult(resultCode, data);
 				Log.debug("Seed created, AuthToken=$authToken");
-				WalletJavaHelper.onCreateSeed(authToken);				
+				WalletJavaHelper.onCreateSeed(true, authToken);
 			}
 			catch (Wallet.ActionFailedException e) 
 			{
 				Log.error("Seed creation failed", e);
+				WalletJavaHelper.onCreateSeed(false, -1);				
 			}
 		} 
 		// End SolanaWallet onActivityResult

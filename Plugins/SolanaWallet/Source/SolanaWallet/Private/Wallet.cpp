@@ -63,21 +63,26 @@ void UWallet::StartActivityForResult(FIntent Intent, int32 RequestCode)
 #endif
 }
 
-FIntent UWallet::CreateSeed(EWalletContractV1 Purpose)
+void UWallet::CreateSeed(EWalletContractV1 Purpose)
 {
 #if PLATFORM_ANDROID
+	UE_LOG(LogTemp, Log, TEXT("CreateSeed(): Purpose = %d"), Purpose);
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 	FIntent Intent = Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose);
 	AndroidJavaEnv::CheckJavaException();
 	if (Intent.JObject)
 		StartActivityForResult(Intent, (int32)EActivityRequestCode::REQUEST_CREATE_NEW_SEED);
-	return Intent;
-#else
-	return FIntent();
 #endif	
 }
 
-void UWallet::OnCreateSeed(int64 AuthToken)
+void UWallet::OnCreateSeed(bool bSuccess, int64 AuthToken)
 {
-	UE_LOG(LogTemp, Log, TEXT("OnCreateSeed(): AuthToken = %lld"), AuthToken);	
+	if (bSuccess)
+	{
+		UE_LOG(LogTemp, Log, TEXT("OnCreateSeed(): AuthToken = %lld"), AuthToken);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("OnCreateSeed(): failed"));		
+	}
 }
