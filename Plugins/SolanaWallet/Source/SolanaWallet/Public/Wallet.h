@@ -43,7 +43,11 @@ protected:
 	static void Initialize();
 	static void StartActivityForResult(FIntent Intent, int32 RequestCode);
 public:
+	DECLARE_DYNAMIC_DELEGATE_TwoParams(FCreateSeedCallback, bool, bSuccess, int64, AuthToken);
 	UFUNCTION(BlueprintCallable)
-	static void CreateSeed(EWalletContractV1 Purpose = EWalletContractV1::PURPOSE_SIGN_SOLANA_TRANSACTION);
+	static void CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 Purpose = EWalletContractV1::PURPOSE_SIGN_SOLANA_TRANSACTION);
 	static void OnCreateSeed(bool bSuccess, int64 AuthToken);
+
+protected:
+	static FCreateSeedCallback OnCreateSeedCallback;
 };

@@ -19,6 +19,8 @@ static jmethodID WalletCreateSeedMethod;
 
 #endif
 
+UWallet::FCreateSeedCallback UWallet::OnCreateSeedCallback;
+
 
 enum class EActivityRequestCode
 {
@@ -63,10 +65,11 @@ void UWallet::StartActivityForResult(FIntent Intent, int32 RequestCode)
 #endif
 }
 
-void UWallet::CreateSeed(EWalletContractV1 Purpose)
+void UWallet::CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 Purpose)
 {
 #if PLATFORM_ANDROID
 	UE_LOG(LogTemp, Log, TEXT("CreateSeed(): Purpose = %d"), Purpose);
+	OnCreateSeedCallback = FinishCallback;
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
 	FIntent Intent = Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose);
 	AndroidJavaEnv::CheckJavaException();
@@ -85,4 +88,8 @@ void UWallet::OnCreateSeed(bool bSuccess, int64 AuthToken)
 	{
 		UE_LOG(LogTemp, Error, TEXT("OnCreateSeed(): failed"));		
 	}
+
+	AsyncTask(ENamedThreads::GameThread, [&bSuccess, &AuthToken]() {
+		OnCreateSeedCallback.ExecuteIfBound(bSuccess, AuthToken);
+	});	
 }
