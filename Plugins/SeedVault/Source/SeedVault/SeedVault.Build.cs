@@ -3,9 +3,9 @@
 using UnrealBuildTool;
 using System.IO;
 
-public class SolanaWallet : ModuleRules
+public class SeedVault : ModuleRules
 {
-	public SolanaWallet(ReadOnlyTargetRules Target) : base(Target)
+	public SeedVault(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 		
@@ -27,7 +27,7 @@ public class SolanaWallet : ModuleRules
 		
 		PrivateDependencyModuleNames.AddRange(new string[]
 			{
-				"CoreUObject",
+				"CoreUObject",	
 				"Engine",
 				"Slate",
 				"SlateCore",
@@ -47,7 +47,7 @@ public class SolanaWallet : ModuleRules
 		if (Target.IsInPlatformGroup(UnrealPlatformGroup.Android) )
 		{
 			string PluginPath = Utils.MakePathRelativeTo(ModuleDirectory, Target.RelativeEnginePath);
-			AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "SolanaWallet_UPL.xml"));			
+			AdditionalPropertiesForReceipt.Add("AndroidPlugin", Path.Combine(PluginPath, "SeedVault_UPL.xml"));			
 			//PublicIncludePaths.Add("$(ModuleDir)/Public/Android");
 			//PrivateIncludePaths.Add("ElectraPlayerRuntime/Private/Runtime/Decoder/Android");
 		}		

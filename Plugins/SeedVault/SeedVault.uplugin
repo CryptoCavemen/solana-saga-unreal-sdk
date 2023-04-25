@@ -2,8 +2,8 @@
 	"FileVersion": 3,
 	"Version": 1,
 	"VersionName": "1.0",
-	"FriendlyName": "SolanaWallet",
-	"Description": "Solana Wallet",
+	"FriendlyName": "SeedVault",
+	"Description": "Seed Vault",
 	"Category": "Other",
 	"CreatedBy": "Sergey Makovkin",
 	"CreatedByURL": "",
@@ -16,7 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "SolanaWallet",
+			"Name": "SeedVault",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

@@ -3,7 +3,7 @@
 <root xmlns:android="http://schemas.android.com/apk/res/android">
 	<!-- init section is always evaluated once per architecture -->
 	<init>
-		<log text="SolanaWallet init"/>
+		<log text="SeedVault init"/>
 	</init>
 
 	<!-- optional updates applied to AndroidManifest.xml -->
@@ -65,7 +65,6 @@ import com.solanamobile.unreal.WalletJavaHelper;
 		</insert>
 	</gameActivityOnStopAdditions>
 	
-	
 	<!-- optional additions to GameActivity onPause in GameActivity.java -->
 	<gameActivityOnPauseAdditions>
 		<insert>
@@ -81,7 +80,7 @@ import com.solanamobile.unreal.WalletJavaHelper;
 	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
 	<gameActivityOnActivityResultAdditions>
 		<insert>
-		// Begin SolanaWallet onActivityResult
+		// Begin SeedVault onActivityResult
 		if (requestCode == REQUEST_CREATE_NEW_SEED) 
 		{
 			try
@@ -96,7 +95,7 @@ import com.solanamobile.unreal.WalletJavaHelper;
 				WalletJavaHelper.onCreateSeed(false, -1);				
 			}
 		} 
-		// End SolanaWallet onActivityResult
+		// End SeedVault onActivityResult
 		</insert>
 	</gameActivityOnActivityResultAdditions>
 	

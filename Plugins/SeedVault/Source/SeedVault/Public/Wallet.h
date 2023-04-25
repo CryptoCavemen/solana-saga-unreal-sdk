@@ -33,9 +33,9 @@ enum class EWalletContractV1 : uint8
  * Wrapper for com/solanamobile/seedvault/Wallet.java. 
  */
 UCLASS()
-class SOLANAWALLET_API UWallet : public UBlueprintFunctionLibrary
+class SEEDVAULT_API UWallet : public UBlueprintFunctionLibrary
 {
-	friend class FSolanaWalletModule;
+	friend class FSeedVaultModule;
 	GENERATED_BODY()
 protected:
 	static const char* GetClassName();

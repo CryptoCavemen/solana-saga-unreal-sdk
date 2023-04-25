@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 
-class SOLANAWALLET_API FSolanaWalletModule : public IModuleInterface
+class SEEDVAULT_API FSeedVaultModule : public IModuleInterface
 {
 public:
 	/** IModuleInterface implementation */
