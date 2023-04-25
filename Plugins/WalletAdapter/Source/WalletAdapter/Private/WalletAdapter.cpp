@@ -2,8 +2,11 @@
 
 #include "WalletAdapter.h"
 
+#include "MobileWalletAdapterClient.h"
+
 void FWalletAdapterModule::StartupModule()
 {
+	//FMobileWalletAdapterClient::Initialize();
 }
 
 void FWalletAdapterModule::ShutdownModule()
