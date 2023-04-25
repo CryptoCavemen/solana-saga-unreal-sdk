@@ -14,7 +14,8 @@ public class SolanaSuite : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"SolanaWallet"
+			"SeedVault",
+			"WalletAdapter",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

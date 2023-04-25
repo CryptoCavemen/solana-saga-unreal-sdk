@@ -15,7 +15,11 @@
 	],
 	"Plugins": [
 		{
-			"Name": "SolanaWallet",
+			"Name": "SeedVault",
+			"Enabled": true
+		},
+		{
+			"Name": "WalletAdapter",
 			"Enabled": true
 		},
 		{
