@@ -14,7 +14,6 @@
 	<!-- optional additions to proguard -->
 	<proguardAdditions>
 		<insert>
--keep class com.solanamobile.seedvault.** { *; }
 -keep class com.solanamobile.unreal.** { *; }
 		</insert>
 	</proguardAdditions>
@@ -22,6 +21,21 @@
 	<prebuildCopies>
 		<copyDir src="$S(PluginDir)/java" dst="$S(BuildDir)/src" />
 	</prebuildCopies>
+
+	<gradleProperties>
+		<insert>
+			android.useAndroidX=true
+			android.enableJetifier=true
+		</insert>
+	</gradleProperties>
+
+	<buildGradleAdditions>
+		<insert>
+			dependencies {
+				implementation 'com.solanamobile:seedvault-wallet-sdk:0.2.7'
+			}
+		</insert>
+	</buildGradleAdditions>	
 	
 	<!-- optional additions to the GameActivity imports in GameActivity.java -->
 	<gameActivityImportAdditions>
