@@ -38,6 +38,10 @@
 					sourceCompatibility JavaVersion.VERSION_1_8
 				}
 			}
+			
+			dependencies {
+				implementation 'com.neovisionaries:nv-websocket-client:2.14'
+			}			
 		</insert>
 	</buildGradleAdditions>
 
