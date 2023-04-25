@@ -2,14 +2,13 @@
 
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
-#include "Android/AndroidJNI.h"
-#include "Android/AndroidJava.h"
+#include "Android/JavaClassObjectEx.h"
 #include "Defines.h"
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient 
  */
-class FMobileWalletAdapterClientWrapper : public FJavaClassObject
+class FMobileWalletAdapterClientWrapper : public FJavaClassObjectEx
 {
 public:
 	FMobileWalletAdapterClientWrapper(int32 ClientTimeoutMs);
@@ -19,7 +18,7 @@ public:
 
 protected:
 	static FName GetClassName();
-	void OnAuthorizeInternal();
+	void OnAuthorizeInternal(bool bSuccess);
 
 private:
 	FJavaClassMethod AuthorizeMethod;
