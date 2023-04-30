@@ -5,7 +5,7 @@
 
 void FSeedVaultModule::StartupModule()
 {
-	UWallet::Initialize();
+	UWallet::StaticConstruct();
 }
 
 void FSeedVaultModule::ShutdownModule()

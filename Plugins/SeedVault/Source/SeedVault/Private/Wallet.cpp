@@ -32,12 +32,7 @@ enum class EActivityRequestCode
 	REQUEST_GET_PUBLIC_KEYS = 5
 };
 
-const char* UWallet::GetClassName()
-{
-	return "com/solanamobile/seedvault/Wallet";
-}
-
-void UWallet::Initialize()
+void UWallet::StaticConstruct()
 {
 #if PLATFORM_ANDROID	
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
@@ -49,21 +44,21 @@ void UWallet::Initialize()
 	ActivityStartActivityForResultMethod = Env->GetMethodID(ActivityClass, "startActivityForResult", "(Landroid/content/Intent;I)V");
 	check(ActivityStartActivityForResultMethod);	
 
-	WalletClass = FAndroidApplication::FindJavaClassGlobalRef(GetClassName());
+	WalletClass = FAndroidApplication::FindJavaClassGlobalRef("com/solanamobile/seedvault/Wallet");
 	check(WalletClass);
 	WalletCreateSeedMethod = Env->GetStaticMethodID(WalletClass, "createSeed", "(I)Landroid/content/Intent;");
 	check(WalletCreateSeedMethod);
 #endif
 }
 
-void UWallet::StartActivityForResult(FIntent Intent, int32 RequestCode)
-{
-#if PLATFORM_ANDROID	
+#if PLATFORM_ANDROID
+void UWallet::StartActivityForResult(jobject Intent, int32 RequestCode)
+{	
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	Env->CallVoidMethod(FAndroidApplication::GetGameActivityThis(), ActivityStartActivityForResultMethod, Intent.JObject, RequestCode);
+	Env->CallVoidMethod(FAndroidApplication::GetGameActivityThis(), ActivityStartActivityForResultMethod, Intent, RequestCode);
 	AndroidJavaEnv::CheckJavaException();
-#endif
 }
+#endif
 
 void UWallet::CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 Purpose)
 {
@@ -71,9 +66,9 @@ void UWallet::CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 P
 	UE_LOG(LogTemp, Log, TEXT("CreateSeed(): Purpose = %d"), Purpose);
 	OnCreateSeedCallback = FinishCallback;
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	FIntent Intent = Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose);
+	jobject Intent = Env->CallStaticObjectMethod(WalletClass, WalletCreateSeedMethod, (int32)Purpose);
 	AndroidJavaEnv::CheckJavaException();
-	if (Intent.JObject)
+	if (Intent)
 		StartActivityForResult(Intent, (int32)EActivityRequestCode::REQUEST_CREATE_NEW_SEED);
 #endif	
 }

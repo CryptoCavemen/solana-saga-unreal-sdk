@@ -6,33 +6,36 @@
 jclass UriClass = nullptr;
 jmethodID UriParseMethod = nullptr;
 
-FJavaClassObjectEx::FJavaClassObjectEx(FName ClassName, const char* CtorSig, ...)
+FJavaClassObjectEx::FJavaClassObjectEx()
+	: Object(nullptr)
+	, Class(nullptr)
 {
-	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
-
-	ANSICHAR AnsiClassName[NAME_SIZE];
-	ClassName.GetPlainANSIString(AnsiClassName);
-
-	Class = AndroidJavaEnv::FindJavaClassGlobalRef(AnsiClassName);
-	check(Class);
-	jmethodID Constructor = JEnv->GetMethodID(Class, "<init>", CtorSig);
-	check(Constructor);
-	va_list Params;
-	va_start(Params, CtorSig);
-	auto LocalObject = NewScopedJavaObject(JEnv, JEnv->NewObjectV(Class, Constructor, Params));
-	va_end(Params);
-	VerifyException();
-	check(LocalObject);
-
-	// Promote local references to global
-	Object = JEnv->NewGlobalRef(*LocalObject);
 }
 
 FJavaClassObjectEx::~FJavaClassObjectEx()
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
-	JEnv->DeleteGlobalRef(Object);
-	JEnv->DeleteGlobalRef(Class);
+	if (Object)
+		JEnv->DeleteGlobalRef(Object);
+	if (Class)
+		JEnv->DeleteGlobalRef(Class);
+}
+
+void FJavaClassObjectEx::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
+{
+	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
+
+	Class = AndroidJavaEnv::FindJavaClassGlobalRef(ClassName);
+	check(Class);
+	jmethodID Constructor = JEnv->GetMethodID(Class, "<init>", CtorSig);
+	check(Constructor);
+	
+	auto LocalObject = NewScopedJavaObject(JEnv, JEnv->NewObjectV(Class, Constructor, Args));
+	VerifyException();
+	check(LocalObject);
+
+	// Promote local references to global
+	Object = JEnv->NewGlobalRef(*LocalObject);	
 }
 
 FJavaClassMethod FJavaClassObjectEx::GetClassMethod(const char* MethodName, const char* FuncSig)

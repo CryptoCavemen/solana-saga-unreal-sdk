@@ -1,12 +1,14 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "WalletAdapter.h"
-
-#include "MobileWalletAdapterClient.h"
+#include "Android/LocalAssociationIntentCreator.h"
+#include "MobileWalletAdapterClientBP.h"
 
 void FWalletAdapterModule::StartupModule()
 {
-	//FMobileWalletAdapterClient::Initialize();
+#if PLATFORM_ANDROID
+	FLocalAssociationIntentCreator::StaticConstruct();
+#endif
 }
 
 void FWalletAdapterModule::ShutdownModule()
