@@ -26,12 +26,12 @@ void FLocalAssociationIntentCreator::StaticConstruct()
 	check(CreateAssociationIntentMethod);	
 }
 
-FGlobalJavaObjectRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
+FGlobalJavaClassObjectRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
 {
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	jobject Intent = Env->CallStaticObjectMethod(Class, CreateAssociationIntentMethod, *FJavaClassObjectWrapper::GetJUri(EndpointPrefix), Port, Session.GetJObject());
+	jobject RetVal = Env->CallStaticObjectMethod(Class, CreateAssociationIntentMethod, *FJavaClassObjectWrapper::GetJUri(EndpointPrefix), Port, Session.GetJObject());
 	AndroidJavaEnv::CheckJavaException();
-	return FGlobalJavaObjectRef(new FGlobalJavaObject<jobject>(Env, Intent));
+	return MakeShared<FGlobalJavaClassObject>(Env, RetVal);
 }
 
 #endif

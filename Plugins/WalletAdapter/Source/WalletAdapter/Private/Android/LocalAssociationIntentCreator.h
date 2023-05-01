@@ -18,7 +18,7 @@ public:
 	/** Initialize java objects and cache them for further usage. Called when the module is loaded. */
 	static void StaticConstruct();	
 	
-	static FGlobalJavaObjectRef CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session);	
+	static FGlobalJavaClassObjectRef CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session);	
 };
 
 

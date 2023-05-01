@@ -175,17 +175,7 @@ private:
 	T ObjRef = nullptr;
 };
 
-/**
- Helper function that allows template deduction on the java object type, for example:
- auto ScopeObject = NewGlobalScopedJavaObject(Env, JavaString);
- instead of FGlobalScopedJavaObject<jstring> ScopeObject(Env, JavaString);
- */
-template <typename T>
-CORE_API FGlobalJavaObject<T> NewGlobalJavaObject(JNIEnv* InEnv, const T& InObjRef)
-{
-	return FGlobalJavaObject<T>(InEnv, InObjRef);
-}
-
-typedef TSharedRef<FGlobalJavaObject<jobject>> FGlobalJavaObjectRef;
+typedef FGlobalJavaObject<jobject> FGlobalJavaClassObject;
+typedef TSharedRef<FGlobalJavaClassObject> FGlobalJavaClassObjectRef;
 
 #endif
