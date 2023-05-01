@@ -3,13 +3,13 @@
 #include "CoreMinimal.h"
 #include "Scenario.h"
 #if PLATFORM_ANDROID
-#include "Android/JavaClassObjectEx.h"
+#include "Android/JavaClassObjectWrapper.h"
 #include "Defines.h"
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient 
  */
-class FMobileWalletAdapterClient : public FJavaClassObjectEx
+class FMobileWalletAdapterClient : public FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, int32 ClientTimeoutMs);
 public:

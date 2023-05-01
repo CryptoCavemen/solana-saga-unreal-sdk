@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
-#include "Android/JavaClassObjectEx.h"
+#include "Android/JavaClassObjectWrapper.h"
 #include "Defines.h"
 
 #define DEFAULT_CLIENT_TIMEOUT_MS 90000
@@ -12,7 +12,7 @@
 /**
  * Wrapper for com.solana.mobilewalletadapter.common.protocol.MobileWalletAdapterSessionCommon 
  */
-class FMobileWalletAdapterSessionCommon : public FJavaClassObjectEx
+class FMobileWalletAdapterSessionCommon : public FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterSessionCommon);
 };

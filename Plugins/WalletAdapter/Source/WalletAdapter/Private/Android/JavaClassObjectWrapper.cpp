@@ -1,4 +1,4 @@
-#include "Android/JavaClassObjectEx.h"
+#include "Android/JavaClassObjectWrapper.h"
 #include "Android/AndroidJavaEnv.h"
 
 #if USE_ANDROID_JNI
@@ -6,13 +6,13 @@
 jclass UriClass = nullptr;
 jmethodID UriParseMethod = nullptr;
 
-FJavaClassObjectEx::FJavaClassObjectEx(jobject LocalObject)
+FJavaClassObjectWrapper::FJavaClassObjectWrapper(jobject LocalObject)
 	: Object(LocalObject)
 	, Class(nullptr)
 {
 }
 
-FJavaClassObjectEx::~FJavaClassObjectEx()
+FJavaClassObjectWrapper::~FJavaClassObjectWrapper()
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	if (Object)
@@ -21,7 +21,7 @@ FJavaClassObjectEx::~FJavaClassObjectEx()
 		JEnv->DeleteGlobalRef(Class);
 }
 
-void FJavaClassObjectEx::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
+void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	
@@ -52,7 +52,7 @@ void FJavaClassObjectEx::PostConstruct(const char* ClassName, const char* CtorSi
 	JEnv->DeleteLocalRef(LocalObject);
 }
 
-FJavaClassMethod FJavaClassObjectEx::GetClassMethod(const char* MethodName, const char* FuncSig)
+FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	FJavaClassMethod Method;
@@ -65,7 +65,7 @@ FJavaClassMethod FJavaClassObjectEx::GetClassMethod(const char* MethodName, cons
 }
 
 template<>
-void FJavaClassObjectEx::CallMethod<void>(FJavaClassMethod Method, ...)
+void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -76,7 +76,7 @@ void FJavaClassObjectEx::CallMethod<void>(FJavaClassMethod Method, ...)
 }
 
 template<>
-bool FJavaClassObjectEx::CallMethod<bool>(FJavaClassMethod Method, ...)
+bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -88,7 +88,7 @@ bool FJavaClassObjectEx::CallMethod<bool>(FJavaClassMethod Method, ...)
 }
 
 template<>
-int FJavaClassObjectEx::CallMethod<int>(FJavaClassMethod Method, ...)
+int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -100,7 +100,7 @@ int FJavaClassObjectEx::CallMethod<int>(FJavaClassMethod Method, ...)
 }
 
 template<>
-jobject FJavaClassObjectEx::CallMethod<jobject>(FJavaClassMethod Method, ...)
+jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -114,7 +114,7 @@ jobject FJavaClassObjectEx::CallMethod<jobject>(FJavaClassMethod Method, ...)
 }
 
 template<>
-jobjectArray FJavaClassObjectEx::CallMethod<jobjectArray>(FJavaClassMethod Method, ...)
+jobjectArray FJavaClassObjectWrapper::CallMethod<jobjectArray>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -128,7 +128,7 @@ jobjectArray FJavaClassObjectEx::CallMethod<jobjectArray>(FJavaClassMethod Metho
 }
 
 template<>
-int64 FJavaClassObjectEx::CallMethod<int64>(FJavaClassMethod Method, ...)
+int64 FJavaClassObjectWrapper::CallMethod<int64>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -140,7 +140,7 @@ int64 FJavaClassObjectEx::CallMethod<int64>(FJavaClassMethod Method, ...)
 }
 
 template<>
-FString FJavaClassObjectEx::CallMethod<FString>(FJavaClassMethod Method, ...)
+FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -153,7 +153,7 @@ FString FJavaClassObjectEx::CallMethod<FString>(FJavaClassMethod Method, ...)
 }
 
 template<>
-jobject FJavaClassObjectEx::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...)
+jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
@@ -171,13 +171,13 @@ jobject FJavaClassObjectEx::CallThrowableMethod<jobject>(bool& bExceptionThrown,
 	return RetVal;
 }
 
-FScopedJavaObject<jstring> FJavaClassObjectEx::GetJString(const FString& String)
+FScopedJavaObject<jstring> FJavaClassObjectWrapper::GetJString(const FString& String)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	return FJavaHelper::ToJavaString(JEnv, String);
 }
 
-FScopedJavaObject<jobject> FJavaClassObjectEx::GetJUri(const FString& Uri)
+FScopedJavaObject<jobject> FJavaClassObjectWrapper::GetJUri(const FString& Uri)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	if (!UriClass)
@@ -188,7 +188,7 @@ FScopedJavaObject<jobject> FJavaClassObjectEx::GetJUri(const FString& Uri)
 	return NewScopedJavaObject(JEnv, JUri);	
 }
 
-void FJavaClassObjectEx::VerifyException()
+void FJavaClassObjectWrapper::VerifyException()
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	if (JEnv->ExceptionCheck())
@@ -199,7 +199,7 @@ void FJavaClassObjectEx::VerifyException()
 	}
 }
 
-void FJavaClassObjectEx::LogException()
+void FJavaClassObjectWrapper::LogException()
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	if (JEnv->ExceptionCheck())

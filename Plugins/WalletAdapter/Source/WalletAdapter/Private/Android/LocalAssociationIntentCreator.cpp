@@ -5,7 +5,7 @@
 #include "MobileWalletAdapterSession.h"
 
 #if PLATFORM_ANDROID
-#include "Android/JavaClassObjectEx.h"
+#include "Android/JavaClassObjectWrapper.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
@@ -29,7 +29,7 @@ void FLocalAssociationIntentCreator::StaticConstruct()
 FGlobalJavaObjectRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
 {
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	jobject Intent = Env->CallStaticObjectMethod(Class, CreateAssociationIntentMethod, *FJavaClassObjectEx::GetJUri(EndpointPrefix), Port, Session.GetJObject());
+	jobject Intent = Env->CallStaticObjectMethod(Class, CreateAssociationIntentMethod, *FJavaClassObjectWrapper::GetJUri(EndpointPrefix), Port, Session.GetJObject());
 	AndroidJavaEnv::CheckJavaException();
 	return FGlobalJavaObjectRef(new FGlobalJavaObject<jobject>(Env, Intent));
 }

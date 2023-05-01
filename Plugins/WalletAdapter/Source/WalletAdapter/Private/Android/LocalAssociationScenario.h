@@ -6,7 +6,7 @@
 #include "MobileWalletAdapterSession.h"
 #include "Scenario.h"
 #if PLATFORM_ANDROID
-#include "Android/JavaClassObjectEx.h"
+#include "Android/JavaClassObjectWrapper.h"
 #include "Defines.h"
 
 /**

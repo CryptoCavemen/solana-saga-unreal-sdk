@@ -52,7 +52,7 @@ void ImplClass::PostConstruct(const char* ClassName, const char* CtorSig, const 
 /**
  * Base class for java object wrappers. 
  */
-class FJavaClassObjectEx
+class FJavaClassObjectWrapper
 {
 protected:
 	/**
@@ -61,9 +61,9 @@ protected:
 	 * 
 	 * !! Please note, that all Java objects returned by JNI functions are local references.
 	 */	
-	FJavaClassObjectEx(jobject LocalObject);
+	FJavaClassObjectWrapper(jobject LocalObject);
 public:
-	virtual ~FJavaClassObjectEx();
+	virtual ~FJavaClassObjectWrapper();
 protected:
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args);
 public:
@@ -93,33 +93,33 @@ protected:
 	jclass			Class;
 
 private:
-	FJavaClassObjectEx(const FJavaClassObjectEx& rhs);
-	FJavaClassObjectEx& operator = (const FJavaClassObjectEx& rhs);
+	FJavaClassObjectWrapper(const FJavaClassObjectWrapper& rhs);
+	FJavaClassObjectWrapper& operator = (const FJavaClassObjectWrapper& rhs);
 };
 
 template<>
-void FJavaClassObjectEx::CallMethod<void>(FJavaClassMethod Method, ...);
+void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...);
 
 template<>
-bool FJavaClassObjectEx::CallMethod<bool>(FJavaClassMethod Method, ...);
+bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...);
 
 template<>
-int FJavaClassObjectEx::CallMethod<int>(FJavaClassMethod Method, ...);
+int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...);
 
 template<>
-jobject FJavaClassObjectEx::CallMethod<jobject>(FJavaClassMethod Method, ...);
+jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ...);
 
 template<>
-jobjectArray FJavaClassObjectEx::CallMethod<jobjectArray>(FJavaClassMethod Method, ...);
+jobjectArray FJavaClassObjectWrapper::CallMethod<jobjectArray>(FJavaClassMethod Method, ...);
 
 template<>
-int64 FJavaClassObjectEx::CallMethod<int64>(FJavaClassMethod Method, ...);
+int64 FJavaClassObjectWrapper::CallMethod<int64>(FJavaClassMethod Method, ...);
 
 template<>
-FString FJavaClassObjectEx::CallMethod<FString>(FJavaClassMethod Method, ...);
+FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...);
 
 template<>
-jobject FJavaClassObjectEx::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...);
+jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...);
 
 
 
