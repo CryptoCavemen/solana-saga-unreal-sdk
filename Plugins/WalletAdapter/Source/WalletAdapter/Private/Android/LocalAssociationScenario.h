@@ -18,10 +18,14 @@ class FLocalAssociationScenario : public FScenario
 public:
 	int32 GetPort();
 	TSharedRef<FMobileWalletAdapterSession> GetSession();
+	void Start();
+	void Close();
 
 protected:
 	FJavaClassMethod GetPortMethod;
 	FJavaClassMethod GetSessionMethod;
+	FJavaClassMethod StartMethod;
+	FJavaClassMethod CloseMethod;
 };
 
 

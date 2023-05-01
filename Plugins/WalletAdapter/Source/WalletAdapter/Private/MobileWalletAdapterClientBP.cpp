@@ -37,7 +37,7 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix.IsEmpty() ? nullptr : &UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
 
-	Activity->StartActivityForResult(AssociationIntent, 0);
+	Activity->StartActivityForResult(AssociationIntent, 55);
 #endif
 }
 

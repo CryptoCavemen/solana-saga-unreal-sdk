@@ -66,7 +66,6 @@
 		</insert>
 	</gameActivityOnStopAdditions>
 	
-	
 	<!-- optional additions to GameActivity onPause in GameActivity.java -->
 	<gameActivityOnPauseAdditions>
 		<insert>
@@ -78,10 +77,26 @@
 		<insert>
 		</insert>
 	</gameActivityOnResumeAdditions>
-	
+
 	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
 	<gameActivityOnActivityResultAdditions>
 		<insert>
+		// Begin WalletAdapter onActivityResult
+		if (requestCode == 55)
+		{
+			try
+			{
+				//long authToken = Wallet.onCreateSeedResult(resultCode, data);
+				Log.debug("Assoсiation created");
+				//WalletJavaHelper.onCreateSeed(true, authToken);
+			}
+			catch (Throwable e)
+			{
+				Log.error("Assoсiation creation failed", e);
+				//WalletJavaHelper.onCreateSeed(false, -1);
+			}
+		}
+		// End WalletAdapter onActivityResult
 		</insert>
 	</gameActivityOnActivityResultAdditions>
 	
