@@ -5,15 +5,63 @@
 #if USE_ANDROID_JNI
 #include "Android/AndroidJava.h"
 #include "Android/AndroidJavaEnv.h"
+#include "Defines.h"
 #include <jni.h>
 
-class UObject;
+/**
+ * Must be defined in a header file for every class derived from FJavaClassObjectEx
+ */
+#define DECLARE_JAVA_CLASS_OBJECT(ImplClass, ...)\
+protected:\
+	ImplClass(jobject LocalObject);\
+public:\
+	static ImplClass* Construct(jobject LocalObject, ...);\
+protected:\
+	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;
 
+/**
+ * Must be defined in a cpp file for every class derived from FJavaClassObjectEx  
+ */
+#define BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(ImplClass, ParentClass, JavaClassName, JavaCtorSig, ...)\
+ImplClass::ImplClass(jobject LocalObject)\
+	: ParentClass(LocalObject)\
+{\
+}\
+\
+ImplClass* ImplClass::Construct(jobject LocalObject, ...)\
+{\
+	ImplClass* Object = new ImplClass(LocalObject);\
+\
+	va_list Args;\
+	va_start(Args, LocalObject);\
+	Object->PostConstruct(JavaClassName, JavaCtorSig, Args);\
+	va_end(Args);\
+\
+	return Object;\
+}\
+\
+void ImplClass::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)\
+{\
+	ParentClass::PostConstruct(ClassName, CtorSig, Args);
+
+/**
+ *  Must be defined after BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT
+ */
+#define END_IMPLEMENT_JAVA_CLASS_OBJECT }
+	
+/**
+ * Base class for java object wrappers. 
+ */
 class FJavaClassObjectEx
 {
 protected:
-	// !!  All Java objects returned by JNI functions are local references.
-	FJavaClassObjectEx();
+	/**
+	 * Constructs a new java object or stores a pointer to it if passed LocalObject is not null.
+	 * Local reference to the passed java object is deleted automatically!
+	 * 
+	 * !! Please note, that all Java objects returned by JNI functions are local references.
+	 */	
+	FJavaClassObjectEx(jobject LocalObject);
 public:
 	virtual ~FJavaClassObjectEx();
 protected:
@@ -75,13 +123,13 @@ jobject FJavaClassObjectEx::CallThrowableMethod<jobject>(bool& bExceptionThrown,
 
 
 
-/*** Helper class that automatically creates a global ref from a local ref, calls DeleteLocalRef
- *   and calls DeleteGlobalRef on the passed-in Java object when goes out of scope */
+/** Helper class that automatically creates a global ref from a local ref, calls DeleteLocalRef for it
+ *  and then calls DeleteGlobalRef on the passed-in Java object when goes out of scope */
 template <typename T>
-class FGlobalScopedJavaObject
+class FGlobalJavaObject
 {
 public:
-	FGlobalScopedJavaObject(JNIEnv* InEnv, const T& InObjRef)
+	FGlobalJavaObject(JNIEnv* InEnv, const T& InObjRef)
 		: Env(InEnv)
 		, ObjRef(InObjRef)
 	{
@@ -90,7 +138,7 @@ public:
 		ObjRef = ObjGlobalRef;
 	}
 	
-	FGlobalScopedJavaObject(FGlobalScopedJavaObject&& Other)
+	FGlobalJavaObject(FGlobalJavaObject&& Other)
 		: Env(Other.Env)
 		, ObjRef(Other.ObjRef)
 	{
@@ -98,10 +146,10 @@ public:
 		Other.ObjRef = nullptr;
 	}
 	
-	FGlobalScopedJavaObject(const FGlobalScopedJavaObject& Other) = delete;
-	FGlobalScopedJavaObject& operator=(const FGlobalScopedJavaObject& Other) = delete;
+	FGlobalJavaObject(const FGlobalJavaObject& Other) = delete;
+	FGlobalJavaObject& operator=(const FGlobalJavaObject& Other) = delete;
 	
-	~FGlobalScopedJavaObject()
+	~FGlobalJavaObject()
 	{
 		if (*this)
 		{
@@ -133,11 +181,11 @@ private:
  instead of FGlobalScopedJavaObject<jstring> ScopeObject(Env, JavaString);
  */
 template <typename T>
-CORE_API FGlobalScopedJavaObject<T> NewGlobalScopedJavaObject(JNIEnv* InEnv, const T& InObjRef)
+CORE_API FGlobalJavaObject<T> NewGlobalJavaObject(JNIEnv* InEnv, const T& InObjRef)
 {
-	return FGlobalScopedJavaObject<T>(InEnv, InObjRef);
+	return FGlobalJavaObject<T>(InEnv, InObjRef);
 }
 
-typedef TSharedRef<FGlobalScopedJavaObject<jobject>> FJavaObjectRef;
+typedef TSharedRef<FGlobalJavaObject<jobject>> FGlobalJavaObjectRef;
 
 #endif

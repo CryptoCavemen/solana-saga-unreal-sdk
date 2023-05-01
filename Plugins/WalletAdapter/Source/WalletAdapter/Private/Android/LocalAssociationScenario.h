@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MobileWalletAdapterSession.h"
 #include "Scenario.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectEx.h"
@@ -13,13 +14,14 @@
  */
 class FLocalAssociationScenario : public FScenario
 {
-protected:
-	FLocalAssociationScenario();
+	DECLARE_JAVA_CLASS_OBJECT(FLocalAssociationScenario, int32 ClientTimeoutMs);
 public:
-	virtual ~FLocalAssociationScenario() override;
-	static FLocalAssociationScenario* Construct(int32 ClientTimeoutMs = DEFAULT_CLIENT_TIMEOUT_MS, ...);
-protected:
-	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;
+	int32 GetPort();
+	TSharedRef<FMobileWalletAdapterSession> GetSession();
+
+private:
+	FJavaClassMethod GetPortMethod;
+	FJavaClassMethod GetSessionMethod;
 };
 
 

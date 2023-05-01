@@ -15,13 +15,7 @@
  */
 class FMobileWalletAdapterSession : public FMobileWalletAdapterSessionCommon
 {
-protected:
-	FMobileWalletAdapterSession();
-public:
-	virtual ~FMobileWalletAdapterSession() override;
-	static FMobileWalletAdapterSession* Construct();
-protected:
-	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;
+	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterSession);
 };
 
 #endif

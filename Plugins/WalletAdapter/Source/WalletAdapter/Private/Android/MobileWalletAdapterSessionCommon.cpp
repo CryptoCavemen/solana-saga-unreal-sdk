@@ -1,27 +1,6 @@
 ﻿#include "MobileWalletAdapterSessionCommon.h"
 
-FMobileWalletAdapterSessionCommon::FMobileWalletAdapterSessionCommon()
-{
-}
-
-FMobileWalletAdapterSessionCommon::~FMobileWalletAdapterSessionCommon()
-{
-}
-
-FMobileWalletAdapterSessionCommon* FMobileWalletAdapterSessionCommon::Construct()
-{
-	FMobileWalletAdapterSessionCommon* Object = new FMobileWalletAdapterSessionCommon();
-	
-	va_list Args = va_list();
-	//va_start(Args, ClientTimeoutMs);
-	// TODO: wrong signature!
-	Object->PostConstruct("com/solana/mobilewalletadapter/common/protocol/FMobileWalletAdapterSessionCommon", "()V", Args);
-	//va_end(Args);
-	
-	return Object;	
-}
-
-void FMobileWalletAdapterSessionCommon::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
-{
-	FJavaClassObjectEx::PostConstruct(ClassName, CtorSig, Args);
-}
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterSessionCommon, FJavaClassObjectEx,
+	"com/solana/mobilewalletadapter/common/protocol/FMobileWalletAdapterSessionCommon",
+	"(Lcom/solana/mobilewalletadapter/common/protocol/MessageReceiver;Lcom/solana/mobilewalletadapter/common/protocol/MobileWalletAdapterSessionCommon$StateCallbacks;)V")
+END_IMPLEMENT_JAVA_CLASS_OBJECT

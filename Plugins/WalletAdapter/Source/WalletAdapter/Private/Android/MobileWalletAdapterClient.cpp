@@ -6,31 +6,11 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-FMobileWalletAdapterClient::FMobileWalletAdapterClient()
-{
-}
 
-FMobileWalletAdapterClient::~FMobileWalletAdapterClient()
-{
-}
-
-FMobileWalletAdapterClient* FMobileWalletAdapterClient::Construct(int32 ClientTimeoutMs, ...)
-{
-	FMobileWalletAdapterClient* Object = new FMobileWalletAdapterClient();
-	
-	va_list Args;
-	va_start(Args, ClientTimeoutMs);
-	Object->PostConstruct("com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient", "(I)V", Args);
-	va_end(Args);
-	
-	return Object;	
-}
-
-void FMobileWalletAdapterClient::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
-{
-	FJavaClassObjectEx::PostConstruct(ClassName, CtorSig, Args);
-	AuthorizeMethod = GetClassMethod("authorize", "(Landroid/net/Uri;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationFuture;");	
-}
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectEx, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient", "(I)V", int ClientTimeoutMs)
+	AuthorizeMethod = GetClassMethod("authorize",
+		"(Landroid/net/Uri;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationFuture;");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 jobject FMobileWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster)
 {

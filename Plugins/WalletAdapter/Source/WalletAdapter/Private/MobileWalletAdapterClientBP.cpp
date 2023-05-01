@@ -5,7 +5,7 @@ UMobileWalletAdapterClientBP::UMobileWalletAdapterClientBP()
 {
 #if PLATFORM_ANDROID
 	if (!HasAnyFlags(RF_ClassDefaultObject))
-		Wrapper = FMobileWalletAdapterClient::Construct(DEFAULT_CLIENT_TIMEOUT_MS);
+		Wrapper = FMobileWalletAdapterClient::Construct(nullptr, DEFAULT_CLIENT_TIMEOUT_MS);
 	else
 		Wrapper = nullptr;
 #endif

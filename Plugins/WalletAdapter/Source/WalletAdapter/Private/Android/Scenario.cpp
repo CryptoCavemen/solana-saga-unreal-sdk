@@ -8,29 +8,7 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-FScenario::FScenario()
-{
-}
-
-FScenario::~FScenario()
-{
-}
-
-FScenario* FScenario::Construct(int32 ClientTimeoutMs, ...)
-{
-	FScenario* Object = new FScenario();
-	
-	va_list Args;
-	va_start(Args, ClientTimeoutMs);
-	Object->PostConstruct("com/solana/mobilewalletadapter/clientlib/scenario/Scenario", "(I)V", Args);
-	va_end(Args);
-	
-	return Object;
-}
-
-void FScenario::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
-{
-	FJavaClassObjectEx::PostConstruct(ClassName, CtorSig, Args);
-}
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FScenario, FJavaClassObjectEx, "com/solana/mobilewalletadapter/clientlib/scenario/Scenario", "(I)V", int ClientTimeoutMs)
+END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 #endif

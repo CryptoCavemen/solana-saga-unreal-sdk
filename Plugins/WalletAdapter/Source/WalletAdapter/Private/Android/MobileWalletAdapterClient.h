@@ -11,14 +11,7 @@
  */
 class FMobileWalletAdapterClient : public FJavaClassObjectEx
 {
-protected:
-	FMobileWalletAdapterClient();
-public:
-	virtual ~FMobileWalletAdapterClient() override;
-	static FMobileWalletAdapterClient* Construct(int32 ClientTimeoutMs = DEFAULT_CLIENT_TIMEOUT_MS, ...);
-protected:
-	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;
-
+	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, int32 ClientTimeoutMs);
 public:
 	jobject Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
 
