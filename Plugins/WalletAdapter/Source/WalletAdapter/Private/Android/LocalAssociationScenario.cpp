@@ -21,7 +21,7 @@ int32 FLocalAssociationScenario::GetPort()
 TSharedRef<FMobileWalletAdapterSession> FLocalAssociationScenario::GetSession()
 {
 	jobject JObject = CallMethod<jobject>(GetSessionMethod);
-	return TSharedRef<FMobileWalletAdapterSession>(FMobileWalletAdapterSession::Construct(JObject));
+	return FMobileWalletAdapterSession::MakeFromExistingObject(JObject);
 }
 
 

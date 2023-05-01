@@ -1,27 +1,51 @@
 ﻿#include "MobileWalletAdapterClientBP.h"
-#include "Android/Scenario.h"
+#include "Android/GameActivity.h"
+#include "Android/LocalAssociationIntentCreator.h"
+#include "Android/LocalAssociationScenario.h"
+
+#if PLATFORM_ANDROID
+#include "Android/AndroidApplication.h"
+#endif
 
 UMobileWalletAdapterClientBP::UMobileWalletAdapterClientBP()
 {
+/*
 #if PLATFORM_ANDROID
 	if (!HasAnyFlags(RF_ClassDefaultObject))
 		Wrapper = FMobileWalletAdapterClient::Construct(nullptr, DEFAULT_CLIENT_TIMEOUT_MS);
 	else
 		Wrapper = nullptr;
 #endif
+*/
 }
 
 UMobileWalletAdapterClientBP::~UMobileWalletAdapterClientBP()
 {
+/*	
 #if PLATFORM_ANDROID	
 	if (Wrapper)
 		delete Wrapper;
 #endif
+*/
 }
 
+void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
+{
+#if PLATFORM_ANDROID
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	
+	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
+	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix.IsEmpty() ? nullptr : &UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
+
+	Activity->StartActivityForResult(AssociationIntent, 0);
+#endif
+}
+
+/*
 void UMobileWalletAdapterClientBP::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster)
 {
 #if PLATFORM_ANDROID
 	Wrapper->Authorize(IdentityUri, IconUri, IdentityName, Cluster);
 #endif
 }
+*/

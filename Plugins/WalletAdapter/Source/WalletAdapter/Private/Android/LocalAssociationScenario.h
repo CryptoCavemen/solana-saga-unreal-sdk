@@ -19,7 +19,7 @@ public:
 	int32 GetPort();
 	TSharedRef<FMobileWalletAdapterSession> GetSession();
 
-private:
+protected:
 	FJavaClassMethod GetPortMethod;
 	FJavaClassMethod GetSessionMethod;
 };

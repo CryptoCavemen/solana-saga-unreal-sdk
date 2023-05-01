@@ -14,10 +14,19 @@
 #define DECLARE_JAVA_CLASS_OBJECT(ImplClass, ...)\
 protected:\
 	ImplClass(jobject LocalObject);\
-public:\
 	static ImplClass* Construct(jobject LocalObject, ...);\
-protected:\
-	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;
+	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;\
+public:\
+	template<typename... Args>\
+	static TSharedRef<ImplClass> MakeInstance(Args... args)\
+	{\
+		return MakeShareable(Construct(nullptr, args...));\
+	}\
+	template<typename... Args>\
+	static TSharedRef<ImplClass> MakeFromExistingObject(jobject LocalObject, Args... args)\
+	{\
+		return MakeShareable(Construct(LocalObject, args...));\
+	}
 
 /**
  * Must be defined in a cpp file for every class derived from FJavaClassObjectEx  

@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LocalAssociationIntentCreator.h"
-
 #include "MobileWalletAdapterSession.h"
 
 #if PLATFORM_ANDROID
@@ -26,10 +25,15 @@ void FLocalAssociationIntentCreator::StaticConstruct()
 	check(CreateAssociationIntentMethod);	
 }
 
-FGlobalJavaClassObjectRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
+FGlobalJavaClassObjectRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString* EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
 {
 	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
-	jobject RetVal = Env->CallStaticObjectMethod(Class, CreateAssociationIntentMethod, *FJavaClassObjectWrapper::GetJUri(EndpointPrefix), Port, Session.GetJObject());
+	jobject RetVal = Env->CallStaticObjectMethod(
+		Class,
+		CreateAssociationIntentMethod,
+		EndpointPrefix ? *FJavaClassObjectWrapper::GetJUri(*EndpointPrefix) : nullptr, 
+		Port,
+		Session.GetJObject());
 	AndroidJavaEnv::CheckJavaException();
 	return MakeShared<FGlobalJavaClassObject>(Env, RetVal);
 }

@@ -17,9 +17,12 @@ public:
 	UMobileWalletAdapterClientBP();
 	virtual ~UMobileWalletAdapterClientBP() override;
 
-	UFUNCTION(BlueprintCallable)
-	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
+//	UFUNCTION(BlueprintCallable)
+//	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
 
+	UFUNCTION(BlueprintCallable)
+	void LocalAssociateAndExecute(FString UriPrefix);
+	
 private:
 #if PLATFORM_ANDROID
 	FMobileWalletAdapterClient* Wrapper;

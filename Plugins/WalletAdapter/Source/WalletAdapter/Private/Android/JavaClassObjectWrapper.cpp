@@ -47,9 +47,24 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 		JEnv->DeleteLocalRef(LocalClass);
 	}
 	
-	// Promote local references to global
-	Object = JEnv->NewGlobalRef(LocalObject);
-	JEnv->DeleteLocalRef(LocalObject);
+	jobjectRefType RefType = JEnv->GetObjectRefType(LocalObject);
+	switch (RefType)
+	{
+	case JNILocalRefType:
+		// Promote local ref to global
+		Object = JEnv->NewGlobalRef(LocalObject);
+		JEnv->DeleteLocalRef(LocalObject);		
+		break;
+	case JNIGlobalRefType:
+		Object = JEnv->NewGlobalRef(LocalObject);
+		break;
+	case JNIWeakGlobalRefType:
+		verifyf(false, TEXT("Weak global reference is not supported"));
+		break;
+	case JNIInvalidRefType:
+		verifyf(false, TEXT("Reference is invalid"));
+		break;		
+	}
 }
 
 FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig)
