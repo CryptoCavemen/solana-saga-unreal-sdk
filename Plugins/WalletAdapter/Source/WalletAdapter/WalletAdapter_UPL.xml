@@ -30,6 +30,12 @@
 
 	<buildGradleAdditions>
 		<insert>
+			android {
+				compileOptions {
+					targetCompatibility JavaVersion.VERSION_1_8
+					sourceCompatibility JavaVersion.VERSION_1_8
+				}
+			}
 			dependencies {
 				implementation 'com.solanamobile:mobile-wallet-adapter-clientlib:1.0.5'
 			}			

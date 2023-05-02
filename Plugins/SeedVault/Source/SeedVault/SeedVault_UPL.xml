@@ -31,6 +31,12 @@
 
 	<buildGradleAdditions>
 		<insert>
+			android {
+				compileOptions {
+					targetCompatibility JavaVersion.VERSION_1_8
+					sourceCompatibility JavaVersion.VERSION_1_8
+				}
+			}			
 			dependencies {
 				implementation 'com.solanamobile:seedvault-wallet-sdk:0.2.7'
 			}

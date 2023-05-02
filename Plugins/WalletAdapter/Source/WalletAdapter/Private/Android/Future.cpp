@@ -8,11 +8,11 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FFuture, FJavaClassObjectWrapper, "jvav/util/concurrent/Future", "()V")
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FFuture, FJavaClassObjectWrapper, "jvav/util/concurrent/Future", nullptr)
 	CancelMethod = GetClassMethod("cancel", "(Z)Z");
 	IsCancelledMethod = GetClassMethod("isCancelled", "()Z");
-	IsDoneMethod = GetClassMethod("isDone", "()Ljava/lang/Object;");
-	GetMethod = GetClassMethod("get", "()Z");
+	IsDoneMethod = GetClassMethod("isDone", "()Z");
+	GetMethod = GetClassMethod("get", "()Ljava/lang/Object;");
 	GetWithTimeoutMethod = GetClassMethod("get", "(JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
@@ -44,11 +44,14 @@ FGlobalJavaClassObjectRef FFuture::Get(int64 TimeoutMilliseconds)
 	jclass TimeUnitClass = JEnv->FindClass("java/util/concurrent/TimeUnit");
 	check(TimeUnitClass);
 
-	jfieldID MillisecondsField = JEnv->GetStaticFieldID(TimeUnitClass, "MILLISECONDS", "LMILLISECONDS;");
-	check(MillisecondsField);
+	jfieldID MillisecondsFieldId = JEnv->GetStaticFieldID(TimeUnitClass, "MILLISECONDS", "Ljava/util/concurrent/TimeUnit;");
+	check(MillisecondsFieldId);
+
+	jobject MillisecondsObject = JEnv->GetStaticObjectField(TimeUnitClass, MillisecondsFieldId);
+	check(MillisecondsObject);
 	
-	jobject JObject = CallMethod<jobject>(GetWithTimeoutMethod, TimeoutMilliseconds, MillisecondsField);
-	return FGlobalJavaClassObjectRef(new FGlobalJavaClassObject(JEnv, JObject));
+	jobject RetVal = CallMethod<jobject>(GetWithTimeoutMethod, TimeoutMilliseconds, MillisecondsObject);
+	return FGlobalJavaClassObjectRef(new FGlobalJavaClassObject(JEnv, RetVal));
 }
 
 #endif

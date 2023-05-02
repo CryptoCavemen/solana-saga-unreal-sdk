@@ -142,9 +142,28 @@ public:
 		: Env(InEnv)
 		, ObjRef(InObjRef)
 	{
-		T ObjGlobalRef = (T)Env->NewGlobalRef(ObjRef);
-		Env->DeleteLocalRef(ObjRef);
-		ObjRef = ObjGlobalRef;
+		JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
+		jobjectRefType RefType = JEnv->GetObjectRefType(ObjRef);
+		
+		switch (RefType)
+		{
+		case JNILocalRefType:
+			{
+				T ObjGlobalRef = (T)Env->NewGlobalRef(ObjRef);
+				Env->DeleteLocalRef(ObjRef);		
+				ObjRef = ObjGlobalRef;
+			}
+			break;
+		case JNIGlobalRefType:
+			ObjRef = (T)Env->NewGlobalRef(ObjRef);
+			break;
+		case JNIWeakGlobalRefType:
+			verifyf(false, TEXT("Weak global reference is not supported"));
+			break;
+		case JNIInvalidRefType:
+			verifyf(false, TEXT("Reference is invalid"));
+			break;		
+		}
 	}
 	
 	FGlobalJavaObject(FGlobalJavaObject&& Other)

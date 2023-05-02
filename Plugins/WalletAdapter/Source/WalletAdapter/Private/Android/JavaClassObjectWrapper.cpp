@@ -24,6 +24,9 @@ FJavaClassObjectWrapper::~FJavaClassObjectWrapper()
 void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
+
+	if (!CtorSig)
+		verifyf(Object, TEXT("If the ctor signature is null, a reference to an object must be passed because the object can't be constructed"));
 	
 	jobject LocalObject = Object;
 	
@@ -34,7 +37,7 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 		
 		jmethodID Constructor = JEnv->GetMethodID(Class, "<init>", CtorSig);
 		check(Constructor);
-	
+
 		LocalObject = JEnv->NewObjectV(Class, Constructor, Args);
 		VerifyException();
 		check(LocalObject);
