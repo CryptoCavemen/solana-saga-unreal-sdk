@@ -26,15 +26,16 @@ TSharedRef<FMobileWalletAdapterSession> FLocalAssociationScenario::GetSession()
 	return FMobileWalletAdapterSession::MakeFromExistingObject(JObject);
 }
 
-void FLocalAssociationScenario::Start()
-{
-	CallMethod<jobject>(StartMethod);
+TSharedRef<FNotifyOnCompleteFuture> FLocalAssociationScenario::Start()
+{	
+	jobject RetVal = CallMethod<jobject>(StartMethod);
+	return FNotifyOnCompleteFuture::MakeFromExistingObject(RetVal);
 }
 
-void FLocalAssociationScenario::Close()
-{
-	CallMethod<jobject>(CloseMethod);
+TSharedRef<FNotifyOnCompleteFuture> FLocalAssociationScenario::Close()
+{	
+	jobject RetVal = CallMethod<jobject>(CloseMethod);
+	return FNotifyOnCompleteFuture::MakeFromExistingObject(RetVal);
 }
-
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MobileWalletAdapterSession.h"
+#include "NotifyOnCompleteFuture.h"
 #include "Scenario.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
@@ -18,8 +19,8 @@ class FLocalAssociationScenario : public FScenario
 public:
 	int32 GetPort();
 	TSharedRef<FMobileWalletAdapterSession> GetSession();
-	void Start();
-	void Close();
+	TSharedRef<FNotifyOnCompleteFuture> Start();
+	TSharedRef<FNotifyOnCompleteFuture> Close();
 
 protected:
 	FJavaClassMethod GetPortMethod;

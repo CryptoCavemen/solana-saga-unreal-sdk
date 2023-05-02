@@ -87,7 +87,7 @@ void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...)
 	va_start(Params, Method);
 	JEnv->CallVoidMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 }
 
 template<>
@@ -98,7 +98,7 @@ bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...)
 	va_start(Params, Method);
 	bool RetVal = JEnv->CallBooleanMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 	return RetVal;
 }
 
@@ -110,7 +110,7 @@ int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...)
 	va_start(Params, Method);
 	int RetVal = JEnv->CallIntMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 	return RetVal;
 }
 
@@ -122,7 +122,7 @@ jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ..
 	va_start(Params, Method);
 	jobject val = JEnv->CallObjectMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 	jobject RetVal = JEnv->NewGlobalRef(val);
 	JEnv->DeleteLocalRef(val);
 	return RetVal;
@@ -136,7 +136,7 @@ jobjectArray FJavaClassObjectWrapper::CallMethod<jobjectArray>(FJavaClassMethod 
 	va_start(Params, Method);
 	jobject val = JEnv->CallObjectMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 	jobjectArray RetVal = (jobjectArray)JEnv->NewGlobalRef(val);
 	JEnv->DeleteLocalRef(val);
 	return RetVal;
@@ -150,7 +150,7 @@ int64 FJavaClassObjectWrapper::CallMethod<int64>(FJavaClassMethod Method, ...)
 	va_start(Params, Method);
 	int64 RetVal = JEnv->CallLongMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	LogException();
+	VerifyException();
 	return RetVal;
 }
 
@@ -162,7 +162,7 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 	va_start(Params, Method);
 	jstring RetVal = static_cast<jstring>(JEnv->CallObjectMethodV(Object, Method.Method, Params));
 	va_end(Params);
-	LogException();
+	VerifyException();
 	auto Result = FJavaHelper::FStringFromLocalRef(JEnv, RetVal);
 	return Result;
 }
