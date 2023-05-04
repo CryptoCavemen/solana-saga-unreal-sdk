@@ -1,4 +1,9 @@
-﻿#include "MobileWalletAdapterSessionCommon.h"
+﻿//
+// Copyright (c) 2023 Solana Mobile Inc.
+// Author: Sergey Makovkin (makovkin.s@gmail.com)
+//
+
+#include "MobileWalletAdapterSessionCommon.h"
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterSessionCommon, FJavaClassObjectWrapper,
 	"com/solana/mobilewalletadapter/common/protocol/FMobileWalletAdapterSessionCommon",

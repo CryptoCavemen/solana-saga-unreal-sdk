@@ -1,4 +1,7 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+//
+// Copyright (c) 2023 Solana Mobile Inc.
+// Author: Sergey Makovkin (makovkin.s@gmail.com)
+//
 
 using UnrealBuildTool;
 using System.Collections.Generic;

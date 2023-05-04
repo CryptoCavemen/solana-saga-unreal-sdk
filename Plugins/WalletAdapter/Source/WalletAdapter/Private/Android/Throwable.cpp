@@ -1,4 +1,9 @@
-﻿#include "Throwable.h"
+﻿//
+// Copyright (c) 2023 Solana Mobile Inc.
+// Author: Sergey Makovkin (makovkin.s@gmail.com)
+//
+
+#include "Throwable.h"
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"

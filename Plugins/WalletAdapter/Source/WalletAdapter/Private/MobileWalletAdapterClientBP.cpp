@@ -1,4 +1,9 @@
-﻿#include "MobileWalletAdapterClientBP.h"
+﻿//
+// Copyright (c) 2023 Solana Mobile Inc.
+// Author: Sergey Makovkin (makovkin.s@gmail.com)
+//
+
+#include "MobileWalletAdapterClientBP.h"
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationIntentCreator.h"
 #include "Android/LocalAssociationScenario.h"
@@ -39,7 +44,7 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
 
-	Activity->StartActivityForResult(AssociationIntent, 55);
+	Activity->StartActivity(AssociationIntent);
 
 	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
 	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, Throwable);
