@@ -14,7 +14,6 @@ class FMobileWalletAdapterClient : public FJavaClassObjectWrapper
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, int32 ClientTimeoutMs);
 public:
 	TSharedRef<FFuture> Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster);
-	void OnAuthorizeInternal(bool bSuccess);
 protected:
 	FJavaClassMethod AuthorizeMethod;	
 };

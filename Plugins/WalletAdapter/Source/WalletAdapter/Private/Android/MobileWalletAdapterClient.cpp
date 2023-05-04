@@ -15,9 +15,8 @@ TSharedRef<FFuture> FMobileWalletAdapterClient::Authorize(const FString& Identit
 {
 	UE_LOG(LogAndroid, Verbose, TEXT("Authorize(): IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', Cluster = '%s'"),
 		*IdentityUri, *IconUri, *IdentityName, *Cluster);
-
-	bool bExceptionThrown;
-	jobject RetVal = CallThrowableMethod<jobject>(bExceptionThrown, AuthorizeMethod,
+	
+	jobject RetVal = CallMethod<jobject>(AuthorizeMethod,
 		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
 		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
 		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
@@ -26,7 +25,4 @@ TSharedRef<FFuture> FMobileWalletAdapterClient::Authorize(const FString& Identit
 	return FFuture::MakeFromExistingObject(RetVal);
 }
 
-void FMobileWalletAdapterClient::OnAuthorizeInternal(bool bSuccess)
-{
-}
 #endif

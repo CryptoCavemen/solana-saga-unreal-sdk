@@ -84,8 +84,9 @@ public:
 	template<typename ReturnType>
 	ReturnType CallMethod(FJavaClassMethod Method, ...);
 
+	/** Calls the method and stores a local reference to an exception if any occured. */
 	template<typename ReturnType>
-	ReturnType CallThrowableMethod(bool& bExceptionThrown, FJavaClassMethod Method, ...);	
+	ReturnType CallThrowableMethod(jthrowable& Exception, FJavaClassMethod Method, ...);	
 
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject GetJObject() const { return Object; }
@@ -135,9 +136,10 @@ template<>
 FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...);
 
 template<>
-jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...);
+jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
 
 typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
+typedef TSharedPtr<FJavaClassObjectWrapper> FJavaClassObjectWrapperPtr;
 
 #endif

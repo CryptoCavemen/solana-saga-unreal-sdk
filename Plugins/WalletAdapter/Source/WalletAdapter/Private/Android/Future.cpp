@@ -37,6 +37,14 @@ FJavaClassObjectWrapperRef FFuture::Get()
 	return MakeShared<FJavaClassObjectWrapper>(RetVal);
 }
 
+FJavaClassObjectWrapperPtr FFuture::Get(TSharedPtr<FThrowable>& Throwable)
+{
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, GetMethod);
+	Throwable = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	return RetVal ? MakeShared<FJavaClassObjectWrapper>(RetVal) : TSharedPtr<FJavaClassObjectWrapper>();	
+}
+
 FJavaClassObjectWrapperRef FFuture::Get(int64 TimeoutMilliseconds)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
@@ -51,6 +59,25 @@ FJavaClassObjectWrapperRef FFuture::Get(int64 TimeoutMilliseconds)
 	
 	jobject RetVal = CallMethod<jobject>(GetWithTimeoutMethod, TimeoutMilliseconds, MillisecondsObject);
 	return MakeShared<FJavaClassObjectWrapper>(RetVal);
+}
+
+FJavaClassObjectWrapperPtr FFuture::Get(int64 TimeoutMilliseconds, TSharedPtr<FThrowable>& Throwable)
+{
+	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
+	jclass TimeUnitClass = JEnv->FindClass("java/util/concurrent/TimeUnit");
+	check(TimeUnitClass);
+
+	jfieldID MillisecondsFieldId = JEnv->GetStaticFieldID(TimeUnitClass, "MILLISECONDS", "Ljava/util/concurrent/TimeUnit;");
+	check(MillisecondsFieldId);
+
+	jobject MillisecondsObject = JEnv->GetStaticObjectField(TimeUnitClass, MillisecondsFieldId);
+	check(MillisecondsObject);
+
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, GetWithTimeoutMethod, TimeoutMilliseconds, MillisecondsObject);
+	Throwable = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	
+	return RetVal ? MakeShared<FJavaClassObjectWrapper>(RetVal) : TSharedPtr<FJavaClassObjectWrapper>();	
 }
 
 #endif

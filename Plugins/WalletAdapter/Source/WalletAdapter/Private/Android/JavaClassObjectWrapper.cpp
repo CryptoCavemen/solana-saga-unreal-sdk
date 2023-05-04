@@ -187,18 +187,24 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 }
 
 template<>
-jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...)
+jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
 	va_list Params;
 	va_start(Params, Method);
 	jobject val = Env->CallObjectMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	bExceptionThrown = Env->ExceptionCheck();
-	if (bExceptionThrown)
+
+	if (Env->ExceptionCheck())
 	{
+		Exception = Env->ExceptionOccurred();		
 		Env->ExceptionDescribe();
 		Env->ExceptionClear();
 	}
+	else
+	{
+		Exception = nullptr;
+	}
+	
 	jobject RetVal = Env->NewGlobalRef(val);
 	Env->DeleteLocalRef(val);
 	return RetVal;

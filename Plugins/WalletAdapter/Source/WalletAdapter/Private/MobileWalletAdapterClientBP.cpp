@@ -32,6 +32,8 @@ UMobileWalletAdapterClientBP::~UMobileWalletAdapterClientBP()
 void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 {
 #if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Throwable;
+	
 	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
 	
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
@@ -39,9 +41,21 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 
 	Activity->StartActivityForResult(AssociationIntent, 55);
 
-	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure	
- 	auto Client = FMobileWalletAdapterClient::MakeFromExistingObject(LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS)->GetJObject());
-	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet");
+	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
+	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, Throwable);
+	if (Throwable.IsValid())
+	{
+		UE_LOG(LogAndroid, Error, TEXT("Local association scenario start failed: %s"), *Throwable->GetMessage());
+		return;
+	}
+	
+ 	auto Client = FMobileWalletAdapterClient::MakeFromExistingObject(FutureResult->GetJObject());
+	
+	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet")->Get(Throwable);
+	if (Throwable.IsValid())
+	{
+		UE_LOG(LogAndroid, Error, TEXT("Authorization failed: %s"), *Throwable->GetMessage());
+	}
 
 /*
 	public static final String CLUSTER_MAINNET_BETA = "mainnet-beta";
