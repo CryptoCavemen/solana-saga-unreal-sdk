@@ -37,29 +37,34 @@ UMobileWalletAdapterClientBP::~UMobileWalletAdapterClientBP()
 void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 {
 #if PLATFORM_ANDROID
-	TSharedPtr<FThrowable> Throwable;
+	TSharedPtr<FThrowable> Exception;
 	
 	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
 	
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
 
-	Activity->StartActivity(AssociationIntent);
-
-	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
-	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, Throwable);
-	if (Throwable.IsValid())
+	Activity->StartActivity(AssociationIntent, &Exception);
+	if (Exception)
 	{
-		UE_LOG(LogAndroid, Error, TEXT("Local association scenario start failed: %s"), *Throwable->GetMessage());
+		UE_LOG(LogAndroid, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());
+		return;
+	}
+	
+	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
+	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogAndroid, Error, TEXT("Failed establishing local association with wallet: %s"), *Exception->GetMessage());
 		return;
 	}
 	
  	auto Client = FMobileWalletAdapterClient::MakeFromExistingObject(FutureResult->GetJObject());
 	
-	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet")->Get(Throwable);
-	if (Throwable.IsValid())
+	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet")->Get(&Exception);
+	if (Exception)
 	{
-		UE_LOG(LogAndroid, Error, TEXT("Authorization failed: %s"), *Throwable->GetMessage());
+		UE_LOG(LogAndroid, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
 	}
 
 /*

@@ -141,6 +141,9 @@ template<>
 FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...);
 
 template<>
+void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...);
+
+template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
 

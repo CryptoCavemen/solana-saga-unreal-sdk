@@ -192,6 +192,26 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 }
 
 template<>
+void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...)
+{
+	va_list Params;
+	va_start(Params, Method);
+	Env->CallVoidMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}	
+}
+
+template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
 	va_list Params;

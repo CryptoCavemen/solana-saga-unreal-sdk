@@ -17,14 +17,32 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/e
 	StartActivityForResultMethod = GetClassMethod("startActivityForResult", "(Landroid/content/Intent;I)V");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-void FGameActivity::StartActivity(const FJavaClassObjectWrapperRef& Intent)
+void FGameActivity::StartActivity(const FJavaClassObjectWrapperRef& Intent, TSharedPtr<FThrowable>* OutException)
 {
-	CallMethod<void>(StartActivityMethod, **Intent);
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		CallThrowableMethod<void>(JThrowable, StartActivityForResultMethod, **Intent);
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	}
+	else
+	{
+		CallMethod<void>(StartActivityMethod, **Intent);
+	}
 }
 
-void FGameActivity::StartActivityForResult(const FJavaClassObjectWrapperRef& Intent, int32 RequestCode)
+void FGameActivity::StartActivityForResult(const FJavaClassObjectWrapperRef& Intent, int32 RequestCode, TSharedPtr<FThrowable>* OutException)
 {
-	CallMethod<void>(StartActivityForResultMethod, **Intent, RequestCode);
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		CallThrowableMethod<void>(JThrowable, StartActivityForResultMethod, **Intent, RequestCode);
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
+	}
+	else
+	{
+		CallMethod<void>(StartActivityForResultMethod, **Intent, RequestCode);
+	}
 }
 
 #endif

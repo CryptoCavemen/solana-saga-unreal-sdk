@@ -25,13 +25,9 @@ public:
 	/** Returns true if this task completed. */
 	bool IsDone();
 	/** Waits if necessary for the computation to complete, and then retrieves its result. */
-	FJavaClassObjectWrapperRef Get();
-	/** Waits if necessary for the computation to complete, and then retrieves its result. Throwable pointer is valid if exception occured. */
-	FJavaClassObjectWrapperPtr Get(TSharedPtr<FThrowable>& Throwable);
+	FJavaClassObjectWrapperPtr Get(TSharedPtr<FThrowable>* OutException = nullptr);
 	/** Waits if necessary for at most the given time for the computation to complete, and then retrieves its result, if available. */
-	FJavaClassObjectWrapperRef Get(int64 TimeoutMilliseconds);
-	/** Waits if necessary for at most the given time for the computation to complete, and then retrieves its result, if available. Throwable pointer is valid if exception occured. */
-	FJavaClassObjectWrapperPtr Get(int64 TimeoutMilliseconds, TSharedPtr<FThrowable>& Throwable);	
+	FJavaClassObjectWrapperPtr Get(int64 TimeoutMilliseconds, TSharedPtr<FThrowable>* OutException = nullptr);	
 	
 public:
 	FJavaClassMethod CancelMethod;
