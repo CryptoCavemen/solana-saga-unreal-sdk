@@ -40,7 +40,8 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 	Activity->StartActivityForResult(AssociationIntent, 55);
 
 	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure	
-	LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS);
+ 	auto Client = FMobileWalletAdapterClient::MakeFromExistingObject(LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS)->GetJObject());
+	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet");
 
 /*
 	public static final String CLUSTER_MAINNET_BETA = "mainnet-beta";
