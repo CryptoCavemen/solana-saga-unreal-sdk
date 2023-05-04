@@ -14,12 +14,12 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/e
 	StartActivityForResultMethod = GetClassMethod("startActivityForResult", "(Landroid/content/Intent;I)V");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-void FGameActivity::StartActivity(const FGlobalJavaClassObjectRef& Intent)
+void FGameActivity::StartActivity(const FJavaClassObjectWrapperRef& Intent)
 {
 	CallMethod<void>(StartActivityMethod, **Intent);
 }
 
-void FGameActivity::StartActivityForResult(const FGlobalJavaClassObjectRef& Intent, int32 RequestCode)
+void FGameActivity::StartActivityForResult(const FJavaClassObjectWrapperRef& Intent, int32 RequestCode)
 {
 	CallMethod<void>(StartActivityForResultMethod, **Intent, RequestCode);
 }

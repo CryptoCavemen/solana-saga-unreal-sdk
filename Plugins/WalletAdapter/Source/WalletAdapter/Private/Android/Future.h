@@ -21,9 +21,9 @@ public:
 	/** Returns true if this task completed. */
 	bool IsDone();
 	/** Waits if necessary for the computation to complete, and then retrieves its result. */
-	FGlobalJavaClassObjectRef Get();
+	FJavaClassObjectWrapperRef Get();
 	/** Waits if necessary for at most the given time for the computation to complete, and then retrieves its result, if available. */
-	FGlobalJavaClassObjectRef Get(int64 TimeoutMilliseconds);	
+	FJavaClassObjectWrapperRef Get(int64 TimeoutMilliseconds);	
 	
 public:
 	FJavaClassMethod CancelMethod;

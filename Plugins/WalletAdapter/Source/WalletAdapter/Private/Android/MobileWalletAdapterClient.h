@@ -1,25 +1,22 @@
 ﻿#pragma once
 
 #include "CoreMinimal.h"
-#include "Scenario.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
+#include "Future.h"
 #include "Defines.h"
 
 /**
- * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient 
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.Scenario 
  */
 class FMobileWalletAdapterClient : public FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, int32 ClientTimeoutMs);
 public:
-	jobject Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
-
-protected:
+	TSharedRef<FFuture> Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster);
 	void OnAuthorizeInternal(bool bSuccess);
-
-private:
-	FJavaClassMethod AuthorizeMethod;
+protected:
+	FJavaClassMethod AuthorizeMethod;	
 };
 
 #endif

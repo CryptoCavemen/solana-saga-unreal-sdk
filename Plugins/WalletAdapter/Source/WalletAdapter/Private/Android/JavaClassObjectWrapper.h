@@ -13,6 +13,8 @@
  */
 #define DECLARE_JAVA_CLASS_OBJECT(ImplClass, ...)\
 protected:\
+	ImplClass();\
+public:\
 	ImplClass(jobject LocalObject);\
 	static ImplClass* Construct(jobject LocalObject, ...);\
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;\
@@ -32,6 +34,11 @@ public:\
  * Must be defined in a cpp file for every class derived from FJavaClassObjectEx  
  */
 #define BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(ImplClass, ParentClass, JavaClassName, JavaCtorSig, ...)\
+ImplClass::ImplClass()\
+	: ParentClass()\
+{\
+}\
+\
 ImplClass::ImplClass(jobject LocalObject)\
 	: ParentClass(LocalObject)\
 {\
@@ -39,7 +46,7 @@ ImplClass::ImplClass(jobject LocalObject)\
 \
 ImplClass* ImplClass::Construct(jobject LocalObject, ...)\
 {\
-	ImplClass* Object = new ImplClass(LocalObject);\
+	ImplClass* Object = LocalObject ? new ImplClass(LocalObject) : new ImplClass();\
 \
 	va_list Args;\
 	va_start(Args, LocalObject);\
@@ -64,14 +71,9 @@ void ImplClass::PostConstruct(const char* ClassName, const char* CtorSig, const 
 class FJavaClassObjectWrapper
 {
 protected:
-	/**
-	 * Constructs a new java object or stores a pointer to it if passed LocalObject is not null.
-	 * Local reference to the passed java object is deleted automatically!
-	 * 
-	 * !! Please note, that all Java objects returned by JNI functions are local references.
-	 */	
-	FJavaClassObjectWrapper(jobject LocalObject);
-public:
+	FJavaClassObjectWrapper();
+public:	
+	FJavaClassObjectWrapper(jobject InObject);
 	virtual ~FJavaClassObjectWrapper();
 protected:
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args);
@@ -85,11 +87,12 @@ public:
 	template<typename ReturnType>
 	ReturnType CallThrowableMethod(bool& bExceptionThrown, FJavaClassMethod Method, ...);	
 
-	FORCEINLINE jobject GetJObject() const
-	{
-		return Object;
-	}
-
+	/** Returns the underlying JNI pointer */
+	FORCEINLINE jobject GetJObject() const { return Object; }
+	/** Returns the underlying JNI pointer */
+	FORCEINLINE jobject operator*() const { return Object; }
+	FORCEINLINE operator bool() const { return !Env || !Object || Env->IsSameObject(Object, nullptr); }
+	
 	static FScopedJavaObject<jstring> GetJString(const FString& String);
 	static FScopedJavaObject<jobject> GetJUri(const FString& Uri);
 
@@ -98,12 +101,16 @@ public:
 
 protected:
 
-	jobject			Object;
-	jclass			Class;
+	JNIEnv*	Env;
+	jobject Object;
+	jclass Class;
 
 private:
 	FJavaClassObjectWrapper(const FJavaClassObjectWrapper& rhs);
 	FJavaClassObjectWrapper& operator = (const FJavaClassObjectWrapper& rhs);
+
+	void StoreObjectClass(jobject InObject);
+	void StoreObjectReference(jobject InObject);
 };
 
 template<>
@@ -131,79 +138,6 @@ template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(bool& bExceptionThrown, FJavaClassMethod Method, ...);
 
 
-
-/** Helper class that automatically creates a global ref from a local ref, calls DeleteLocalRef for it
- *  and then calls DeleteGlobalRef on the passed-in Java object when goes out of scope */
-template <typename T>
-class FGlobalJavaObject
-{
-public:
-	FGlobalJavaObject(JNIEnv* InEnv, const T& InObjRef)
-		: Env(InEnv)
-		, ObjRef(InObjRef)
-	{
-		JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
-		jobjectRefType RefType = JEnv->GetObjectRefType(ObjRef);
-		
-		switch (RefType)
-		{
-		case JNILocalRefType:
-			{
-				T ObjGlobalRef = (T)Env->NewGlobalRef(ObjRef);
-				Env->DeleteLocalRef(ObjRef);		
-				ObjRef = ObjGlobalRef;
-			}
-			break;
-		case JNIGlobalRefType:
-			ObjRef = (T)Env->NewGlobalRef(ObjRef);
-			break;
-		case JNIWeakGlobalRefType:
-			verifyf(false, TEXT("Weak global reference is not supported"));
-			break;
-		case JNIInvalidRefType:
-			verifyf(false, TEXT("Reference is invalid"));
-			break;		
-		}
-	}
-	
-	FGlobalJavaObject(FGlobalJavaObject&& Other)
-		: Env(Other.Env)
-		, ObjRef(Other.ObjRef)
-	{
-		Other.Env = nullptr;
-		Other.ObjRef = nullptr;
-	}
-	
-	FGlobalJavaObject(const FGlobalJavaObject& Other) = delete;
-	FGlobalJavaObject& operator=(const FGlobalJavaObject& Other) = delete;
-	
-	~FGlobalJavaObject()
-	{
-		if (*this)
-		{
-			Env->DeleteGlobalRef(ObjRef);
-		}
-	}
-	
-	// Returns the underlying JNI pointer
-	T operator*() const { return ObjRef; }
-	
-	operator bool() const
-	{
-		if (!Env || !ObjRef || Env->IsSameObject(ObjRef, NULL))
-		{
-			return false;
-		}
-		
-		return true;
-	}
-	
-private:
-	JNIEnv* Env = nullptr;
-	T ObjRef = nullptr;
-};
-
-typedef FGlobalJavaObject<jobject> FGlobalJavaClassObject;
-typedef TSharedRef<FGlobalJavaClassObject> FGlobalJavaClassObjectRef;
+typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
 
 #endif

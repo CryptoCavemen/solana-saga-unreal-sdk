@@ -31,14 +31,13 @@ bool FFuture::IsDone()
 	return CallMethod<bool>(IsDoneMethod);
 }
 
-FGlobalJavaClassObjectRef FFuture::Get()
+FJavaClassObjectWrapperRef FFuture::Get()
 {
-	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
-	jobject JObject = CallMethod<jobject>(GetMethod);
-	return FGlobalJavaClassObjectRef(new FGlobalJavaClassObject(JEnv, JObject));
+	jobject RetVal = CallMethod<jobject>(GetMethod);
+	return MakeShared<FJavaClassObjectWrapper>(RetVal);
 }
 
-FGlobalJavaClassObjectRef FFuture::Get(int64 TimeoutMilliseconds)
+FJavaClassObjectWrapperRef FFuture::Get(int64 TimeoutMilliseconds)
 {
 	JNIEnv*	JEnv = AndroidJavaEnv::GetJavaEnv();
 	jclass TimeUnitClass = JEnv->FindClass("java/util/concurrent/TimeUnit");
@@ -51,7 +50,7 @@ FGlobalJavaClassObjectRef FFuture::Get(int64 TimeoutMilliseconds)
 	check(MillisecondsObject);
 	
 	jobject RetVal = CallMethod<jobject>(GetWithTimeoutMethod, TimeoutMilliseconds, MillisecondsObject);
-	return FGlobalJavaClassObjectRef(new FGlobalJavaClassObject(JEnv, RetVal));
+	return MakeShared<FJavaClassObjectWrapper>(RetVal);
 }
 
 #endif

@@ -41,6 +41,20 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 
 	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure	
 	LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS);
+
+/*
+	public static final String CLUSTER_MAINNET_BETA = "mainnet-beta";
+	public static final String CLUSTER_TESTNET = "testnet";
+	public static final String CLUSTER_DEVNET = "devnet";*
+		
+	private val CLUSTER_RPC_URI = Uri.parse("https://api.testnet.solana.com")
+	private const val CLUSTER_NAME = ProtocolContract.CLUSTER_TESTNET
+	private val IDENTITY = MobileWalletAdapterUseCase.DappIdentity(
+		uri = Uri.parse("https://solanamobile.com"),
+		iconRelativeUri = Uri.parse("favicon.ico"),
+		name = "FakeDApp"
+	)
+*/
 #endif
 }
 

@@ -13,8 +13,8 @@ class FGameActivity : FJavaClassObjectWrapper
 	DECLARE_JAVA_CLASS_OBJECT(FGameActivity);
 
 public:
-	void StartActivity(const FGlobalJavaClassObjectRef& Intent);
-	void StartActivityForResult(const FGlobalJavaClassObjectRef& Intent, int32 RequestCode);
+	void StartActivity(const FJavaClassObjectWrapperRef& Intent);
+	void StartActivityForResult(const FJavaClassObjectWrapperRef& Intent, int32 RequestCode);
 	
 protected:
 	FJavaClassMethod StartActivityMethod;

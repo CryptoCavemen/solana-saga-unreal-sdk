@@ -6,24 +6,27 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient", "(I)V", int ClientTimeoutMs)
 	AuthorizeMethod = GetClassMethod("authorize",
 		"(Landroid/net/Uri;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationFuture;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-jobject FMobileWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster)
+TSharedRef<FFuture> FMobileWalletAdapterClient::Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster)
 {
 	UE_LOG(LogAndroid, Verbose, TEXT("Authorize(): IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', Cluster = '%s'"),
 		*IdentityUri, *IconUri, *IdentityName, *Cluster);
 
 	bool bExceptionThrown;
-	jobject AuthorizationFuture = CallThrowableMethod<jobject>(bExceptionThrown, AuthorizeMethod, *GetJUri(IdentityUri), *GetJUri(IconUri), *GetJString(IdentityName), *GetJString(Cluster));
-	return AuthorizationFuture;
+	jobject RetVal = CallThrowableMethod<jobject>(bExceptionThrown, AuthorizeMethod,
+		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
+		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
+		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
+		!Cluster.IsEmpty() ? *GetJString(Cluster) : nullptr);
+	
+	return FFuture::MakeFromExistingObject(RetVal);
 }
 
 void FMobileWalletAdapterClient::OnAuthorizeInternal(bool bSuccess)
 {
 }
-
 #endif
