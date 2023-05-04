@@ -35,7 +35,7 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
 	
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
-	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix.IsEmpty() ? nullptr : &UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
+	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
 
 	Activity->StartActivityForResult(AssociationIntent, 55);
 

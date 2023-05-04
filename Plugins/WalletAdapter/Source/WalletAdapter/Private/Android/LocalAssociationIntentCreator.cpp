@@ -25,13 +25,13 @@ void FLocalAssociationIntentCreator::StaticConstruct()
 	check(CreateAssociationIntentMethod);	
 }
 
-FJavaClassObjectWrapperRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString* EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
+FJavaClassObjectWrapperRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
 {
 	JNIEnv* JEnv = FAndroidApplication::GetJavaEnv();
 	jobject RetVal = JEnv->CallStaticObjectMethod(
 		Class,
 		CreateAssociationIntentMethod,
-		EndpointPrefix ? *FJavaClassObjectWrapper::GetJUri(*EndpointPrefix) : nullptr, 
+		!EndpointPrefix.IsEmpty() ? *FJavaClassObjectWrapper::GetJUri(EndpointPrefix) : nullptr, 
 		Port,
 		Session.GetJObject());
 	AndroidJavaEnv::CheckJavaException();
