@@ -37,12 +37,25 @@ UMobileWalletAdapterClientBP::~UMobileWalletAdapterClientBP()
 void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 {
 #if PLATFORM_ANDROID
+	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
+	const int64 LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS = 2000L;
+	
 	TSharedPtr<FThrowable> Exception;
 	
 	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
 	
 	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
+
+	auto CloseLocalAssociation = [&LocalAssociation]
+	{
+		TSharedPtr<FThrowable> Ex;
+		LocalAssociation->Close()->Get(LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS, &Ex);
+		if (Ex)
+		{
+			UE_LOG(LogAndroid, Warning, TEXT("Local association close failed: %s"), *Ex->GetMessage());			
+		}		
+	};
 
 	Activity->StartActivity(AssociationIntent, &Exception);
 	if (Exception)
@@ -51,11 +64,11 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 		return;
 	}
 	
-	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
 	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogAndroid, Error, TEXT("Failed establishing local association with wallet: %s"), *Exception->GetMessage());
+		CloseLocalAssociation();
 		return;
 	}
 	
@@ -65,7 +78,14 @@ void UMobileWalletAdapterClientBP::LocalAssociateAndExecute(FString UriPrefix)
 	if (Exception)
 	{
 		UE_LOG(LogAndroid, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
+		CloseLocalAssociation();
+		return;
 	}
+
+	// SUCCESS
+	UE_LOG(LogAndroid, Log, TEXT("Authorized successfully"));
+	
+	CloseLocalAssociation();
 
 /*
 	public static final String CLUSTER_MAINNET_BETA = "mainnet-beta";
