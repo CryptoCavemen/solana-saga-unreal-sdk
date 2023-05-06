@@ -97,17 +97,15 @@ public:
 	FORCEINLINE jobject GetJObject() const { return Object; }
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject operator*() const { return Object; }
-	FORCEINLINE operator bool() const { return !Env || !Object || Env->IsSameObject(Object, nullptr); }
-	
+	operator bool() const;
+
 	static FScopedJavaObject<jstring> GetJString(const FString& String);
 	static FScopedJavaObject<jobject> GetJUri(const FString& Uri);
 
-	void VerifyException();
-	void LogException();
+	static void VerifyException(JNIEnv* Env);
+	static void LogException(JNIEnv* Env);
 
 protected:
-
-	JNIEnv*	Env;
 	jobject Object;
 	jclass Class;
 

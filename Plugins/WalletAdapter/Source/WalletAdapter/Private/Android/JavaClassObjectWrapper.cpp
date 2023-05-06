@@ -8,26 +8,16 @@
 
 #if USE_ANDROID_JNI
 
-jclass UriClass = nullptr;
-jmethodID UriParseMethod = nullptr;
-
 FJavaClassObjectWrapper::FJavaClassObjectWrapper()
-	: Env(nullptr)
-	, Object(nullptr)
+	: Object(nullptr)
 	, Class(nullptr)
 {
-	Env = AndroidJavaEnv::GetJavaEnv();
-	check(Env);	
 }
 
 FJavaClassObjectWrapper::FJavaClassObjectWrapper(jobject InObject)
-	: Env(nullptr)
-	, Object(nullptr)
+	: Object(nullptr)
 	, Class(nullptr)
 {
-	Env = AndroidJavaEnv::GetJavaEnv();
-	check(Env);
-
 	check(InObject);
 	StoreObjectClass(InObject);
 	StoreObjectReference(InObject);
@@ -35,6 +25,8 @@ FJavaClassObjectWrapper::FJavaClassObjectWrapper(jobject InObject)
 
 FJavaClassObjectWrapper::~FJavaClassObjectWrapper()
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
 	if (Object)
 		Env->DeleteGlobalRef(Object);
 	if (Class)
@@ -53,6 +45,8 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 	
 	if (Object == nullptr)
 	{
+		JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+		
 		Class = AndroidJavaEnv::FindJavaClassGlobalRef(ClassName);
 		check(Class);
 		
@@ -61,7 +55,7 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 
 		// Construct a new object
 		Object = Env->NewObjectV(Class, Constructor, Args);
-		VerifyException();
+		VerifyException(Env);
 		check(Object);
 	}
 	
@@ -71,6 +65,8 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 
 FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
 	FJavaClassMethod Method;
 	Method.Method = Env->GetMethodID(Class, MethodName, FuncSig);
 	Method.Name = MethodName;
@@ -82,6 +78,8 @@ FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName,
 
 void FJavaClassObjectWrapper::StoreObjectClass(jobject InObject)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
 	jclass LocalClass = Env->GetObjectClass(InObject);
 	check(LocalClass);
 	Class = (jclass)Env->NewGlobalRef(LocalClass);
@@ -90,6 +88,8 @@ void FJavaClassObjectWrapper::StoreObjectClass(jobject InObject)
 
 void FJavaClassObjectWrapper::StoreObjectReference(jobject InObject)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
 	jobjectRefType RefType = Env->GetObjectRefType(InObject);
 	switch (RefType)
 	{
@@ -113,43 +113,47 @@ void FJavaClassObjectWrapper::StoreObjectReference(jobject InObject)
 template<>
 void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	Env->CallVoidMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 }
 
 template<>
 bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	bool RetVal = Env->CallBooleanMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	return RetVal;
 }
 
 template<>
 int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	int RetVal = Env->CallIntMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	return RetVal;
 }
 
 template<>
 jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	jobject val = Env->CallObjectMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	jobject RetVal = Env->NewGlobalRef(val);
 	Env->DeleteLocalRef(val);
 	return RetVal;
@@ -158,11 +162,12 @@ jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ..
 template<>
 jobjectArray FJavaClassObjectWrapper::CallMethod<jobjectArray>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	jobject val = Env->CallObjectMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	jobjectArray RetVal = (jobjectArray)Env->NewGlobalRef(val);
 	Env->DeleteLocalRef(val);
 	return RetVal;
@@ -171,22 +176,24 @@ jobjectArray FJavaClassObjectWrapper::CallMethod<jobjectArray>(FJavaClassMethod 
 template<>
 int64 FJavaClassObjectWrapper::CallMethod<int64>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	int64 RetVal = Env->CallLongMethodV(Object, Method.Method, Params);
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	return RetVal;
 }
 
 template<>
 FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	jstring RetVal = static_cast<jstring>(Env->CallObjectMethodV(Object, Method.Method, Params));
 	va_end(Params);
-	VerifyException();
+	VerifyException(Env);
 	auto Result = FJavaHelper::FStringFromLocalRef(Env, RetVal);
 	return Result;
 }
@@ -194,6 +201,7 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 template<>
 void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	Env->CallVoidMethodV(Object, Method.Method, Params);
@@ -214,6 +222,7 @@ void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, F
 template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
 	jobject val = Env->CallObjectMethodV(Object, Method.Method, Params);
@@ -235,6 +244,12 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 	return RetVal;
 }
 
+FJavaClassObjectWrapper::operator bool() const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	return !Env || !Object || Env->IsSameObject(Object, nullptr);
+}
+
 FScopedJavaObject<jstring> FJavaClassObjectWrapper::GetJString(const FString& String)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -244,15 +259,19 @@ FScopedJavaObject<jstring> FJavaClassObjectWrapper::GetJString(const FString& St
 FScopedJavaObject<jobject> FJavaClassObjectWrapper::GetJUri(const FString& Uri)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
-	if (!UriClass)
-		UriClass = Env->FindClass("android/net/Uri");
-	if (!UriParseMethod)
-		UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
-	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *FJavaHelper::ToJavaString(Env, Uri));
-	return NewScopedJavaObject(Env, JUri);	
+
+	if (Uri.IsEmpty())
+		return FScopedJavaObject<jobject>(Env, nullptr);
+	
+	jclass UriClass = Env->FindClass("android/net/Uri");
+	jmethodID UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
+	auto JStringScoped = FJavaHelper::ToJavaString(Env, Uri);
+	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *JStringScoped);
+	LogException(Env);
+	return NewScopedJavaObject(Env, JUri);		
 }
 
-void FJavaClassObjectWrapper::VerifyException()
+void FJavaClassObjectWrapper::VerifyException(JNIEnv* Env)
 {
 	if (Env->ExceptionCheck())
 	{
@@ -262,7 +281,7 @@ void FJavaClassObjectWrapper::VerifyException()
 	}
 }
 
-void FJavaClassObjectWrapper::LogException()
+void FJavaClassObjectWrapper::LogException(JNIEnv* Env)
 {
 	if (Env->ExceptionCheck())
 	{

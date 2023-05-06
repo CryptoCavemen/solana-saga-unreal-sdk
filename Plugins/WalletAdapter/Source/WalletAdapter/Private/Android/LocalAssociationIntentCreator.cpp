@@ -5,6 +5,7 @@
 
 #include "LocalAssociationIntentCreator.h"
 #include "MobileWalletAdapterSession.h"
+#include "WalletAdapter.h"
 
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
@@ -30,6 +31,7 @@ void FLocalAssociationIntentCreator::StaticConstruct()
 
 FJavaClassObjectWrapperRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
 {
+	UE_LOG(LogWalletAdapter, Verbose, TEXT("Creating Association Intent: EnpointPrefix = '%s'"), *EndpointPrefix);
 	JNIEnv* JEnv = FAndroidApplication::GetJavaEnv();
 	jobject RetVal = JEnv->CallStaticObjectMethod(
 		Class,

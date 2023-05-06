@@ -50,6 +50,8 @@ FJavaClassObjectWrapperPtr FFuture::Get(TSharedPtr<FThrowable>* OutException)
 
 FJavaClassObjectWrapperPtr FFuture::Get(int64 TimeoutMilliseconds, TSharedPtr<FThrowable>* OutException)
 {
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
 	jclass TimeUnitClass = Env->FindClass("java/util/concurrent/TimeUnit");
 	check(TimeUnitClass);
 

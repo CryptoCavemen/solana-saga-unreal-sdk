@@ -7,6 +7,8 @@
 
 #include "CoreMinimal.h"
 
+WALLETADAPTER_API DECLARE_LOG_CATEGORY_EXTERN(LogWalletAdapter, Log, All);
+
 class WALLETADAPTER_API FWalletAdapterModule : public IModuleInterface
 {
 public:

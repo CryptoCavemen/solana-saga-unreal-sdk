@@ -4,6 +4,7 @@
 //
 
 #include "MobileWalletAdapterClient.h"
+#include "WalletAdapter.h"
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
@@ -18,7 +19,7 @@ END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 TSharedRef<FFuture> FMobileWalletAdapterClient::Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster)
 {
-	UE_LOG(LogAndroid, Verbose, TEXT("Authorize(): IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', Cluster = '%s'"),
+	UE_LOG(LogWalletAdapter, Log, TEXT("Authorizing client: IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', Cluster = '%s'"),
 		*IdentityUri, *IconUri, *IdentityName, *Cluster);
 	
 	jobject RetVal = CallMethod<jobject>(AuthorizeMethod,

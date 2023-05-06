@@ -5,7 +5,8 @@
 
 #include "WalletAdapter.h"
 #include "Android/LocalAssociationIntentCreator.h"
-#include "MobileWalletAdapterClientBP.h"
+
+DEFINE_LOG_CATEGORY(LogWalletAdapter);
 
 void FWalletAdapterModule::StartupModule()
 {
