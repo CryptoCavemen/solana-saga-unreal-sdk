@@ -69,7 +69,15 @@ void ImplClass::PostConstruct(const char* ClassName, const char* CtorSig, const 
  *  Must be defined after BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT
  */
 #define END_IMPLEMENT_JAVA_CLASS_OBJECT }
-	
+
+
+struct FJavaClassField
+{
+	FName		Name;
+	FName		Signature;
+	jfieldID	Field;
+};
+
 /**
  * Base class for java object wrappers. 
  */
@@ -84,14 +92,20 @@ protected:
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args);
 public:
 
-	FJavaClassMethod GetClassMethod(const char* MethodName, const char* FuncSig);
+	FJavaClassMethod GetClassMethod(const char* MethodName, const char* FuncSig) const;
+	FJavaClassField GetClassField(const char* FieldName, const char* FuncSig) const;
 	
 	template<typename ReturnType>
 	ReturnType CallMethod(FJavaClassMethod Method, ...);
 
 	/** Calls the method and stores a local reference to an exception if any occured. */
 	template<typename ReturnType>
-	ReturnType CallThrowableMethod(jthrowable& Exception, FJavaClassMethod Method, ...);	
+	ReturnType CallThrowableMethod(jthrowable& Exception, FJavaClassMethod Method, ...);
+
+	jobject GetObjectField(FJavaClassField Field) const;
+	FString GetStringField(FJavaClassField Field) const;
+	uint8 GetByteField(FJavaClassField Field) const;
+	TArray<uint8> GetByteArrayField(FJavaClassField Field) const;
 
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject GetJObject() const { return Object; }
@@ -101,6 +115,7 @@ public:
 
 	static FScopedJavaObject<jstring> GetJString(const FString& String);
 	static FScopedJavaObject<jobject> GetJUri(const FString& Uri);
+	static FString JUriToString(jobject JUri);
 
 	static void VerifyException(JNIEnv* Env);
 	static void LogException(JNIEnv* Env);
@@ -116,6 +131,7 @@ private:
 	void StoreObjectClass(jobject InObject);
 	void StoreObjectReference(jobject InObject);
 };
+
 
 template<>
 void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...);
@@ -143,7 +159,6 @@ void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, F
 
 template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
-
 
 typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
 typedef TSharedPtr<FJavaClassObjectWrapper> FJavaClassObjectWrapperPtr;

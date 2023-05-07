@@ -23,13 +23,28 @@ public:
 	void SetClientImpl(const TSharedPtr<FMobileWalletAdapterClient>& InClient);
 #endif
 
+public:
+	/** Authorizes a client. Blocking call. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
 	bool Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
+	/** Reauthorizes a client. Blocking call. */
+	UFUNCTION(BlueprintCallable, Category = "Solana")
+	bool Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken);
+	/** Deauthorizes a client. Blocking call. */
+	UFUNCTION(BlueprintCallable, Category = "Solana")
+	bool Deauthorize(FString AuthorizationToken);	
 
-	//UFUNCTION(BlueprintCallable, Category = "Solana")
-	//void LocalAssociateAndExecute(FString UriPrefix);
+public:
+	UPROPERTY(BlueprintReadOnly)
+	FString AuthToken;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<uint8> PublicKey;
+	UPROPERTY(BlueprintReadOnly)
+	FString AccountLabel;
+	UPROPERTY(BlueprintReadOnly)
+	FString WalletUriBase;
 	
-private:
+protected:
 #if PLATFORM_ANDROID
 	TSharedPtr<FMobileWalletAdapterClient> Client;
 #endif

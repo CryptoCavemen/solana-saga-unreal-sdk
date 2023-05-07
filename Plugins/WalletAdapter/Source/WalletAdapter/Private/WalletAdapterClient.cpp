@@ -25,18 +25,98 @@ bool UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 #if PLATFORM_ANDROID
     TSharedPtr<FThrowable> Exception;
 
-	Client->Authorize(IdentityUri, IconUri, IdentityName, Cluster)->Get(&Exception);
+	auto JAuthFuture = Client->Authorize(IdentityUri, IconUri, IdentityName, Cluster, &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
 		return false;
 	}
 
+	check(JAuthFuture.IsValid());
+	auto JAuthResult = JAuthFuture->Get(&Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JAuthResult.IsValid());
+
+	auto AuthResult = FAuthorizationResult::MakeFromExistingObject(JAuthResult->GetJObject());
+	AuthToken = AuthResult->GetAuthToken();
+	PublicKey = AuthResult->GetPublicKey();
+	AccountLabel = AuthResult->GetAccountLabel();
+	WalletUriBase = AuthResult->GetWalletUriBase();
+
 	// SUCCESS
-	UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully"));
+	UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully: AuthToken = %s"), *AuthToken);
 	return true;
 #endif
 	return false;
+}
+
+bool UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto JAuthFuture = Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthToken, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JAuthFuture.IsValid());
+	auto JAuthResult = JAuthFuture->Get(&Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JAuthResult.IsValid());
+
+	auto AuthResult = FAuthorizationResult::MakeFromExistingObject(JAuthResult->GetJObject());
+	AuthToken = AuthResult->GetAuthToken();
+	PublicKey = AuthResult->GetPublicKey();
+	AccountLabel = AuthResult->GetAccountLabel();
+	WalletUriBase = AuthResult->GetWalletUriBase();
+	
+	// SUCCESS
+	UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorized successfully"));
+	return true;
+#endif
+	return false;	
+}
+
+bool UWalletAdapterClient::Deauthorize(FString AuthorizationToken)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto JDeauthFuture = Client->Deauthorize(AuthToken);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JDeauthFuture.IsValid());
+	JDeauthFuture->Get(&Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *Exception->GetMessage());
+		return false;
+	}	
+
+	AuthToken.Empty();
+
+	// SUCCESS
+	UE_LOG(LogWalletAdapter, Log, TEXT("Deauthorized successfully"));
+	return true;
+#endif
+	return false;	
 }
 
 /*

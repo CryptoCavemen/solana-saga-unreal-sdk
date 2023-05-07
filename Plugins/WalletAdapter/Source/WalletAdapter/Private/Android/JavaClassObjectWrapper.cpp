@@ -63,7 +63,7 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 	StoreObjectReference(Object);
 }
 
-FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig)
+FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	
@@ -74,6 +74,19 @@ FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName,
 	// Is method valid?
 	checkf(Method.Method, TEXT("Unable to find Java Method %s with Signature %s"), UTF8_TO_TCHAR(MethodName), UTF8_TO_TCHAR(FuncSig));
 	return Method;
+}
+
+FJavaClassField FJavaClassObjectWrapper::GetClassField(const char* FieldName, const char* FuncSig) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
+	FJavaClassField Field;
+	Field.Field = Env->GetFieldID(Class, FieldName, FuncSig);
+	Field.Name = FieldName;
+	Field.Signature = FuncSig;
+	// Is field valid?
+	checkf(Field.Field, TEXT("Unable to find Java Field %s with Signature %s"), UTF8_TO_TCHAR(FieldName), UTF8_TO_TCHAR(FuncSig));
+	return Field;	
 }
 
 void FJavaClassObjectWrapper::StoreObjectClass(jobject InObject)
@@ -244,6 +257,54 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 	return RetVal;
 }
 
+jobject FJavaClassObjectWrapper::GetObjectField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jobject RetVal = Env->GetObjectField(Object, Field.Field);
+	VerifyException(Env);
+	return RetVal;		
+}
+
+FString FJavaClassObjectWrapper::GetStringField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jstring RetVal = static_cast<jstring>(Env->GetObjectField(Object, Field.Field));
+	VerifyException(Env);
+	auto Result = FJavaHelper::FStringFromLocalRef(Env, RetVal);
+	return Result;	
+}
+
+uint8 FJavaClassObjectWrapper::GetByteField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jbyte RetVal = Env->GetByteField(Object, Field.Field);
+	VerifyException(Env);
+	return RetVal;
+}
+
+TArray<uint8> FJavaClassObjectWrapper::GetByteArrayField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jbyteArray JByteArray = static_cast<jbyteArray>(Env->GetObjectField(Object, Field.Field));
+	VerifyException(Env);
+	
+	jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
+	int32 ArraySize = Env->GetArrayLength(JByteArray);
+
+	TArray<uint8> ByteArray;
+	
+	if (JByteArray != nullptr)
+	{
+		ByteArray.SetNumUninitialized(ArraySize);
+		memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
+		Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
+	}
+	
+	Env->DeleteLocalRef(JByteArray);
+	
+	return ByteArray;
+}
+
 FJavaClassObjectWrapper::operator bool() const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -265,10 +326,23 @@ FScopedJavaObject<jobject> FJavaClassObjectWrapper::GetJUri(const FString& Uri)
 	
 	jclass UriClass = Env->FindClass("android/net/Uri");
 	jmethodID UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
-	auto JStringScoped = FJavaHelper::ToJavaString(Env, Uri);
-	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *JStringScoped);
+	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *FJavaHelper::ToJavaString(Env, Uri));
 	LogException(Env);
-	return NewScopedJavaObject(Env, JUri);		
+	return NewScopedJavaObject(Env, JUri);
+}
+
+FString FJavaClassObjectWrapper::JUriToString(jobject JUri)
+{
+	if (!JUri)
+		return FString();
+		
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	jclass UriClass = Env->FindClass("android/net/Uri");
+	jmethodID ToStringMethod = Env->GetMethodID(UriClass, "toString", "()Ljava/lang/String;");
+	jstring JString = static_cast<jstring>(Env->CallObjectMethod(JUri, ToStringMethod));
+	LogException(Env);
+	return FJavaHelper::FStringFromLocalRef(Env, JString);
 }
 
 void FJavaClassObjectWrapper::VerifyException(JNIEnv* Env)

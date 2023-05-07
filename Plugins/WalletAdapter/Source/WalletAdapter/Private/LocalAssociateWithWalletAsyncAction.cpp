@@ -70,7 +70,7 @@ void ULocalAssociateWithWalletAsyncAction::Close()
 {
 	AsyncTask(ENamedThreads::AnyThread, [this]
 	{
-		if (LocalAssociation->Close())
+		if (LocalAssociation && LocalAssociation->Close())
 			OnSuccess();
 		else
 			OnError(ELocalAssociateWithWalletError::CloseFailed);
