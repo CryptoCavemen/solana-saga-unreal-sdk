@@ -21,77 +21,45 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectWr
 		"(Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$DeauthorizeFuture;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-TSharedPtr<FFuture> FMobileWalletAdapterClient::Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster, TSharedPtr<FThrowable>* OutException)
+TSharedPtr<FFuture> FMobileWalletAdapterClient::Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster, TSharedPtr<FThrowable>& OutException)
 {
 	UE_LOG(LogWalletAdapter, Log, TEXT("Authorizing client: IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', Cluster = '%s'"),
 		*IdentityUri, *IconUri, *IdentityName, *Cluster);
 
-	jobject RetVal;
-	if (OutException)
-	{
-		jthrowable JThrowable;
-		RetVal = CallThrowableMethod<jobject>(JThrowable, AuthorizeMethod,
-			!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-			!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-			!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-			!Cluster.IsEmpty() ? *GetJString(Cluster) : nullptr);
-		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
-	}
-	else
-	{
-		RetVal = CallMethod<jobject>(ReauthorizeMethod,
-			!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-			!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-			!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-			!Cluster.IsEmpty() ? *GetJString(Cluster) : nullptr);
-	}
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, AuthorizeMethod,
+		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
+		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
+		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
+		!Cluster.IsEmpty() ? *GetJString(Cluster) : nullptr);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 			
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
 }
 
-TSharedPtr<FFuture> FMobileWalletAdapterClient::Reauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken, TSharedPtr<FThrowable>* OutException)
+TSharedPtr<FFuture> FMobileWalletAdapterClient::Reauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken, TSharedPtr<FThrowable>& OutException)
 {
 	UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorizing client: IdentityUri = '%s', IconUri = '%s', IdentityName = '%s', AuthToken = '%s'"),
 		*IdentityUri, *IconUri, *IdentityName, *AuthToken);
 
-	jobject RetVal;
-	if (OutException)
-	{
-		jthrowable JThrowable;
-		RetVal = CallThrowableMethod<jobject>(JThrowable, ReauthorizeMethod,
-			!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-			!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-			!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-			!AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
-		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
-	}
-	else
-	{
-		RetVal = CallMethod<jobject>(ReauthorizeMethod,
-			!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-			!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-			!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-			!AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
-	}
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, ReauthorizeMethod,
+		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
+		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
+		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
+		!AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
 }
 
-TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>* OutException)
+TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>& OutException)
 {
 	UE_LOG(LogWalletAdapter, Log, TEXT("Deauthorizing client: AuthToken = '%s'"), *AuthToken);
-
-	jobject RetVal;
-	if (OutException)
-	{
-		jthrowable JThrowable;
-		RetVal = CallThrowableMethod<jobject>(JThrowable, DeauthorizeMethod, !AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
-		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
-	}
-	else
-	{
-		RetVal = CallMethod<jobject>(DeauthorizeMethod, !AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
-	}
+	
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, DeauthorizeMethod, !AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
 }

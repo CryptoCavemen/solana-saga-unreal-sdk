@@ -25,7 +25,7 @@ bool UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 #if PLATFORM_ANDROID
     TSharedPtr<FThrowable> Exception;
 
-	auto JAuthFuture = Client->Authorize(IdentityUri, IconUri, IdentityName, Cluster, &Exception);
+	auto JAuthFuture = Client->Authorize(IdentityUri, IconUri, IdentityName, Cluster, Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
@@ -60,7 +60,7 @@ bool UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto JAuthFuture = Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthToken, &Exception);
+	auto JAuthFuture = Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthToken, Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *Exception->GetMessage());
@@ -95,7 +95,7 @@ bool UWalletAdapterClient::Deauthorize(FString AuthorizationToken)
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto JDeauthFuture = Client->Deauthorize(AuthToken);
+	auto JDeauthFuture = Client->Deauthorize(AuthToken, Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *Exception->GetMessage());

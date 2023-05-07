@@ -5,9 +5,9 @@
 
 using UnrealBuildTool;
 
-public class SolanaSuite : ModuleRules
+public class UnrealWalletAdapter : ModuleRules
 {
-	public SolanaSuite(ReadOnlyTargetRules Target) : base(Target)
+	public UnrealWalletAdapter(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
@@ -17,7 +17,6 @@ public class SolanaSuite : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"SeedVault",
 			"WalletAdapter",
 		});
 

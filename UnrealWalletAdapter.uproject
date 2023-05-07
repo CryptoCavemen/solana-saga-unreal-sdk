@@ -5,7 +5,7 @@
 	"Description": "",
 	"Modules": [
 		{
-			"Name": "SolanaSuite",
+			"Name": "UnrealWalletAdapter",
 			"Type": "Runtime",
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
@@ -14,10 +14,6 @@
 		}
 	],
 	"Plugins": [
-		{
-			"Name": "SeedVault",
-			"Enabled": true
-		},
 		{
 			"Name": "WalletAdapter",
 			"Enabled": true
@@ -36,7 +32,6 @@
 	],
 	"TargetPlatforms": [
 		"Windows",
-		"Android",
-		"HoloLens"
+		"Android"
 	]
 }

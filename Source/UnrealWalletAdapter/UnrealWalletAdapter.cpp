@@ -3,7 +3,7 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "SolanaSuite.h"
+#include "UnrealWalletAdapter.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, SolanaSuite, "SolanaSuite" );
+IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, UnrealWalletAdapter, "UnrealWalletAdapter" );
