@@ -27,8 +27,8 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectWr
 		"([[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
 	SignMessagesMethod = GetClassMethod("signMessages",
 		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
-//	SignMessagesDetachedMethod = GetClassMethod("signMessagesDetached",
-//		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesFuture;");
+	SignMessagesDetachedMethod = GetClassMethod("signMessagesDetached",
+		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesFuture;");
 	SignAndSendTransactionsMethod = GetClassMethod("signAndSendTransactions",
 		"([[BLjava/lang/Integer;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignAndSendTransactionsFuture;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT

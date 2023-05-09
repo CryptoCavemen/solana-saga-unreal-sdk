@@ -33,7 +33,7 @@ protected:
 	FJavaClassMethod GetCapabilitiesMethod;
 	FJavaClassMethod SignTransactionsMethod;
 	FJavaClassMethod SignMessagesMethod;
-//	FJavaClassMethod SignMessagesDetachedMethod;
+	FJavaClassMethod SignMessagesDetachedMethod;
 	FJavaClassMethod SignAndSendTransactionsMethod;
 };
 

@@ -42,7 +42,7 @@
 				}
 			}
 			dependencies {
-				implementation 'com.solanamobile:mobile-wallet-adapter-clientlib:1.0.5'
+				implementation 'com.solanamobile:mobile-wallet-adapter-clientlib:1.1.0'
 			}			
 		</insert>
 	</buildGradleAdditions>
