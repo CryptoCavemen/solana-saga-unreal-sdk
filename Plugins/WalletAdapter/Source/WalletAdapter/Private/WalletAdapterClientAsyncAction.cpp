@@ -12,11 +12,27 @@ UWalletAdapterClientAsyncAction::UWalletAdapterClientAsyncAction()
 }
 
 UWalletAdapterClientAsyncAction* UWalletAdapterClientAsyncAction::Authorize(
-	UObject* WorldContextObject, UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster)
+	UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster)
 {
 	UWalletAdapterClientAsyncAction* BlueprintNode = NewObject<UWalletAdapterClientAsyncAction>();
 	BlueprintNode->Client = Client;
-	BlueprintNode->Start(IdentityUri, IconUri, IdentityName, Cluster);
+	BlueprintNode->StartAuthorize(IdentityUri, IconUri, IdentityName, Cluster);
+	return BlueprintNode;
+}
+
+UWalletAdapterClientAsyncAction* UWalletAdapterClientAsyncAction::Reauthorize(UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString AuthToken)
+{
+	UWalletAdapterClientAsyncAction* BlueprintNode = NewObject<UWalletAdapterClientAsyncAction>();
+	BlueprintNode->Client = Client;
+	BlueprintNode->StartReauthorize(IdentityUri, IconUri, IdentityName, AuthToken);
+	return BlueprintNode;
+}
+
+UWalletAdapterClientAsyncAction* UWalletAdapterClientAsyncAction::Deauthorize(UWalletAdapterClient* Client, FString AuthToken)
+{
+	UWalletAdapterClientAsyncAction* BlueprintNode = NewObject<UWalletAdapterClientAsyncAction>();
+	BlueprintNode->Client = Client;
+	BlueprintNode->StartDeauthorize(AuthToken);
 	return BlueprintNode;
 }
 
@@ -38,7 +54,7 @@ void UWalletAdapterClientAsyncAction::OnError()
 	});	
 }
 
-void UWalletAdapterClientAsyncAction::Start(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster)
+void UWalletAdapterClientAsyncAction::StartAuthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster)
 {
 	AsyncTask(ENamedThreads::AnyThread, [this, IdentityUri, IconUri, IdentityName, Cluster]
 	{
@@ -47,4 +63,26 @@ void UWalletAdapterClientAsyncAction::Start(const FString& IdentityUri, const FS
 		else
 			OnError();
 	});		
+}
+
+void UWalletAdapterClientAsyncAction::StartReauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken)
+{
+	AsyncTask(ENamedThreads::AnyThread, [this, IdentityUri, IconUri, IdentityName, AuthToken]
+	{
+		if (Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthToken))
+			OnSuccess();
+		else
+			OnError();
+	});
+}
+
+void UWalletAdapterClientAsyncAction::StartDeauthorize(const FString& AuthToken)
+{
+	AsyncTask(ENamedThreads::AnyThread, [this, AuthToken]
+	{
+		if (Client->Deauthorize(AuthToken))
+			OnSuccess();
+		else
+			OnError();
+	});	
 }

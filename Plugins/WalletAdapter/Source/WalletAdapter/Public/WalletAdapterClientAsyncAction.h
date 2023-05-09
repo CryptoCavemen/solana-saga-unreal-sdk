@@ -21,8 +21,12 @@ class UWalletAdapterClientAsyncAction : public UBlueprintAsyncActionBase
 public:
 	UWalletAdapterClientAsyncAction();
 	
-	UFUNCTION(BlueprintCallable, Category = "Solana", meta = (BlueprintInternalUseOnly = "true", WorldContext="WorldContextObject"))
-	static UWalletAdapterClientAsyncAction* Authorize(UObject* WorldContextObject, UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
+	UFUNCTION(BlueprintCallable, Category = "Solana", meta = (BlueprintInternalUseOnly = "true"))
+	static UWalletAdapterClientAsyncAction* Authorize(UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
+	UFUNCTION(BlueprintCallable, Category = "Solana", meta = (BlueprintInternalUseOnly = "true"))
+	static UWalletAdapterClientAsyncAction* Reauthorize(UWalletAdapterClient* Client, FString IdentityUri, FString IconUri, FString IdentityName, FString AuthToken);
+	UFUNCTION(BlueprintCallable, Category = "Solana", meta = (BlueprintInternalUseOnly = "true"))
+	static UWalletAdapterClientAsyncAction* Deauthorize(UWalletAdapterClient* Client, FString AuthToken);	
 	
 	UFUNCTION()
 	void OnSuccess();
@@ -30,7 +34,9 @@ public:
 	void OnError();
 
 protected:
-	void Start(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster);	
+	void StartAuthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster);
+	void StartReauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken);
+	void StartDeauthorize(const FString& AuthToken);
 	
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAuthorizeResult, UWalletAdapterClient*, Client);
@@ -41,8 +47,6 @@ public:
 	FAuthorizeResult Fail;
 
 private:
-	UPROPERTY()
-	UObject* WorldContextObject;
 	UPROPERTY()
 	UWalletAdapterClient* Client;	 
 };
