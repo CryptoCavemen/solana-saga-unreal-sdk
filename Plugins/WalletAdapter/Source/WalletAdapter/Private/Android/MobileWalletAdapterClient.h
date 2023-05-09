@@ -24,10 +24,17 @@ public:
 	TSharedPtr<FFuture> Reauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken, TSharedPtr<FThrowable>& OutException);
 	/** Deauthorizes a client. */
 	TSharedPtr<FFuture> Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>& OutException);
+	/** Sign transactions. */
+	TSharedPtr<FFuture> SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException);	
 protected:
 	FJavaClassMethod AuthorizeMethod;
 	FJavaClassMethod ReauthorizeMethod;
 	FJavaClassMethod DeauthorizeMethod;
+	FJavaClassMethod GetCapabilitiesMethod;
+	FJavaClassMethod SignTransactionsMethod;
+	FJavaClassMethod SignMessagesMethod;
+//	FJavaClassMethod SignMessagesDetachedMethod;
+	FJavaClassMethod SignAndSendTransactionsMethod;
 };
 
 /**

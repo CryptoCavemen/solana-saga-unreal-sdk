@@ -4,6 +4,8 @@
 //
 
 #include "MobileWalletAdapterClient.h"
+
+#include "JavaUtils.h"
 #include "WalletAdapter.h"
 
 #if PLATFORM_ANDROID
@@ -19,6 +21,16 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectWr
 		"(Landroid/net/Uri;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationFuture;");
 	DeauthorizeMethod = GetClassMethod("deauthorize",
 		"(Ljava/lang/String;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$DeauthorizeFuture;");
+	GetCapabilitiesMethod = GetClassMethod("getCapabilities",
+		"()Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$GetCapabilitiesFuture;");
+	SignTransactionsMethod = GetClassMethod("signTransactions",
+		"([[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
+	SignMessagesMethod = GetClassMethod("signMessages",
+		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
+//	SignMessagesDetachedMethod = GetClassMethod("signMessagesDetached",
+//		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesFuture;");
+	SignAndSendTransactionsMethod = GetClassMethod("signAndSendTransactions",
+		"([[BLjava/lang/Integer;)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignAndSendTransactionsFuture;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::Authorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& Cluster, TSharedPtr<FThrowable>& OutException)
@@ -28,10 +40,10 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Authorize(const FString& Identit
 
 	jthrowable JThrowable;
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, AuthorizeMethod,
-		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-		!Cluster.IsEmpty() ? *GetJString(Cluster) : nullptr);
+		!IdentityUri.IsEmpty() ? *FJavaUtils::GetJUri(IdentityUri) : nullptr,
+		!IconUri.IsEmpty() ? *FJavaUtils::GetJUri(IconUri) : nullptr,
+		!IdentityName.IsEmpty() ? *FJavaUtils::GetJString(IdentityName) : nullptr,
+		!Cluster.IsEmpty() ? *FJavaUtils::GetJString(Cluster) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 			
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
@@ -44,10 +56,10 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Reauthorize(const FString& Ident
 
 	jthrowable JThrowable;
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, ReauthorizeMethod,
-		!IdentityUri.IsEmpty() ? *GetJUri(IdentityUri) : nullptr,
-		!IconUri.IsEmpty() ? *GetJUri(IconUri) : nullptr,
-		!IdentityName.IsEmpty() ? *GetJString(IdentityName) : nullptr,
-		!AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
+		!IdentityUri.IsEmpty() ? *FJavaUtils::GetJUri(IdentityUri) : nullptr,
+		!IconUri.IsEmpty() ? *FJavaUtils::GetJUri(IconUri) : nullptr,
+		!IdentityName.IsEmpty() ? *FJavaUtils::GetJString(IdentityName) : nullptr,
+		!AuthToken.IsEmpty() ? *FJavaUtils::GetJString(AuthToken) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
@@ -58,16 +70,26 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthT
 	UE_LOG(LogWalletAdapter, Log, TEXT("Deauthorizing client: AuthToken = '%s'"), *AuthToken);
 	
 	jthrowable JThrowable;
-	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, DeauthorizeMethod, !AuthToken.IsEmpty() ? *GetJString(AuthToken) : nullptr);
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, DeauthorizeMethod, !AuthToken.IsEmpty() ? *FJavaUtils::GetJString(AuthToken) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
 }
 
+TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException)
+{
+	UE_LOG(LogWalletAdapter, Log, TEXT("Signing %d transactions"), Transactions.Num());
+	
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignTransactionsMethod);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	
+	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();	
+}
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
-		"(Ljava/lang/String;[BLjava/lang/String;Landroid/net/Uri;)V",
-		const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase)
+                                  "(Ljava/lang/String;[BLjava/lang/String;Landroid/net/Uri;)V",
+                                  const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase)
 	AuthTokenField = GetClassField("authToken", "Ljava/lang/String;");
 	PublicKeyField = GetClassField("publicKey", "[B");
 	AccountLabelField = GetClassField("accountLabel", "Ljava/lang/String;");
@@ -93,7 +115,7 @@ FString FAuthorizationResult::GetWalletUriBase()
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	auto JUri = FScopedJavaObject(Env, GetObjectField(WalletUriBaseField));
-	FString Uri = JUriToString(*JUri);
+	FString Uri = FJavaUtils::JUriToString(*JUri);
 	return Uri;
 }
 

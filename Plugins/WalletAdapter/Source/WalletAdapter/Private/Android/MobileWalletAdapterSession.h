@@ -11,8 +11,6 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Defines.h"
 
-#define DEFAULT_CLIENT_TIMEOUT_MS 90000
-
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterSession 
  */

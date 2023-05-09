@@ -15,6 +15,8 @@
 #include "Android/AndroidApplication.h"
 #endif
 
+#define DEFAULT_CLIENT_TIMEOUT_MS 60000
+
 #define LOCAL_ASSOCIATION_START_TIMEOUT_MS 60000L // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
 #define LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS 2000L
 

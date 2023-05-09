@@ -113,13 +113,6 @@ public:
 	FORCEINLINE jobject operator*() const { return Object; }
 	operator bool() const;
 
-	static FScopedJavaObject<jstring> GetJString(const FString& String);
-	static FScopedJavaObject<jobject> GetJUri(const FString& Uri);
-	static FString JUriToString(jobject JUri);
-
-	static void VerifyException(JNIEnv* Env);
-	static void LogException(JNIEnv* Env);
-
 protected:
 	jobject Object;
 	jclass Class;

@@ -4,11 +4,12 @@
 //
 
 #include "LocalAssociationIntentCreator.h"
+
+#include "JavaUtils.h"
 #include "MobileWalletAdapterSession.h"
 #include "WalletAdapter.h"
 
 #if PLATFORM_ANDROID
-#include "Android/JavaClassObjectWrapper.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
@@ -36,7 +37,7 @@ FJavaClassObjectWrapperRef FLocalAssociationIntentCreator::CreateAssociationInte
 	jobject RetVal = JEnv->CallStaticObjectMethod(
 		Class,
 		CreateAssociationIntentMethod,
-		!EndpointPrefix.IsEmpty() ? *FJavaClassObjectWrapper::GetJUri(EndpointPrefix) : nullptr, 
+		!EndpointPrefix.IsEmpty() ? *FJavaUtils::GetJUri(EndpointPrefix) : nullptr, 
 		Port,
 		Session.GetJObject());
 	AndroidJavaEnv::CheckJavaException();
