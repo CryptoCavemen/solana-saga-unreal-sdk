@@ -81,7 +81,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TA
 	UE_LOG(LogWalletAdapter, Log, TEXT("Signing %d transactions"), Transactions.Num());
 	
 	jthrowable JThrowable;
-	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignTransactionsMethod);
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignTransactionsMethod, *FJavaUtils::GetArrayOfByteArray(Transactions));
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();	
@@ -102,7 +102,18 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignAndSendTransactions(const TA
 	}
 
 	jthrowable JThrowable;
-	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignAndSendTransactionsMethod, JMinContextSlot);
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignAndSendTransactionsMethod, *FJavaUtils::GetArrayOfByteArray(Transactions), JMinContextSlot);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	
+	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
+}
+
+TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessages(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException)
+{
+	UE_LOG(LogWalletAdapter, Log, TEXT("Signing %d messages"), Messages.Num());
+	
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignMessagesMethod, *FJavaUtils::GetArrayOfByteArray(Messages), *FJavaUtils::GetArrayOfByteArray(Addresses));
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		

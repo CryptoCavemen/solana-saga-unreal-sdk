@@ -27,7 +27,10 @@ public:
 	/** Sign transactions. */
 	TSharedPtr<FFuture> SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException);
 	/** Sign and send transactions. MinContextSlot might be null. */
-	TSharedPtr<FFuture> SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException);	
+	TSharedPtr<FFuture> SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException);
+	/** Sign messages. */
+	TSharedPtr<FFuture> SignMessages(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException);	
+	
 protected:
 	FJavaClassMethod AuthorizeMethod;
 	FJavaClassMethod ReauthorizeMethod;

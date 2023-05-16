@@ -27,6 +27,41 @@ FScopedJavaObject<jobject> FJavaUtils::GetJUri(const FString& Uri)
 	return NewScopedJavaObject(Env, JUri);
 }
 
+FScopedJavaObject<jbyteArray> FJavaUtils::GetByteArray(const TArray<uint8>& Bytes)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	if (!Bytes.Num())
+		return FScopedJavaObject<jbyteArray>(Env, nullptr);
+	
+	jbyteArray JByteArray = Env->NewByteArray(Bytes.Num());
+	jbyte* Buffer = Env->GetByteArrayElements(JByteArray, nullptr);
+	FMemory::Memcpy(Buffer, Bytes.GetData(), Bytes.Num());
+	Env->ReleaseByteArrayElements(JByteArray, Buffer, 0);
+
+	return NewScopedJavaObject(Env, JByteArray);
+}
+
+FScopedJavaObject<jobjectArray> FJavaUtils::GetArrayOfByteArray(const TArray<TArray<uint8>>& ByteArray)
+{	
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	if (!ByteArray.Num())
+		return FScopedJavaObject<jobjectArray>(Env, nullptr);
+		
+	jclass ArrayElemClass = Env->FindClass("[B");
+	jobjectArray JByteArray = Env->NewObjectArray(ByteArray.Num(), ArrayElemClass, Env->NewByteArray(1));
+	Env->DeleteLocalRef(ArrayElemClass);
+
+	for (int32 Index = 0; Index < ByteArray.Num(); Index++)
+	{   
+		auto JBytes = GetByteArray(ByteArray[Index]);
+		Env->SetObjectArrayElement(JByteArray, Index, *JBytes);
+	}
+
+	return NewScopedJavaObject(Env, JByteArray);	
+}
+
 FString FJavaUtils::JUriToString(jobject JUri)
 {
 	if (!JUri)
