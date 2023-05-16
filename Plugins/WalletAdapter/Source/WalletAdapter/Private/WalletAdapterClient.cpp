@@ -119,6 +119,75 @@ bool UWalletAdapterClient::Deauthorize(FString AuthorizationToken)
 	return false;	
 }
 
+bool UWalletAdapterClient::SignTransaction(const FSolanaTransaction& Transaction)
+{
+	TArray<FSolanaTransaction> Transactions;
+	Transactions.Add(Transaction);
+	return SignTransactions(Transactions);
+}
+
+bool UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	TArray<TArray<uint8>> RawTransactions;
+	for (const auto& [Data] : Transactions)
+		RawTransactions.Add(Data);
+
+	auto JSignFuture = Client->SignAndSendTransactions(RawTransactions, MinContextSlot ? &MinContextSlot : nullptr, Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign and send %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JSignFuture.IsValid());
+	JSignFuture->Get(&Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign and send %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
+		return false;
+	}
+
+	// SUCCESS
+	UE_LOG(LogWalletAdapter, Log, TEXT("Signed and sent %d transaction(s)"), Transactions.Num());
+	return true;
+#endif
+	return false;		
+}
+
+bool UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Transactions)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	TArray<TArray<uint8>> RawTransactions;
+	for (const auto& [Data] : Transactions)
+		RawTransactions.Add(Data);
+
+	auto JSignFuture = Client->SignTransactions(RawTransactions, Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
+		return false;
+	}
+
+	check(JSignFuture.IsValid());
+	JSignFuture->Get(&Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
+		return false;
+	}
+
+	// SUCCESS
+	UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d transaction(s)"), Transactions.Num());
+	return true;
+#endif
+	return false;	
+}
+
 /*
 void UWalletAdapterClient::LocalAssociateAndExecute(FString UriPrefix)
 {

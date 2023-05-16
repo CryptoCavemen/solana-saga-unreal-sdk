@@ -25,7 +25,9 @@ public:
 	/** Deauthorizes a client. */
 	TSharedPtr<FFuture> Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>& OutException);
 	/** Sign transactions. */
-	TSharedPtr<FFuture> SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException);	
+	TSharedPtr<FFuture> SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException);
+	/** Sign and send transactions. MinContextSlot might be null. */
+	TSharedPtr<FFuture> SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException);	
 protected:
 	FJavaClassMethod AuthorizeMethod;
 	FJavaClassMethod ReauthorizeMethod;

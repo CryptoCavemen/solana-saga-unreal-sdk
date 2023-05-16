@@ -87,6 +87,27 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TA
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();	
 }
 
+TSharedPtr<FFuture> FMobileWalletAdapterClient::SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException)
+{
+	UE_LOG(LogWalletAdapter, Log, TEXT("Signing and sending %d transactions"), Transactions.Num());
+	
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	jobject JMinContextSlot = nullptr;
+	if (MinContextSlot)
+	{
+		jclass IntegerClass = Env->FindClass("java/lang/Integer");
+		jmethodID IntegerCtor = Env->GetMethodID(IntegerClass, "<init>", "(I)V");
+		JMinContextSlot = Env->NewObject(IntegerClass, IntegerCtor, *MinContextSlot);
+	}
+
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignAndSendTransactionsMethod, JMinContextSlot);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	
+	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
+}
+
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
                                   "(Ljava/lang/String;[BLjava/lang/String;Landroid/net/Uri;)V",
                                   const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase)
