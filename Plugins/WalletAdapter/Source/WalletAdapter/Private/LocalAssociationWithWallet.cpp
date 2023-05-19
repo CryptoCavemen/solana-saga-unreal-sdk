@@ -44,58 +44,83 @@ bool ULocalAssociationWithWallet::OpenWallet(const FString& UriPrefix)
 #endif
 }
 
-bool ULocalAssociationWithWallet::Start()
+void ULocalAssociationWithWallet::Start(const FSuccessStartCallback& Success, const FFailCallback& Fail)
 {
 #if PLATFORM_ANDROID
 	if (!LocalAssociation.IsValid())
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("OpenWallet() must be called before starting the association"));
-		return false;
+		Fail.ExecuteIfBound("Wallet is not opened");
+		return;
 	}
-
-	TSharedPtr<FThrowable> Ex;
-	auto JClient = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, &Ex);
-	if (Ex)
-	{
-		UE_LOG(LogWalletAdapter, Error, TEXT("Failed establishing local association with wallet: %s"), *Ex->GetMessage());
-		return false;
-	}
-
-	auto NativeClient = FMobileWalletAdapterClient::MakeFromExistingObject(JClient->GetJObject());
-	Client = NewObject<UWalletAdapterClient>();
-	Client->SetClientImpl(NativeClient);			
 	
-	return true;
+	auto JFutureClient = LocalAssociation->Start();
+
+	AsyncTask(ENamedThreads::AnyThread, [this, JFutureClient, Success, Fail]
+	{
+		TSharedPtr<FThrowable> Exception;
+		auto JClient = JFutureClient->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, &Exception);
+
+		AsyncTask(ENamedThreads::GameThread, [this, JClient, Exception, Success, Fail]
+		{		
+			if (Exception)
+			{
+				UE_LOG(LogWalletAdapter, Error, TEXT("Failed establishing local association with wallet: %s"), *Exception->GetMessage());
+				AsyncTask(ENamedThreads::GameThread, [Fail, Exception]
+				{
+					Fail.ExecuteIfBound(Exception->GetMessage());
+				});
+				return;
+			}
+
+			auto NativeClient = FMobileWalletAdapterClient::MakeFromExistingObject(JClient->GetJObject());
+			Client = NewObject<UWalletAdapterClient>();
+			Client->SetClientImpl(NativeClient);
+
+			Success.ExecuteIfBound(Client);
+		});
+	});
 #else
-	return false;
+	Fail.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-bool ULocalAssociationWithWallet::Close()
+void ULocalAssociationWithWallet::Close(const FSuccessCloseCallback& Success, const FFailCallback& Fail)
 {
 #if PLATFORM_ANDROID
 	Client = nullptr;
-	
-	if (LocalAssociation.IsValid())
-	{
-		TSharedPtr<FThrowable> Ex;
-		LocalAssociation->Close()->Get(LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS, &Ex);
-		LocalAssociation.Reset();
-		if (Ex)
-		{
-			UE_LOG(LogWalletAdapter, Warning, TEXT("Local association close failed: %s"), *Ex->GetMessage());
-			return false;
-		}
-	}
-	else
+
+	if (!LocalAssociation.IsValid())
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Start() must be called before closing the association"));
+		Fail.ExecuteIfBound("Local association is not started");
+		return;
 	}
+	
+	auto JFuture = LocalAssociation->Close();
+	
+	AsyncTask(ENamedThreads::AnyThread, [this, JFuture, Success, Fail]
+	{
+		TSharedPtr<FThrowable> Exception;
+		JFuture->Get(LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS, &Exception);
 
-	return true;
+		AsyncTask(ENamedThreads::GameThread, [this, Exception, Fail, Success]
+		{
+			LocalAssociation.Reset();
+			if (Exception)
+			{
+				UE_LOG(LogWalletAdapter, Warning, TEXT("Local association close failed: %s"), *Exception->GetMessage());
+				Fail.ExecuteIfBound(Exception->GetMessage());
+				return;
+			}
+			
+			Success.ExecuteIfBound();
+		});
+	});
 
+#else
+	Fail.ExecuteIfBound("Current platform is not supported");
 #endif
-	return false;
 }
 
 UWalletAdapterClient* ULocalAssociationWithWallet::GetMobileWalletAdapterClient()

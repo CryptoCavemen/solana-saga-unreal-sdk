@@ -18,22 +18,25 @@ class FFuture;
 
 /**
  * ULocalAssociationScenarioBP
- * OpenWallet -> Start -> IsDone? -> GetMobileWalletAdapterClient -> [any actions with the client] -> Close
  */
 UCLASS(BlueprintType)
 class WALLETADAPTER_API ULocalAssociationWithWallet : public UObject
 {
 	GENERATED_BODY()
 
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSuccessStartCallback, UWalletAdapterClient*, Client);
+	DECLARE_DYNAMIC_DELEGATE(FSuccessCloseCallback);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailCallback, const FString&, ErrorMessage);	
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "Solana")
 	bool OpenWallet(const FString& UriPrefix);
-	/** Starts a local association with a wallet. Blocking call */
+	/** Starts a local association with a wallet. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool Start();
-	/** Closes the local association. Blocking call. */
+	void Start(const FSuccessStartCallback& Success, const FFailCallback& Fail);
+	/** Closes the local association. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool Close();
+	void Close(const FSuccessCloseCallback& Success, const FFailCallback& Fail);
 	/** Returns a mobile wallet adapter client. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
 	UWalletAdapterClient* GetMobileWalletAdapterClient();	

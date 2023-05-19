@@ -16,7 +16,7 @@ struct FSolanaTransaction
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite)
-	TArray<uint8> Data; 
+	TArray<uint8> Data;
 };
 
 /**
@@ -26,6 +26,10 @@ UCLASS(BlueprintType)
 class WALLETADAPTER_API UWalletAdapterClient : public UObject
 {
 	GENERATED_BODY()
+
+	DECLARE_DYNAMIC_DELEGATE(FSuccessCallback);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessCallback, const FString&, AuthToken);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailCallback, const FString&, ErrorMessage);
 	
 public:
 #if PLATFORM_ANDROID
@@ -33,24 +37,24 @@ public:
 #endif
 
 public:
-	/** Authorizes a client. Blocking call. */
+	/** Authorizes a client. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster);
-	/** Reauthorizes a client. Blocking call. */
+	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessCallback& Success, const FFailCallback& Fail);
+	/** Reauthorizes a client. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken);
-	/** Deauthorizes a client. Blocking call. */
+	void Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessCallback& Success, const FFailCallback& Fail);
+	/** Deauthorizes a client. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool Deauthorize(FString AuthorizationToken);
-	/** Signs transactions. Blocking call. */
+	void Deauthorize(const FSuccessCallback& Success, const FFailCallback& Fail);
+	/** Signs transactions. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool SignTransactions(const TArray<FSolanaTransaction>& Transactions);
-	/** Signs a transaction. Blocking call. */
+	void SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSuccessCallback& Success, const FFailCallback& Fail);
+	/** Signs a transaction. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool SignTransaction(const FSolanaTransaction& Transaction);
-	/** Signs and sends transactions. Blocking call. */
+	void SignTransaction(const FSolanaTransaction& Transaction, const FSuccessCallback& Success, const FFailCallback& Fail);
+	/** Signs and sends transactions. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	bool SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot = 0);	
+	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSuccessCallback& Success, const FFailCallback& Fail);	
 
 public:
 	UPROPERTY(BlueprintReadOnly)
