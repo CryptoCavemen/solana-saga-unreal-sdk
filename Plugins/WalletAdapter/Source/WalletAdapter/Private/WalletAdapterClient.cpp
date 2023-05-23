@@ -7,6 +7,7 @@
 #include "WalletAdapter.h"
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationScenario.h"
+#include "Android/MobileWalletAdapterClient.h"
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"

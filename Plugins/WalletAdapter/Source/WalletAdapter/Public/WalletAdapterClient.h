@@ -7,8 +7,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
-#include "Android/MobileWalletAdapterClient.h"
 #include "WalletAdapterClient.generated.h"
+
+class FMobileWalletAdapterClient;
 
 USTRUCT(BlueprintType)
 struct FSolanaTransaction

@@ -28,6 +28,10 @@ DECLARE_LOG_CATEGORY_CLASS(RequestManager, Log, All);
 static int64 LastMessageID = 0;
 static TArray<FRequestData*> PendingRequests;
 
+// "https://api.devnet.solana.com";
+// "https://api.mainnet-beta.solana.com";
+FString ClusterRPCUrl = "https://api.testnet.solana.com";
+
 
 int64 FRequestManager::GetNextMessageID()
 {
@@ -43,9 +47,7 @@ void FRequestManager::SendRequest(FRequestData* RequestData)
 {
 	const FHttpRequestRef Request = FHttpModule::Get().CreateRequest();
 	
-	FString Url = "https://api.devnet.solana.com";
-	//FString Url = "https://api.mainnet-beta.solana.com";
-	Request->SetURL(Url);
+	Request->SetURL(ClusterRPCUrl);
 	Request->SetVerb("POST");
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
 	Request->SetContentAsString(RequestData->Body);

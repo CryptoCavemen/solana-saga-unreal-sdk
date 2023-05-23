@@ -13,6 +13,7 @@ public class UnrealWalletAdapter : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"WalletAdapter"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
@@ -21,7 +22,6 @@ public class UnrealWalletAdapter : ModuleRules
 			"CoreUObject", 
 			"Engine", 
 			"InputCore",
-			"WalletAdapter",
 			"Json",
 			"JsonUtilities",
 			"HTTP"
