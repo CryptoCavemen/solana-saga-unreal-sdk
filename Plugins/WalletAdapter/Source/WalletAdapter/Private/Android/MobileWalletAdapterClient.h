@@ -60,4 +60,16 @@ protected:
 	FJavaClassField WalletUriBaseField;
 };
 
+/**
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignPayloadsResult
+ */
+class FSignPayloadsResult : public FJavaClassObjectWrapper
+{
+	DECLARE_JAVA_CLASS_OBJECT(FSignPayloadsResult, const TArray<TArray<uint8>>& SignedPayloads);
+public:
+	TArray<TArray<uint8>> GetSignedPayloads();
+protected:
+	FJavaClassField SignedPayloadsField;
+};
+
 #endif

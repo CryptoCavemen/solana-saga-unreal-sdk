@@ -24,23 +24,24 @@ class WALLETADAPTER_API ULocalAssociationWithWallet : public UObject
 {
 	GENERATED_BODY()
 
+public:
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSuccessStartCallback, UWalletAdapterClient*, Client);
 	DECLARE_DYNAMIC_DELEGATE(FSuccessCloseCallback);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailCallback, const FString&, ErrorMessage);	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureCallback, const FString&, ErrorMessage);	
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Solana")
 	bool OpenWallet(const FString& UriPrefix);
 	/** Starts a local association with a wallet. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void Start(const FSuccessStartCallback& Success, const FFailCallback& Fail);
+	void Start(const FSuccessStartCallback& Success, const FFailureCallback& Failure);
 	/** Closes the local association. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void Close(const FSuccessCloseCallback& Success, const FFailCallback& Fail);
+	void Close(const FSuccessCloseCallback& Success, const FFailureCallback& Failure);
 	/** Returns a mobile wallet adapter client. */
 	UFUNCTION(BlueprintCallable, Category = "Solana")
-	UWalletAdapterClient* GetMobileWalletAdapterClient();	
-
+	UWalletAdapterClient* GetMobileWalletAdapterClient();
+	
 protected:
 #if PLATFORM_ANDROID
 	TSharedPtr<FLocalAssociationScenario> LocalAssociation;

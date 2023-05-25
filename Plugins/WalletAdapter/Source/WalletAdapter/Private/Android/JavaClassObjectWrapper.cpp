@@ -307,6 +307,41 @@ TArray<uint8> FJavaClassObjectWrapper::GetByteArrayField(FJavaClassField Field) 
 	return ByteArray;
 }
 
+TArray<TArray<uint8>> FJavaClassObjectWrapper::GetArrayOfByteArrayField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	TArray<TArray<uint8>> ArrayOfByteArray;
+
+	jobjectArray JObjectArray = static_cast<jobjectArray>(Env->GetObjectField(Object, Field.Field));
+	FJavaUtils::VerifyException(Env);
+	int32 ObjectArraySize = Env->GetArrayLength(JObjectArray);
+	
+	for (int32 ObjectIndex = 0; ObjectIndex < ObjectArraySize; ObjectIndex++)
+	{
+		jbyteArray JByteArray = static_cast<jbyteArray>(Env->GetObjectArrayElement(JObjectArray, ObjectIndex));
+		FJavaUtils::VerifyException(Env);
+		
+		jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
+		int32 ArraySize = Env->GetArrayLength(JByteArray);
+
+		TArray<uint8>& ByteArray = ArrayOfByteArray.AddDefaulted_GetRef();
+		
+		if (JByteArray != nullptr)
+		{
+			ByteArray.SetNumUninitialized(ArraySize);
+			memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
+			Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
+		}
+		
+		Env->DeleteLocalRef(JByteArray);
+	}
+	
+	Env->DeleteLocalRef(JObjectArray);
+	
+	return ArrayOfByteArray;
+}
+
 FJavaClassObjectWrapper::operator bool() const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();

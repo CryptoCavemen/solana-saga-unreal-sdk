@@ -18,6 +18,9 @@ struct FSolanaTransaction
 	
 	UPROPERTY(BlueprintReadWrite)
 	TArray<uint8> Data;
+	
+	FSolanaTransaction() {}
+	FSolanaTransaction(const TArray<uint8>& InData) : Data(InData) {}
 };
 
 /**
@@ -27,10 +30,6 @@ UCLASS(BlueprintType)
 class WALLETADAPTER_API UWalletAdapterClient : public UObject
 {
 	GENERATED_BODY()
-
-	DECLARE_DYNAMIC_DELEGATE(FSuccessCallback);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessCallback, const FString&, AuthToken);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailCallback, const FString&, ErrorMessage);
 	
 public:
 #if PLATFORM_ANDROID
@@ -38,24 +37,46 @@ public:
 #endif
 
 public:
+	DECLARE_DELEGATE(FSuccessDelegate);
+	DECLARE_DELEGATE_OneParam(FAuthSuccessDelegate, const FString& AuthToken);
+	DECLARE_DELEGATE_OneParam(FSignSuccessDelegate, const TArray<FSolanaTransaction>& Transactions);
+	DECLARE_DELEGATE(FSignAndSendSuccessDelegate);
+	DECLARE_DELEGATE_OneParam(FFailureDelegate, const FString& ErrorMessage);
+
+	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessDynDelegate, const FString&, AuthToken);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FSolanaTransaction>&, Transactions);
+	DECLARE_DYNAMIC_DELEGATE(FSignAndSendSuccessDynDelegate);	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
+	
+public:
 	/** Authorizes a client. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessCallback& Success, const FFailCallback& Fail);
+	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Reauthorizes a client. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessCallback& Success, const FFailCallback& Fail);
+	void Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Deauthorizes a client. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void Deauthorize(const FSuccessCallback& Success, const FFailCallback& Fail);
+	void Deauthorize(const FSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Signs transactions. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSuccessCallback& Success, const FFailCallback& Fail);
-	/** Signs a transaction. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void SignTransaction(const FSolanaTransaction& Transaction, const FSuccessCallback& Success, const FFailCallback& Fail);
+	void SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Signs and sends transactions. */
-	UFUNCTION(BlueprintCallable, Category = "Solana")
-	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSuccessCallback& Success, const FFailCallback& Fail);	
+	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDelegate& Success, const FFailureDelegate& Failure);
+
+public:
+	/** Authorizes a client. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Authorize", ScriptName="Authorize"), Category="Solana")
+	void K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	/** Reauthorizes a client. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Reauthorize", ScriptName="Reauthorize"), Category="Solana")
+	void K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	/** Deauthorizes a client. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="Deauthorize", ScriptName="Deauthorize"), Category="Solana")
+	void K2_Deauthorize(const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	/** Signs transactions. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignTransactions", ScriptName="SignTransactions"), Category="Solana")
+	void K2_SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	/** Signs and sends transactions. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignAndSendTransactions", ScriptName="SignAndSendTransactions"), Category="Solana")
+	void K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 
 public:
 	UPROPERTY(BlueprintReadOnly)

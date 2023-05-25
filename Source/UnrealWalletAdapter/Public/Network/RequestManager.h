@@ -23,8 +23,8 @@ Contributers: Daniele Calanna, Riccardo Torrisi
 
 #include "Interfaces/IHttpRequest.h"
 
-DECLARE_DELEGATE_OneParam( RequestCallback, FJsonObject&);
-DECLARE_DELEGATE_OneParam( RequestErrorCallback, const FText& FailureReason);
+DECLARE_DELEGATE_OneParam( FRequestCallback, FJsonObject&);
+DECLARE_DELEGATE_OneParam( FRequestErrorCallback, const FText& FailureReason);
 
 typedef TFunctionRef<void(FJsonObject&)> RequestCB;
 
@@ -35,8 +35,8 @@ struct UNREALWALLETADAPTER_API FRequestData
 
 	uint32 Id;
 	FString Body;
-	RequestCallback Callback;
-	RequestErrorCallback ErrorCallback;
+	FRequestCallback Callback;
+	FRequestErrorCallback ErrorCallback;
 };
 
 class UNREALWALLETADAPTER_API FRequestManager

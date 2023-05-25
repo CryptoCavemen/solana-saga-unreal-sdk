@@ -20,7 +20,7 @@ void UWalletAdapterClient::SetClientImpl(const TSharedPtr<FMobileWalletAdapterCl
 }
 #endif
 
-void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessCallback& Success, const FFailCallback& Fail)
+void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
     TSharedPtr<FThrowable> Exception;
@@ -29,23 +29,20 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
-		Fail.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 
 	check(JAuthFuture.IsValid());
 	
-	AsyncTask(ENamedThreads::AnyThread, [this, JAuthFuture, Success, Fail]
+	AsyncTask(ENamedThreads::AnyThread, [this, JAuthFuture, Success, Failure]
 	{
 		TSharedPtr<FThrowable> FutureGetException;		
 		auto JAuthResult = JAuthFuture->Get(&FutureGetException);
 		if (FutureGetException)
 		{
 			UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *FutureGetException->GetMessage());
-			AsyncTask(ENamedThreads::GameThread, [Fail, FutureGetException]
-			{
-				Fail.ExecuteIfBound(FutureGetException->GetMessage());
-			});
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
 			return;
 		}
 
@@ -54,22 +51,19 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully: AuthToken = %s"), *AuthToken);
-		AsyncTask(ENamedThreads::GameThread, [this, AuthResult, Success]
-		{
-			AuthToken = AuthResult->GetAuthToken();
-			PublicKey = AuthResult->GetPublicKey();
-			AccountLabel = AuthResult->GetAccountLabel();
-			WalletUriBase = AuthResult->GetWalletUriBase();
-			
-			Success.ExecuteIfBound(AuthToken);
-		});
+		AuthToken = AuthResult->GetAuthToken();
+		PublicKey = AuthResult->GetPublicKey();
+		AccountLabel = AuthResult->GetAccountLabel();
+		WalletUriBase = AuthResult->GetWalletUriBase();
+		
+		Success.ExecuteIfBound(AuthToken);
 	});;
 #else
-	Fail.ExecuteIfBound("Current platform is not supported");	
+	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessCallback& Success, const FFailCallback& Fail)
+void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -78,23 +72,20 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *Exception->GetMessage());
-		Fail.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 
 	check(JAuthFuture.IsValid());
 
-	AsyncTask(ENamedThreads::AnyThread, [this, JAuthFuture, Success, Fail]
+	AsyncTask(ENamedThreads::AnyThread, [this, JAuthFuture, Success, Failure]
 	{
 		TSharedPtr<FThrowable> FutureGetException;	
 		auto JAuthResult = JAuthFuture->Get(&FutureGetException);
 		if (FutureGetException)
 		{
 			UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *FutureGetException->GetMessage());
-			AsyncTask(ENamedThreads::GameThread, [Fail, FutureGetException]
-			{
-				Fail.ExecuteIfBound(FutureGetException->GetMessage());
-			});
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
 			return;
 		}
 
@@ -103,22 +94,19 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 	
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorized successfully"));
-		AsyncTask(ENamedThreads::GameThread, [this, AuthResult, Success]
-		{
-			AuthToken = AuthResult->GetAuthToken();
-			PublicKey = AuthResult->GetPublicKey();
-			AccountLabel = AuthResult->GetAccountLabel();
-			WalletUriBase = AuthResult->GetWalletUriBase();
+		AuthToken = AuthResult->GetAuthToken();
+		PublicKey = AuthResult->GetPublicKey();
+		AccountLabel = AuthResult->GetAccountLabel();
+		WalletUriBase = AuthResult->GetWalletUriBase();
 			
-			Success.ExecuteIfBound(AuthToken);
-		});
+		Success.ExecuteIfBound(AuthToken);
 	});
 #else
-	Fail.ExecuteIfBound("Current platform is not supported");	
+	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-void UWalletAdapterClient::Deauthorize(const FSuccessCallback& Success, const FFailCallback& Fail)
+void UWalletAdapterClient::Deauthorize(const FSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -127,47 +115,34 @@ void UWalletAdapterClient::Deauthorize(const FSuccessCallback& Success, const FF
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *Exception->GetMessage());
-		Fail.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 
 	check(JDeauthFuture.IsValid());
 	
-	AsyncTask(ENamedThreads::AnyThread, [this, JDeauthFuture, Success, Fail]
+	AsyncTask(ENamedThreads::AnyThread, [this, JDeauthFuture, Success, Failure]
 	{
 		TSharedPtr<FThrowable> FutureGetException;	
 		JDeauthFuture->Get(&FutureGetException);
 		if (FutureGetException)
 		{
 			UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *FutureGetException->GetMessage());
-			AsyncTask(ENamedThreads::GameThread, [Fail, FutureGetException]
-			{
-				Fail.ExecuteIfBound(FutureGetException->GetMessage());
-			});
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
 			return;
 		}	
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Deauthorized successfully"));
-		AsyncTask(ENamedThreads::GameThread, [this, Success]
-		{
-			AuthToken.Empty();
-			Success.ExecuteIfBound();
-		});
+		AuthToken.Empty();
+		Success.ExecuteIfBound();
 	});
 #else
-	Fail.ExecuteIfBound("Current platform is not supported");	
+	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-void UWalletAdapterClient::SignTransaction(const FSolanaTransaction& Transaction, const FSuccessCallback& Success, const FFailCallback& Fail)
-{
-	TArray<FSolanaTransaction> Transactions;
-	Transactions.Add(Transaction);
-	SignTransactions(Transactions, Success, Fail);
-}
-
-void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSuccessCallback& Success, const FFailCallback& Fail)
+void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -180,40 +155,42 @@ void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Tr
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
-		Fail.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 
 	check(JSignFuture.IsValid());
 	
-	AsyncTask(ENamedThreads::AnyThread, [JSignFuture, Transactions, Success, Fail]
+	AsyncTask(ENamedThreads::AnyThread, [JSignFuture, Transactions, Success, Failure]
 	{
 		TSharedPtr<FThrowable> FutureGetException;
 		
-		JSignFuture->Get(&FutureGetException);
+		auto JSignResult = JSignFuture->Get(&FutureGetException);
 		if (FutureGetException)
 		{
 			UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d transaction(s): %s"), Transactions.Num(), *FutureGetException->GetMessage());
-			AsyncTask(ENamedThreads::GameThread, [Fail, FutureGetException]
-			{
-				Fail.ExecuteIfBound(FutureGetException->GetMessage());
-			});
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
 			return;
 		}
 
+		check(JSignResult.IsValid());
+		auto SignResult = FSignPayloadsResult::MakeFromExistingObject(JSignResult->GetJObject());
+		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d transaction(s)"), Transactions.Num());
-		AsyncTask(ENamedThreads::GameThread, [Success]
-		{
-			Success.ExecuteIfBound();
-		});
+		
+		TArray<TArray<uint8>> SignedPayloads = SignResult->GetSignedPayloads();
+		TArray<FSolanaTransaction> SignedTransactions;
+		for (const TArray<uint8>& BytesArray : SignedPayloads)
+			SignedTransactions.Add(FSolanaTransaction(BytesArray));
+		Success.ExecuteIfBound(SignedTransactions);
 	});
 #else
-	Fail.ExecuteIfBound("Current platform is not supported");	
+	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-void UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSuccessCallback& Success, const FFailCallback& Fail)
+void UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -226,97 +203,123 @@ void UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransacti
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign and send %d transaction(s): %s"), Transactions.Num(), *Exception->GetMessage());
-		Fail.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 	
 	check(JSignFuture.IsValid());
 
-	AsyncTask(ENamedThreads::AnyThread, [JSignFuture, Transactions, Success, Fail]
+	AsyncTask(ENamedThreads::AnyThread, [JSignFuture, Transactions, Success, Failure]
 	{
 		TSharedPtr<FThrowable> FutureGetException;
 		JSignFuture->Get(&FutureGetException);
 		if (FutureGetException)
 		{
 			UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign and send %d transaction(s): %s"), Transactions.Num(), *FutureGetException->GetMessage());
-			AsyncTask(ENamedThreads::GameThread, [Fail, FutureGetException]
-			{
-				Fail.ExecuteIfBound(FutureGetException->GetMessage());
-			});
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
 			return;
 		}
 
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed and sent %d transaction(s)"), Transactions.Num());
-		AsyncTask(ENamedThreads::GameThread, [Success]
-		{
-			Success.ExecuteIfBound();
-		});
+		Success.ExecuteIfBound();
 	});
 #else
-	Fail.ExecuteIfBound("Current platform is not supported");	
+	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
 }
 
-/*
-void UWalletAdapterClient::LocalAssociateAndExecute(FString UriPrefix)
+void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
-#if PLATFORM_ANDROID
-	const int64 LOCAL_ASSOCIATION_START_TIMEOUT_MS = 60000L; // LocalAssociationScenario.start() has a shorter timeout; this is just a backup safety measure
-	const int64 LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS = 2000L;
-	
-	TSharedPtr<FThrowable> Exception;
-	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
-	
-	auto LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
-	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
-
-	auto CloseLocalAssociation = [&LocalAssociation]
-	{
-		TSharedPtr<FThrowable> Ex;
-		LocalAssociation->Close()->Get(LOCAL_ASSOCIATION_CLOSE_TIMEOUT_MS, &Ex);
-		if (Ex)
+	Authorize(IdentityUri, IconUri, IdentityName, Cluster,
+		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
 		{
-			UE_LOG(LogWalletAdapter, Warning, TEXT("Local association close failed: %s"), *Ex->GetMessage());			
-		}
-	};
-
-	Activity->StartActivity(AssociationIntent, &Exception);
-	if (Exception)
-	{
-		UE_LOG(LogWalletAdapter, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());
-		return;
-	}
-	
-	auto FutureResult = LocalAssociation->Start()->Get(LOCAL_ASSOCIATION_START_TIMEOUT_MS, &Exception);
-	if (Exception)
-	{
-		UE_LOG(LogWalletAdapter, Error, TEXT("Failed establishing local association with wallet: %s"), *Exception->GetMessage());
-		CloseLocalAssociation();
-		return;
-	}
-	
- 	Client = FMobileWalletAdapterClient::MakeFromExistingObject(FutureResult->GetJObject());
-	
-	Client->Authorize("https://solanamobile.com", "favicon.ico", "UnrealDApp", "testnet")->Get(&Exception);
-	if (Exception)
-	{
-		UE_LOG(LogWalletAdapter, Error, TEXT("Authorization failed: %s"), *Exception->GetMessage());
-		CloseLocalAssociation();
-		return;
-	}
-
-	// SUCCESS
-	UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully"));
-
-	Client.Reset();
-	CloseLocalAssociation();
-
-	//public static final String CLUSTER_MAINNET_BETA = "mainnet-beta";
-	//public static final String CLUSTER_TESTNET = "testnet";
-	//public static final String CLUSTER_DEVNET = "devnet";*
-	
-#endif
+			AsyncTask(ENamedThreads::GameThread, [Success, Token]
+			{			
+				Success.ExecuteIfBound(Token);
+			});
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{			
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));
 }
-*/
+
+void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+	Reauthorize(IdentityUri, IconUri, IdentityName,
+		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Success, Token]
+			{			
+				Success.ExecuteIfBound(Token);
+			});
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{			
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));	
+}
+
+void UWalletAdapterClient::K2_Deauthorize(const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+	Deauthorize(
+		FSuccessDelegate::CreateLambda([Success]()
+		{
+			AsyncTask(ENamedThreads::GameThread, [Success]
+			{
+				Success.ExecuteIfBound();
+			});
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));	
+}
+
+void UWalletAdapterClient::K2_SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+	SignTransactions(Transactions,
+		FSignSuccessDelegate::CreateLambda([Success](const TArray<FSolanaTransaction>& Transactions)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Success, Transactions]
+			{			
+				Success.ExecuteIfBound(Transactions);
+			});
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{			
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));
+}
+
+void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+	SignAndSendTransactions(Transactions, MinContextSlot,
+		FSignAndSendSuccessDelegate::CreateLambda([Success]()
+		{
+			AsyncTask(ENamedThreads::GameThread, [Success]
+			{
+				Success.ExecuteIfBound();
+			});
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{			
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));
+}

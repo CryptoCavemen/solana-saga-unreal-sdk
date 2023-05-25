@@ -151,4 +151,15 @@ FString FAuthorizationResult::GetWalletUriBase()
 	return Uri;
 }
 
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignPayloadsResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsResult",
+                                  "([[B)V",
+                                  const TArray<TArray<uint8>>& SignedPayloads)
+	SignedPayloadsField = GetClassField("signedPayloads", "[[B");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+TArray<TArray<uint8>> FSignPayloadsResult::GetSignedPayloads()
+{
+	return GetArrayOfByteArrayField(SignedPayloadsField);
+}
+
 #endif

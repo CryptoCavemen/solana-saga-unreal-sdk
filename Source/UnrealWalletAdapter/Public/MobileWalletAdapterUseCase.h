@@ -21,8 +21,8 @@ class UNREALWALLETADAPTER_API UMobileWalletAdapterUseCase : public UBlueprintFun
 
 public:
 	DECLARE_DYNAMIC_DELEGATE(FSuccessCallback);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailCallback, const FString&, ErrorMessage);	
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureCallback, const FString&, ErrorMessage);
 	
 	UFUNCTION(BlueprintCallable)
-	static void SignTransaction(UWalletAdapterClient* Client, const FSuccessCallback& Success, const FFailCallback& Fail);
+	static void SignTransaction(UWalletAdapterClient* Client, const FSuccessCallback& Success, const FFailureCallback& Failure);
 };

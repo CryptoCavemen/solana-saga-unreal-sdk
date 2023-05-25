@@ -106,6 +106,7 @@ public:
 	FString GetStringField(FJavaClassField Field) const;
 	uint8 GetByteField(FJavaClassField Field) const;
 	TArray<uint8> GetByteArrayField(FJavaClassField Field) const;
+	TArray<TArray<uint8>> GetArrayOfByteArrayField(FJavaClassField Field) const;
 
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject GetJObject() const { return Object; }
