@@ -119,17 +119,31 @@ void ULocalAssociationWithWallet::K2_Start(const FStartSuccessDynDelegate& Succe
 	Start(
 		FStartSuccessDelegate::CreateLambda([Success](UWalletAdapterClient* InClient)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success, InClient]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, InClient]
+				{			
+					Success.ExecuteIfBound(InClient);
+				});
+			}
+			else
+			{
 				Success.ExecuteIfBound(InClient);
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}
 		}));	
 }
 
@@ -138,17 +152,31 @@ void ULocalAssociationWithWallet::K2_Close(const FCloseSuccessDynDelegate& Succe
 	Close(
 		FCloseSuccessDelegate::CreateLambda([Success]
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success]
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success]
+				{
+					Success.ExecuteIfBound();
+				});
+			}
+			else
 			{
 				Success.ExecuteIfBound();
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}			
 		}));	
 }
 

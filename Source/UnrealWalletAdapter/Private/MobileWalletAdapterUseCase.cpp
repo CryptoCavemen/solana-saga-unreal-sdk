@@ -6,6 +6,7 @@
 #include "MobileWalletAdapterUseCase.h"
 
 #include "Crypto/Base58.h"
+#include "Crypto/CryptoUtils.h"
 #include "Network/RequestManager.h"
 #include "Network/RequestUtils.h"
 
@@ -57,19 +58,20 @@ const uint8 MEMO_TRANSACTION_TEMPLATE[] = {
 #define SUFFIX_DIGITS_LEN			8
 
 
-TArray<uint8> CreateMemoLegacyTransaction(const TArray<uint8>& PublicKey, const FString& LatestBlockHash)
+TArray<uint8> CreateMemoTransactionLegacy(const TArray<uint8>& PublicKey, const FString& LatestBlockHash58)
 {
 	checkf(PublicKey.Num() == ACCOUNT_PUBLIC_KEY_LEN, TEXT("Invalid public key length for a Solana transaction"));
-	checkf(LatestBlockHash.Len() == BLOCKHASH_LEN, TEXT("Invalid blockhash length for a Solana transaction"));
 
-	TArray<uint8> LatestBlockHash58;
-	LatestBlockHash58.Append((const uint8*)TCHAR_TO_ANSI(*LatestBlockHash), LatestBlockHash.Len());
-	FBase58::EncodeBase58(LatestBlockHash58);
+	TArray<uint8> LatestBlockHash;
+	LatestBlockHash.Append((const uint8*)TCHAR_TO_ANSI(*LatestBlockHash58), LatestBlockHash58.Len());
+	LatestBlockHash = FBase58::DecodeBase58(LatestBlockHash);
+	
+	checkf(LatestBlockHash.Num() == BLOCKHASH_LEN, TEXT("Invalid blockhash length for a Solana transaction"));	
 
 	TArray<uint8> Transaction;
 	Transaction.Append(MEMO_TRANSACTION_TEMPLATE, sizeof(MEMO_TRANSACTION_TEMPLATE));
 	FMemory::Memcpy(Transaction.GetData() + ACCOUNT_PUBLIC_KEY_OFFSET, PublicKey.GetData(), PublicKey.Num());
-	FMemory::Memcpy(Transaction.GetData() + BLOCKHASH_OFFSET, LatestBlockHash58.GetData(), LatestBlockHash58.Num());
+	FMemory::Memcpy(Transaction.GetData() + BLOCKHASH_OFFSET, LatestBlockHash.GetData(), LatestBlockHash.Num());
 	
 	for (int32 I = 0; I < SUFFIX_DIGITS_LEN; I++)	
 		Transaction.GetData()[SUFFIX_DIGITS_OFFSET + I] = '0' + FMath::RandHelper(10);
@@ -80,7 +82,54 @@ TArray<uint8> CreateMemoLegacyTransaction(const TArray<uint8>& PublicKey, const 
 	return Transaction;
 }
 
-void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, const FSuccessCallback& Success, const FFailureCallback& Failure)
+bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<uint8>& SignedTransaction)
+{
+	checkf(PublicKey.Num() == ACCOUNT_PUBLIC_KEY_LEN, TEXT("Invalid public key length for a Solana transaction"));
+
+	if (SignedTransaction.Num() != sizeof(MEMO_TRANSACTION_TEMPLATE))
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Unexpected signed transaction size"));
+		return false;
+	}
+
+	// First, check that the provided transaction wasn't mangled by the wallet
+	TArray<uint8> UnsignedTransaction = SignedTransaction;
+	FMemory::Memzero(UnsignedTransaction.GetData() + SIGNATURE_OFFSET, SIGNATURE_LEN);
+	FMemory::Memzero(UnsignedTransaction.GetData() + ACCOUNT_PUBLIC_KEY_OFFSET, ACCOUNT_PUBLIC_KEY_LEN);
+	FMemory::Memzero(UnsignedTransaction.GetData() + BLOCKHASH_OFFSET, BLOCKHASH_LEN);
+	FMemory::Memzero(UnsignedTransaction.GetData() + SUFFIX_DIGITS_OFFSET, SUFFIX_DIGITS_LEN);
+
+	if (FMemory::Memcmp(UnsignedTransaction.GetData(), MEMO_TRANSACTION_TEMPLATE, sizeof(MEMO_TRANSACTION_TEMPLATE)))
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Signed memo transaction does not match the one sent"));
+		return false;
+	}
+
+	if (FMemory::Memcmp(UnsignedTransaction.GetData() + ACCOUNT_PUBLIC_KEY_OFFSET, PublicKey.GetData(), sizeof(ACCOUNT_PUBLIC_KEY_LEN)))
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Invalid signing account in transaction"));
+		return false;
+	}
+
+	TArray<uint8> Signature;
+	Signature.AddUninitialized(SIGNATURE_LEN);
+	FMemory::Memcpy(Signature.GetData(), SignedTransaction.GetData() + SIGNATURE_OFFSET, SIGNATURE_LEN);
+	
+	TArray<uint8> Message = SignedTransaction;
+	Message.RemoveAt(HEADER_OFFSET, SignedTransaction.Num() - HEADER_OFFSET);
+	
+	bool bVerified = FCryptoUtils::VerifyMessage(Signature, Message, PublicKey);
+	if (!bVerified)
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Transaction signature is invalid"));
+		return false;
+	}	
+
+	UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Verified memo transaction signature"));
+	return true;
+}
+
+void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 	check(Client);
 
@@ -91,14 +140,17 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 		UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Block Hash = %s"), *BlockHash);
 		
 		TArray<FSolanaTransaction> Transactions;
-		Transactions.Add(FSolanaTransaction(CreateMemoLegacyTransaction(Client->PublicKey, BlockHash)));
+		Transactions.Add(FSolanaTransaction(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
 		
 		Client->SignTransactions(Transactions,
-			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success](const TArray<FSolanaTransaction>& SignedTransactions)
+			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FSolanaTransaction>& SignedTransactions)
 			{
-				AsyncTask(ENamedThreads::GameThread, [Success]
+				AsyncTask(ENamedThreads::GameThread, [Client, Success, Failure, SignedTransactions]
 				{
-					Success.ExecuteIfBound();
+					if (VerifyMemoTransactionLegacy(Client->PublicKey, SignedTransactions[0].Data))
+						Success.ExecuteIfBound(SignedTransactions);
+					else
+						Failure.ExecuteIfBound("Failed to verify the transaction");
 				});
 			}),
 			UWalletAdapterClient::FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)

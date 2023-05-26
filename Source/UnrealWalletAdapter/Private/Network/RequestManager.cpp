@@ -68,7 +68,8 @@ void FRequestManager::OnResponse(FHttpRequestPtr Request, FHttpResponsePtr Respo
 	}
 
 	TSharedPtr<FJsonObject> ParsedJSON;
-	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<>::Create(Response.Get()->GetContentAsString());
+	FString ContentString = Response.Get()->GetContentAsString();
+	TSharedRef<TJsonReader<TCHAR>> Reader = TJsonReaderFactory<>::Create(ContentString);
 
 	if (FJsonSerializer::Deserialize(Reader, ParsedJSON))
 	{

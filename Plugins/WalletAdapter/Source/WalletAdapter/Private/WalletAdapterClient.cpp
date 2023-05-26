@@ -63,12 +63,12 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 #endif
 }
 
-void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure)
+void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto JAuthFuture = Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthToken, Exception);
+	auto JAuthFuture = Client->Reauthorize(IdentityUri, IconUri, IdentityName, AuthorizationToken, Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Reauthorization failed: %s"), *Exception->GetMessage());
@@ -106,12 +106,12 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 #endif
 }
 
-void UWalletAdapterClient::Deauthorize(const FSuccessDelegate& Success, const FFailureDelegate& Failure)
+void UWalletAdapterClient::Deauthorize(const FString& AuthorizationToken, const FSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto JDeauthFuture = Client->Deauthorize(AuthToken, Exception);
+	auto JDeauthFuture = Client->Deauthorize(AuthorizationToken, Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("Deauthorization failed: %s"), *Exception->GetMessage());
@@ -234,55 +234,97 @@ void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FS
 	Authorize(IdentityUri, IconUri, IdentityName, Cluster,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success, Token]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, Token]
+			   {			
+				   Success.ExecuteIfBound(Token);
+			   });
+			}
+			else
+			{
 				Success.ExecuteIfBound(Token);
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}			
 		}));
 }
 
-void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
-	Reauthorize(IdentityUri, IconUri, IdentityName,
+	Reauthorize(IdentityUri, IconUri, IdentityName, AuthorizationToken,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success, Token]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, Token]
+			   {
+				   Success.ExecuteIfBound(Token);
+			   });
+			}
+			else
+			{
 				Success.ExecuteIfBound(Token);
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}
 		}));	
 }
 
-void UWalletAdapterClient::K2_Deauthorize(const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
-	Deauthorize(
+	Deauthorize(AuthorizationToken,
 		FSuccessDelegate::CreateLambda([Success]()
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success]
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success]
+			   {
+				   Success.ExecuteIfBound();
+			   });
+			}
+			else
 			{
 				Success.ExecuteIfBound();
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{
+				   Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
 			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}
 		}));	
 }
 
@@ -291,17 +333,31 @@ void UWalletAdapterClient::K2_SignTransactions(const TArray<FSolanaTransaction>&
 	SignTransactions(Transactions,
 		FSignSuccessDelegate::CreateLambda([Success](const TArray<FSolanaTransaction>& Transactions)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success, Transactions]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, Transactions]
+				{			
+					Success.ExecuteIfBound(Transactions);
+				});
+			}
+			else
+			{
 				Success.ExecuteIfBound(Transactions);
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}
 		}));
 }
 
@@ -310,16 +366,30 @@ void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FSolanaTransa
 	SignAndSendTransactions(Transactions, MinContextSlot,
 		FSignAndSendSuccessDelegate::CreateLambda([Success]()
 		{
-			AsyncTask(ENamedThreads::GameThread, [Success]
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success]
+				{
+					Success.ExecuteIfBound();
+				});
+			}
+			else
 			{
 				Success.ExecuteIfBound();
-			});
+			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
 		{
-			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
-			{			
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
 				Failure.ExecuteIfBound(ErrorMessage);
-			});
+			}
 		}));
 }

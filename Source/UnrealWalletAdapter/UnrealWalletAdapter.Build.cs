@@ -11,8 +11,24 @@ public class UnrealWalletAdapter : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
+		PublicDefinitions.AddRange(
+			new string[] {
+				"ED25519_CUSTOMRNG",
+				"ED25519_CUSTOMHASH",
+				"ED25519_NO_SEED"
+			}
+		);
+		
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+		{
+			PublicDefinitions.Add("_CRT_SECURE_NO_WARNINGS");
+		}
+		
+		bEnableUndefinedIdentifierWarnings = false;
+		
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
+			"OpenSSL",
 			"WalletAdapter"
 		});
 
