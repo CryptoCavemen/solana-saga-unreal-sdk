@@ -215,8 +215,7 @@ TArray<uint8> FCryptoUtils::FStringToUint8(const FString& String)
 
 	for( int i = 0; i < String.Len(); i++)
 	{
-		const uint8* character = (uint8*)TCHAR_TO_UTF8(*String.Mid(i,1));
-		result.Add( *character );
+		result.Add( *(uint8*)TCHAR_TO_UTF8(*String.Mid(i,1)) );
 	}
 	
 	return result;
