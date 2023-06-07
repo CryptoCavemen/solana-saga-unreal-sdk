@@ -5,6 +5,8 @@
 
 #include "MobileWalletAdapterUseCase.h"
 
+#include "HttpManager.h"
+#include "HttpModule.h"
 #include "Crypto/Base58.h"
 #include "Crypto/CryptoUtils.h"
 #include "Network/RequestManager.h"
@@ -172,4 +174,8 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 	});
 	
 	FRequestManager::SendRequest(Request);
+
+	// Force HTTP manager to complete all requests because GameThread is paused when a wallet is opened.
+	FHttpManager& HttpManager = FHttpModule::Get().GetHttpManager();
+	HttpManager.Flush(EHttpFlushReason::FullFlush);
 }
