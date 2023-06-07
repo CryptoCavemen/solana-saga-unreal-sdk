@@ -1,4 +1,7 @@
-// Copyright (c) Sergey Makovkin (makovkin.s@gmail.com). All Rights Reserved.
+//
+// Copyright (c) 2023 Solana Mobile Inc.
+// Author: Sergey Makovkin (makovkin.s@gmail.com)
+//
 
 package com.solanamobile.unreal;
 
