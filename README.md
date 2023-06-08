@@ -17,3 +17,5 @@ This repository is still pre-release. There are a few show stopping known issues
 Currently, there is an integration in code but it has not yet been externalized to the example app.
 
 ## Running the example project
+A proper written manual is in the works but for now you can refer to this video:
+https://www.loom.com/share/f95cc7b191ed43139751adfd8ab453d3
