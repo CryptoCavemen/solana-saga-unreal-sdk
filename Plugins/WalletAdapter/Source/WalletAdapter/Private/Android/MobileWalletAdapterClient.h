@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 #include "Future.h"
-#include "Defines.h"
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient
@@ -70,6 +70,18 @@ public:
 	TArray<TArray<uint8>> GetSignedPayloads();
 protected:
 	FJavaClassField SignedPayloadsField;
+};
+
+/**
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignAndSendTransactionsResult
+ */
+class FSignAndSendTransactionsResult : public FJavaClassObjectWrapper
+{
+	DECLARE_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResult, const TArray<TArray<uint8>>& SignedPayloads);
+public:
+	TArray<TArray<uint8>> GetSignatures();
+protected:
+	FJavaClassField SignaturesField;
 };
 
 #endif

@@ -49,6 +49,7 @@ public:
 	
 	static FRequestData* RequestBlockHash();
 	static FString ParseBlockHashResponse(const FJsonObject& Data);
+	static int32 ParseBlockHashResponseContextSlot(const FJsonObject& Data);
 
 	static FRequestData* GetTransactionFeeAmount(const FString& Transaction);
 	static int ParseTransactionFeeAmountResponse(const FJsonObject& Data);

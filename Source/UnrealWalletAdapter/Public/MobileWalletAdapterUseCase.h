@@ -25,4 +25,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	static void SignTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	UFUNCTION(BlueprintCallable)
+	static void SignAndSendTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 };

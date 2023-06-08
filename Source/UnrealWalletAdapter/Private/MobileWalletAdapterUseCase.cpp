@@ -180,3 +180,51 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 	FHttpManager& HttpManager = FHttpModule::Get().GetHttpManager();
 	HttpManager.Flush(EHttpFlushReason::FullFlush);
 }
+
+void UMobileWalletAdapterUseCase::SignAndSendTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+	check(Client);
+    
+	FRequestData* Request = FRequestUtils::RequestBlockHash();
+	Request->Callback.BindLambda([Client, Success, Failure](FJsonObject& ResponseJsonObject)
+	{
+		FString BlockHash = FRequestUtils::ParseBlockHashResponse(ResponseJsonObject);
+		int32 Slot = FRequestUtils::ParseBlockHashResponseContextSlot(ResponseJsonObject);
+		UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Block Hash = %s, Slot = %d"), *BlockHash, Slot);
+		
+		TArray<FSolanaTransaction> Transactions;
+		Transactions.Add(FSolanaTransaction(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
+		
+		Client->SignAndSendTransactions(Transactions, Slot,
+			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FSolanaTransaction>& SignedTransactions)
+			{
+				AsyncTask(ENamedThreads::GameThread, [Client, Success, Failure, SignedTransactions]
+				{
+					Success.ExecuteIfBound(SignedTransactions);
+				});
+			}),
+			UWalletAdapterClient::FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}));
+	});
+	Request->ErrorCallback.BindLambda([Failure](const FText& FailureReason)
+	{		
+		FString ErrorMessage = FString::Printf(TEXT("Failed to request a block hash: %s"), *FailureReason.ToString());
+		UE_LOG(LogWalletAdapterUseCase, Error, TEXT("%s"), *ErrorMessage);
+		AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+		{
+			Failure.ExecuteIfBound(ErrorMessage);
+		});
+	});
+	
+	// Send the block hash request.
+	FRequestManager::SendRequest(Request);
+    
+	// Force HTTP manager to complete all requests because GameThread is paused when a wallet is opened.
+	FHttpManager& HttpManager = FHttpModule::Get().GetHttpManager();
+	HttpManager.Flush(EHttpFlushReason::FullFlush);	
+}

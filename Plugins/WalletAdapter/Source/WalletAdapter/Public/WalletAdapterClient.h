@@ -40,13 +40,11 @@ public:
 	DECLARE_DELEGATE(FSuccessDelegate);
 	DECLARE_DELEGATE_OneParam(FAuthSuccessDelegate, const FString& AuthToken);
 	DECLARE_DELEGATE_OneParam(FSignSuccessDelegate, const TArray<FSolanaTransaction>& Transactions);
-	DECLARE_DELEGATE(FSignAndSendSuccessDelegate);
 	DECLARE_DELEGATE_OneParam(FFailureDelegate, const FString& ErrorMessage);
 
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessDynDelegate, const FString&, AuthToken);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FSolanaTransaction>&, Transactions);
-	DECLARE_DYNAMIC_DELEGATE(FSignAndSendSuccessDynDelegate);	
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 	
 public:
@@ -59,7 +57,7 @@ public:
 	/** Signs transactions. */
 	void SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Signs and sends transactions. */
-	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDelegate& Success, const FFailureDelegate& Failure);
+	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
 
 public:
 	/** Authorizes a client. */
@@ -76,7 +74,7 @@ public:
 	void K2_SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
 	/** Signs and sends transactions. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignAndSendTransactions", ScriptName="SignAndSendTransactions"), Category="Solana")
-	void K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignAndSendSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+	void K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 
 public:
 	UPROPERTY(BlueprintReadOnly)

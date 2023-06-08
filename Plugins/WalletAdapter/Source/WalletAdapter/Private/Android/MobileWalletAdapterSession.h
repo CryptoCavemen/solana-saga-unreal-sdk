@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "Defines.h"
 #include "CoreMinimal.h"
 #include "MobileWalletAdapterSessionCommon.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-#include "Defines.h"
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterSession 

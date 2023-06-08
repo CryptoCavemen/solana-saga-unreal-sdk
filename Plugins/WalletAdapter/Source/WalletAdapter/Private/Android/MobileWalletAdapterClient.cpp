@@ -162,4 +162,15 @@ TArray<TArray<uint8>> FSignPayloadsResult::GetSignedPayloads()
 	return GetArrayOfByteArrayField(SignedPayloadsField);
 }
 
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignAndSendTransactionsResult",
+								  "([[B)V",
+								  const TArray<TArray<uint8>>& SignedPayloads)
+	SignaturesField = GetClassField("signatures", "[[B");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+TArray<TArray<uint8>> FSignAndSendTransactionsResult::GetSignatures()
+{
+	return GetArrayOfByteArrayField(SignaturesField);
+}
+
 #endif

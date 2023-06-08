@@ -225,6 +225,17 @@ FString FRequestUtils::ParseBlockHashResponse(const FJsonObject& Data)
 	return Hash;
 }
 
+int32 FRequestUtils::ParseBlockHashResponseContextSlot(const FJsonObject& Data)
+{
+	int32 Slot = -1;
+	if(TSharedPtr<FJsonObject> Result = Data.GetObjectField("result"))
+	{
+		const TSharedPtr<FJsonObject> Context = Result->GetObjectField("context");
+		Slot = Context->GetNumberField("slot");
+	}
+	return Slot;
+}
+
 FRequestData* FRequestUtils::GetTransactionFeeAmount(const FString& Transaction)
 {
 	FRequestData* Request = new FRequestData(FRequestManager::GetNextMessageID());
