@@ -7,11 +7,11 @@ This repository is still pre-release. There are a few show stopping known issues
 
 ### Wallet Adapter
 * Authorize: Works
-* Reauthorize: Works, but requires manual closing of wallet app
-* Deauthorize: Works, but requires manual closing of wallet app
-* Sign Transaction: Doesn't work yet, due to known bug
-
-The above functionality lapses are mainly caused by Unreal suspending its' main game thread when the app is detected as going into background. Unreal's default implementation for HTTP/WebSocket requests runs all networking on that main thread. Once we work around that, basic functionality  should be there.
+* Reauthorize: Works
+* Deauthorize: Works
+* Sign Transaction: Works
+* Sign & Send Transaction: Works
+* Sign Message: WIP
 
 ### Seed Vault
 Currently, there is an integration in code but it has not yet been externalized to the example app.
