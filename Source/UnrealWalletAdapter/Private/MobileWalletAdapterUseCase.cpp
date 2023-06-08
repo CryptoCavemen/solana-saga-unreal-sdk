@@ -107,7 +107,7 @@ bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<ui
 		return false;
 	}
 
-	if (FMemory::Memcmp(UnsignedTransaction.GetData() + ACCOUNT_PUBLIC_KEY_OFFSET, PublicKey.GetData(), sizeof(ACCOUNT_PUBLIC_KEY_LEN)))
+	if (FMemory::Memcmp(SignedTransaction.GetData() + ACCOUNT_PUBLIC_KEY_OFFSET, PublicKey.GetData(), sizeof(ACCOUNT_PUBLIC_KEY_LEN)))
 	{
 		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Invalid signing account in transaction"));
 		return false;
@@ -118,7 +118,7 @@ bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<ui
 	FMemory::Memcpy(Signature.GetData(), SignedTransaction.GetData() + SIGNATURE_OFFSET, SIGNATURE_LEN);
 	
 	TArray<uint8> Message = SignedTransaction;
-	Message.RemoveAt(HEADER_OFFSET, SignedTransaction.Num() - HEADER_OFFSET);
+	Message.RemoveAt(0, HEADER_OFFSET);
 	
 	bool bVerified = FCryptoUtils::VerifyMessage(Signature, Message, PublicKey);
 	if (!bVerified)
@@ -126,7 +126,7 @@ bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<ui
 		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Transaction signature is invalid"));
 		return false;
 	}	
-
+    
 	UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Verified memo transaction signature"));
 	return true;
 }
@@ -134,7 +134,7 @@ bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<ui
 void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 	check(Client);
-
+    
 	FRequestData* Request = FRequestUtils::RequestBlockHash();
 	Request->Callback.BindLambda([Client, Success, Failure](FJsonObject& ResponseJsonObject)
 	{
@@ -161,7 +161,7 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 				{
 					Failure.ExecuteIfBound(ErrorMessage);
 				});
-			}));		
+			}));
 	});
 	Request->ErrorCallback.BindLambda([Failure](const FText& FailureReason)
 	{		
@@ -170,11 +170,12 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 		AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
 		{
 			Failure.ExecuteIfBound(ErrorMessage);
-		});		
+		});
 	});
 	
+	// Send the block hash request.
 	FRequestManager::SendRequest(Request);
-
+    
 	// Force HTTP manager to complete all requests because GameThread is paused when a wallet is opened.
 	FHttpManager& HttpManager = FHttpModule::Get().GetHttpManager();
 	HttpManager.Flush(EHttpFlushReason::FullFlush);
