@@ -1,4 +1,4 @@
-![sms-unreal](https://github.com/CryptoCavemen/solana-saga-unreal-sdk/assets/1970424/ac1b281a-6be1-4deb-af71-52170fc3f970)
+![sms-unreal](https://github.com/CryptoCavemen/solana-saga-unreal-sdk/assets/1970424/93df3aed-16fe-4e15-981d-c0b1b1d2edb9)
 
 # solana-saga-unreal-sdk
 
@@ -23,3 +23,4 @@ https://www.loom.com/share/f95cc7b191ed43139751adfd8ab453d3
 ## Getting help
 
 Please refer to the [Discussions](https://github.com/CryptoCavemen/solana-saga-unreal-sdk/discussions) tab of this repository. More support channels will be made available in the near future.
+
