@@ -6,12 +6,12 @@
 This repository is still pre-release. There are a few show stopping known issues. The following describes expected experience for each functionality in the example project:
 
 ### Wallet Adapter
-* Authorize: Works
-* Reauthorize: Works
-* Deauthorize: Works
-* Sign Transaction: Works
-* Sign & Send Transaction: Works
-* Sign Message: WIP
+* [x] Authorize
+* [x] Reauthorize
+* [x] Deauthorize
+* [x] Sign Transaction
+* [x] Sign & Send Transaction
+* [ ] Sign Message: WIP
 
 ### Seed Vault
 Currently, there is an integration in code but it has not yet been externalized to the example app.
