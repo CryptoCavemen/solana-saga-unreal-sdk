@@ -29,7 +29,7 @@ public:
 	/** Sign and send transactions. MinContextSlot might be null. */
 	TSharedPtr<FFuture> SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException);
 	/** Sign messages. */
-	TSharedPtr<FFuture> SignMessages(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException);	
+	TSharedPtr<FFuture> SignMessagesDetached(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException);	
 	
 protected:
 	FJavaClassMethod AuthorizeMethod;
@@ -37,7 +37,6 @@ protected:
 	FJavaClassMethod DeauthorizeMethod;
 	FJavaClassMethod GetCapabilitiesMethod;
 	FJavaClassMethod SignTransactionsMethod;
-	FJavaClassMethod SignMessagesMethod;
 	FJavaClassMethod SignMessagesDetachedMethod;
 	FJavaClassMethod SignAndSendTransactionsMethod;
 };
@@ -45,14 +44,14 @@ protected:
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$AuthorizationResult
  */
-class FAuthorizationResult : public FJavaClassObjectWrapper
+class FAuthorizationResultWrapper : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FAuthorizationResult, const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase);
+	DECLARE_JAVA_CLASS_OBJECT(FAuthorizationResultWrapper, const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase);
 public:
-	FString GetAuthToken();
-	TArray<uint8> GetPublicKey();
-	FString GetAccountLabel();
-	FString GetWalletUriBase();
+	FString GetAuthToken() const;
+	TArray<uint8> GetPublicKey() const;
+	FString GetAccountLabel() const;
+	FString GetWalletUriBase() const;
 protected:
 	FJavaClassField AuthTokenField;
 	FJavaClassField PublicKeyField;
@@ -63,11 +62,11 @@ protected:
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignPayloadsResult
  */
-class FSignPayloadsResult : public FJavaClassObjectWrapper
+class FSignPayloadsResultWrapper : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FSignPayloadsResult, const TArray<TArray<uint8>>& SignedPayloads);
+	DECLARE_JAVA_CLASS_OBJECT(FSignPayloadsResultWrapper, const TArray<TArray<uint8>>& SignedPayloads);
 public:
-	TArray<TArray<uint8>> GetSignedPayloads();
+	TArray<TArray<uint8>> GetSignedPayloads() const;
 protected:
 	FJavaClassField SignedPayloadsField;
 };
@@ -75,13 +74,41 @@ protected:
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignAndSendTransactionsResult
  */
-class FSignAndSendTransactionsResult : public FJavaClassObjectWrapper
+class FSignAndSendTransactionsResultWrapper : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResult, const TArray<TArray<uint8>>& SignedPayloads);
+	DECLARE_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResultWrapper, const TArray<TArray<uint8>>& SignedPayloads);
 public:
-	TArray<TArray<uint8>> GetSignatures();
+	TArray<TArray<uint8>> GetSignatures() const;
 protected:
 	FJavaClassField SignaturesField;
+};
+
+/**
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignMessagesResult$SignedMessage
+ */
+class FSignedMessageWrapper : public FJavaClassObjectWrapper
+{
+	DECLARE_JAVA_CLASS_OBJECT(FSignedMessageWrapper, const TArray<uint8>& Message, const TArray<TArray<uint8>>& Signatures, const TArray<TArray<uint8>>& Addresses);
+public:
+	TArray<uint8> GetMessage() const;
+	TArray<TArray<uint8>> GetSignatures() const;
+	TArray<TArray<uint8>> GetAddresses() const;
+protected:
+	FJavaClassField MessageField;
+	FJavaClassField SignaturesField;
+	FJavaClassField AddressesField;
+};
+
+/**
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$SignMessagesResult
+ */
+class FSignMessagesResultWrapper : public FJavaClassObjectWrapper
+{
+	DECLARE_JAVA_CLASS_OBJECT(FSignMessagesResultWrapper, const TArray<FSignedMessage>& Messages);
+public:
+	TArray<TSharedRef<FSignedMessageWrapper>> GetMessages() const;
+protected:
+	FJavaClassField MessagesField;
 };
 
 #endif

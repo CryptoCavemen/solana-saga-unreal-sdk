@@ -284,6 +284,28 @@ uint8 FJavaClassObjectWrapper::GetByteField(FJavaClassField Field) const
 	return RetVal;
 }
 
+TArray<jobject> FJavaClassObjectWrapper::GetObjectArrayField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	TArray<jobject> ObjectArray;
+
+	jobjectArray JObjectArray = static_cast<jobjectArray>(Env->GetObjectField(Object, Field.Field));
+	FJavaUtils::VerifyException(Env);
+	int32 ObjectArraySize = Env->GetArrayLength(JObjectArray);
+	
+	for (int32 ObjectIndex = 0; ObjectIndex < ObjectArraySize; ObjectIndex++)
+	{
+		jobject JObject = Env->GetObjectArrayElement(JObjectArray, ObjectIndex);
+		FJavaUtils::VerifyException(Env);
+		jobject JObjectGlobalRef = Env->NewGlobalRef(JObject);
+		Env->DeleteLocalRef(JObject);
+		ObjectArray.Add(JObjectGlobalRef);
+	}
+
+	return ObjectArray;
+}
+
 TArray<uint8> FJavaClassObjectWrapper::GetByteArrayField(FJavaClassField Field) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();

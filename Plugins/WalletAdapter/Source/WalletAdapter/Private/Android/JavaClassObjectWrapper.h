@@ -13,14 +13,14 @@
 #include <jni.h>
 
 /**
- * Must be defined in a header file for every class derived from FJavaClassObjectEx
+ * Must be defined in a header file for every class derived from FJavaClassObjectWrapper
  */
 #define DECLARE_JAVA_CLASS_OBJECT(ImplClass, ...)\
 protected:\
 	ImplClass();\
 public:\
-	ImplClass(jobject LocalObject);\
-	static ImplClass* Construct(jobject LocalObject, ...);\
+	ImplClass(jobject JObject);\
+	static ImplClass* Construct(jobject JObject, ...);\
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;\
 public:\
 	template<typename... Args>\
@@ -28,14 +28,13 @@ public:\
 	{\
 		return MakeShareable(Construct(nullptr, args...));\
 	}\
-	template<typename... Args>\
-	static TSharedRef<ImplClass> MakeFromExistingObject(jobject LocalObject, Args... args)\
+	static TSharedRef<ImplClass> MakeFromExistingObject(jobject JObject)\
 	{\
-		return MakeShareable(Construct(LocalObject, args...));\
+		return MakeShareable(Construct(JObject));\
 	}
 
 /**
- * Must be defined in a cpp file for every class derived from FJavaClassObjectEx  
+ * Must be defined in a cpp file for every class derived from FJavaClassObjectWrapper  
  */
 #define BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(ImplClass, ParentClass, JavaClassName, JavaCtorSig, ...)\
 ImplClass::ImplClass()\
@@ -43,17 +42,17 @@ ImplClass::ImplClass()\
 {\
 }\
 \
-ImplClass::ImplClass(jobject LocalObject)\
-	: ParentClass(LocalObject)\
+ImplClass::ImplClass(jobject JObject)\
+	: ParentClass(JObject)\
 {\
 }\
 \
-ImplClass* ImplClass::Construct(jobject LocalObject, ...)\
+ImplClass* ImplClass::Construct(jobject JObject, ...)\
 {\
-	ImplClass* Object = LocalObject ? new ImplClass(LocalObject) : new ImplClass();\
+	ImplClass* Object = JObject ? new ImplClass(JObject) : new ImplClass();\
 \
 	va_list Args;\
-	va_start(Args, LocalObject);\
+	va_start(Args, JObject);\
 	Object->PostConstruct(JavaClassName, JavaCtorSig, Args);\
 	va_end(Args);\
 \
@@ -84,7 +83,8 @@ class FJavaClassObjectWrapper
 {
 protected:
 	FJavaClassObjectWrapper();
-public:	
+public:
+	/** Constructs the wrapper for a java object. Both local and global references are accepted.*/
 	FJavaClassObjectWrapper(jobject InObject);
 	virtual ~FJavaClassObjectWrapper();
 protected:
@@ -104,6 +104,7 @@ public:
 	jobject GetObjectField(FJavaClassField Field) const;
 	FString GetStringField(FJavaClassField Field) const;
 	uint8 GetByteField(FJavaClassField Field) const;
+	TArray<jobject> GetObjectArrayField(FJavaClassField Field) const;
 	TArray<uint8> GetByteArrayField(FJavaClassField Field) const;
 	TArray<TArray<uint8>> GetArrayOfByteArrayField(FJavaClassField Field) const;
 
@@ -121,7 +122,9 @@ private:
 	FJavaClassObjectWrapper(const FJavaClassObjectWrapper& rhs);
 	FJavaClassObjectWrapper& operator = (const FJavaClassObjectWrapper& rhs);
 
+	/** Stores the class of the passed java object. */
 	void StoreObjectClass(jobject InObject);
+	/** Stores a reference to the passed java object creating a global reference from a local if required. */
 	void StoreObjectReference(jobject InObject);
 };
 

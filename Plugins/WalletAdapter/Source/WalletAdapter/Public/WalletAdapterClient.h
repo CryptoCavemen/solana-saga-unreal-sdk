@@ -9,22 +9,56 @@
 #include "UObject/Object.h"
 #include "WalletAdapterClient.generated.h"
 
+// __RESHARPER__ is only defined while in IDE. Used to help editing this file with proper highlighting.
+#ifdef __RESHARPER__
+	#define PLATFORM_ANDROID 1
+	#define USE_ANDROID_JNI 1
+#endif
+
 class FMobileWalletAdapterClient;
 
+
+/**
+ * FByteArray
+ */
 USTRUCT(BlueprintType)
-struct FSolanaTransaction
+struct FByteArray
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite)
 	TArray<uint8> Data;
 	
-	FSolanaTransaction() {}
-	FSolanaTransaction(const TArray<uint8>& InData) : Data(InData) {}
+	FByteArray() {}
+	FByteArray(const TArray<uint8>& InData) : Data(InData) {}
 };
 
+
 /**
- * 
+ * FSignedMessage
+ */
+USTRUCT(BlueprintType)
+struct FSignedMessage
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<uint8> Message;	
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FByteArray> Signatures;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FByteArray> Addresses;
+	
+	FSignedMessage() {}
+	
+#if PLATFORM_ANDROID
+	FSignedMessage(const class FSignedMessageWrapper& SignedMessage);
+#endif	
+};
+
+
+/**
+ * UWalletAdapterClient
  */
 UCLASS(BlueprintType)
 class WALLETADAPTER_API UWalletAdapterClient : public UObject
@@ -39,12 +73,14 @@ public:
 public:
 	DECLARE_DELEGATE(FSuccessDelegate);
 	DECLARE_DELEGATE_OneParam(FAuthSuccessDelegate, const FString& AuthToken);
-	DECLARE_DELEGATE_OneParam(FSignSuccessDelegate, const TArray<FSolanaTransaction>& Transactions);
+	DECLARE_DELEGATE_OneParam(FSignSuccessDelegate, const TArray<FByteArray>& Transactions);
+	DECLARE_DELEGATE_OneParam(FSignMessagesSuccessDelegate, const TArray<FSignedMessage>& SignedMessages);
 	DECLARE_DELEGATE_OneParam(FFailureDelegate, const FString& ErrorMessage);
 
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessDynDelegate, const FString&, AuthToken);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FSolanaTransaction>&, Transactions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FByteArray>&, Transactions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignMessagesSuccessDynDelegate, const TArray<FSignedMessage>&, SignedMessages);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 	
 public:
@@ -55,9 +91,11 @@ public:
 	/** Deauthorizes a client. */
 	void Deauthorize(const FString& AuthorizationToken, const FSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Signs transactions. */
-	void SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
+	void SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Signs and sends transactions. */
-	void SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
+	void SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure);
+	/** Signs messages. */
+	void SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, const FSignMessagesSuccessDelegate& Success, const FFailureDelegate& Failure);	
 
 public:
 	/** Authorizes a client. */
@@ -71,10 +109,13 @@ public:
 	void K2_Deauthorize(FString AuthorizationToken, const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
 	/** Signs transactions. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignTransactions", ScriptName="SignTransactions"), Category="Solana")
-	void K2_SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
 	/** Signs and sends transactions. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignAndSendTransactions", ScriptName="SignAndSendTransactions"), Category="Solana")
-	void K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+	void K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	/** Signs messages. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignMessagesDetached", ScriptName="SignMessagesDetached"), Category="Solana")
+	void K2_SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, const FSignMessagesSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 
 public:
 	UPROPERTY(BlueprintReadOnly)

@@ -25,8 +25,6 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FMobileWalletAdapterClient, FJavaClassObjectWr
 		"()Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$GetCapabilitiesFuture;");
 	SignTransactionsMethod = GetClassMethod("signTransactions",
 		"([[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
-	SignMessagesMethod = GetClassMethod("signMessages",
-		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsFuture;");
 	SignMessagesDetachedMethod = GetClassMethod("signMessagesDetached",
 		"([[B[[B)Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesFuture;");
 	SignAndSendTransactionsMethod = GetClassMethod("signAndSendTransactions",
@@ -108,18 +106,19 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignAndSendTransactions(const TA
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
 }
 
-TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessages(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException)
+TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessagesDetached(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException)
 {
 	UE_LOG(LogWalletAdapter, Log, TEXT("Signing %d messages"), Messages.Num());
 	
 	jthrowable JThrowable;
-	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignMessagesMethod, *FJavaUtils::GetArrayOfByteArray(Messages), *FJavaUtils::GetArrayOfByteArray(Addresses));
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignMessagesDetachedMethod, *FJavaUtils::GetArrayOfByteArray(Messages), *FJavaUtils::GetArrayOfByteArray(Addresses));
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
 	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
 }
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
                                   "(Ljava/lang/String;[BLjava/lang/String;Landroid/net/Uri;)V",
                                   const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase)
 	AuthTokenField = GetClassField("authToken", "Ljava/lang/String;");
@@ -128,22 +127,22 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResult, FJavaClassObjectWrapper,
 	WalletUriBaseField = GetClassField("walletUriBase", "Landroid/net/Uri;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-FString FAuthorizationResult::GetAuthToken()
+FString FAuthorizationResultWrapper::GetAuthToken() const
 {
 	return GetStringField(AuthTokenField);
 }
 
-TArray<uint8> FAuthorizationResult::GetPublicKey()
+TArray<uint8> FAuthorizationResultWrapper::GetPublicKey() const
 {
 	return GetByteArrayField(PublicKeyField);
 }
 
-FString FAuthorizationResult::GetAccountLabel()
+FString FAuthorizationResultWrapper::GetAccountLabel() const
 {
 	return GetStringField(AccountLabelField);
 }
 
-FString FAuthorizationResult::GetWalletUriBase()
+FString FAuthorizationResultWrapper::GetWalletUriBase() const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	auto JUri = FScopedJavaObject(Env, GetObjectField(WalletUriBaseField));
@@ -151,26 +150,70 @@ FString FAuthorizationResult::GetWalletUriBase()
 	return Uri;
 }
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignPayloadsResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsResult",
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignPayloadsResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignPayloadsResult",
                                   "([[B)V",
                                   const TArray<TArray<uint8>>& SignedPayloads)
 	SignedPayloadsField = GetClassField("signedPayloads", "[[B");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-TArray<TArray<uint8>> FSignPayloadsResult::GetSignedPayloads()
+TArray<TArray<uint8>> FSignPayloadsResultWrapper::GetSignedPayloads() const
 {
 	return GetArrayOfByteArrayField(SignedPayloadsField);
 }
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResult, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignAndSendTransactionsResult",
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignAndSendTransactionsResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignAndSendTransactionsResult",
 								  "([[B)V",
 								  const TArray<TArray<uint8>>& SignedPayloads)
 	SignaturesField = GetClassField("signatures", "[[B");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-TArray<TArray<uint8>> FSignAndSendTransactionsResult::GetSignatures()
+TArray<TArray<uint8>> FSignAndSendTransactionsResultWrapper::GetSignatures() const
 {
 	return GetArrayOfByteArrayField(SignaturesField);
+}
+
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignedMessageWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesResult$SignedMessage",
+								  "([B[[B[[B)V",
+								  const TArray<uint8>& Message, const TArray<TArray<uint8>>& Signatures, const TArray<TArray<uint8>>& Addresses)
+	MessageField = GetClassField("message", "[B");
+	SignaturesField = GetClassField("signatures", "[[B");
+	AddressesField = GetClassField("addresses", "[[B");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+TArray<uint8> FSignedMessageWrapper::GetMessage() const
+{
+	return GetByteArrayField(MessageField);
+}
+
+TArray<TArray<uint8>> FSignedMessageWrapper::GetSignatures() const
+{
+	return GetArrayOfByteArrayField(SignaturesField);
+}
+
+TArray<TArray<uint8>> FSignedMessageWrapper::GetAddresses() const
+{
+	return GetArrayOfByteArrayField(AddressesField);
+}
+
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSignMessagesResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesResult",
+								  "([Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesResult$SignedMessage;)V",
+								  const TArray<FSignedMessage>& Messages)
+	MessagesField = GetClassField("messages", "[Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$SignMessagesResult$SignedMessage;");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+TArray<TSharedRef<FSignedMessageWrapper>> FSignMessagesResultWrapper::GetMessages() const
+{
+	TArray<TSharedRef<FSignedMessageWrapper>> Messages;
+	
+	TArray<jobject> JObjectArray = GetObjectArrayField(MessagesField);
+	for (jobject JObject : JObjectArray)
+		 Messages.Add(FSignedMessageWrapper::MakeFromExistingObject(JObject));
+	
+	return Messages;
 }
 
 #endif

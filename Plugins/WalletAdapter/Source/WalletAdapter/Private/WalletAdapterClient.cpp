@@ -14,6 +14,16 @@
 #endif
 
 #if PLATFORM_ANDROID
+
+FSignedMessage::FSignedMessage(const FSignedMessageWrapper& SignedMessage)
+{
+	Message = SignedMessage.GetMessage();
+	for (auto Signature : SignedMessage.GetSignatures())
+		Signatures.Add(FByteArray(Signature));
+	for (auto Address : SignedMessage.GetAddresses())
+		Addresses.Add(FByteArray(Address));	
+}
+
 void UWalletAdapterClient::SetClientImpl(const TSharedPtr<FMobileWalletAdapterClient>& InClient)
 {
 	Client = InClient;
@@ -47,7 +57,7 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResult::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully: AuthToken = %s"), *AuthToken);
@@ -90,7 +100,7 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResult::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
 	
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorized successfully"));
@@ -142,7 +152,7 @@ void UWalletAdapterClient::Deauthorize(const FString& AuthorizationToken, const 
 #endif
 }
 
-void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure)
+void UWalletAdapterClient::SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -174,15 +184,15 @@ void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Tr
 		}
 
 		check(JSignResult.IsValid());
-		auto SignResult = FSignPayloadsResult::MakeFromExistingObject(JSignResult->GetJObject());
+		auto SignResult = FSignPayloadsResultWrapper::MakeFromExistingObject(JSignResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d transaction(s)"), Transactions.Num());
 		
 		TArray<TArray<uint8>> SignedPayloads = SignResult->GetSignedPayloads();
-		TArray<FSolanaTransaction> SignedTransactions;
+		TArray<FByteArray> SignedTransactions;
 		for (const TArray<uint8>& BytesArray : SignedPayloads)
-			SignedTransactions.Add(FSolanaTransaction(BytesArray));
+			SignedTransactions.Add(FByteArray(BytesArray));
 		Success.ExecuteIfBound(SignedTransactions);
 	});
 #else
@@ -190,7 +200,7 @@ void UWalletAdapterClient::SignTransactions(const TArray<FSolanaTransaction>& Tr
 #endif
 }
 
-void UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure)
+void UWalletAdapterClient::SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
@@ -221,17 +231,81 @@ void UWalletAdapterClient::SignAndSendTransactions(const TArray<FSolanaTransacti
 		}
 
 		check(JSignAndSendResult.IsValid());
-		auto SignAndSendResult = FSignAndSendTransactionsResult::MakeFromExistingObject(JSignAndSendResult->GetJObject());
+		auto SignAndSendResult = FSignAndSendTransactionsResultWrapper::MakeFromExistingObject(JSignAndSendResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed and sent %d transaction(s)"), Transactions.Num());
 		
 		TArray<TArray<uint8>> Signatures = SignAndSendResult->GetSignatures();
-		TArray<FSolanaTransaction> SignedTransactions;
+		TArray<FByteArray> SignedTransactions;
 		for (const TArray<uint8>& BytesArray : Signatures)
-			SignedTransactions.Add(FSolanaTransaction(BytesArray));
+			SignedTransactions.Add(FByteArray(BytesArray));
 		
 		Success.ExecuteIfBound(SignedTransactions);
+	});
+#else
+	Failure.ExecuteIfBound("Current platform is not supported");	
+#endif
+}
+
+void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, const FSignMessagesSuccessDelegate& Success, const FFailureDelegate& Failure)
+{
+	if (!Messages.Num())
+	{
+		Failure.ExecuteIfBound("Zero number of messages passed");
+		return;
+	}
+	
+	if (!Addresses.Num())
+	{
+		Failure.ExecuteIfBound("Zero number of addresses passed");
+		return;
+	}
+
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	TArray<TArray<uint8>> RawMessages, RawAddresses;
+	for (const auto& [Data] : Messages)
+		RawMessages.Add(Data);
+	for (const auto& [Data] : Addresses)
+		RawAddresses.Add(Data);	
+
+	auto JSignFuture = Client->SignMessagesDetached(RawMessages, RawAddresses, Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d messages(s): %s"), Messages.Num(), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(JSignFuture.IsValid());
+	
+	AsyncTask(ENamedThreads::AnyThread, [JSignFuture, Messages, Success, Failure]
+	{
+		TSharedPtr<FThrowable> FutureGetException;
+		
+		auto JSignMessagesResult = JSignFuture->Get(&FutureGetException);
+		if (FutureGetException)
+		{
+			UE_LOG(LogWalletAdapter, Error, TEXT("Failed to sign %d message(s): %s"), Messages.Num(), *FutureGetException->GetMessage());
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
+			return;
+		}
+
+		check(JSignMessagesResult.IsValid());
+		auto SignMessagesResult = FSignMessagesResultWrapper::MakeFromExistingObject(JSignMessagesResult->GetJObject());
+		
+		// SUCCESS
+		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d message(s)"), Messages.Num());
+		
+		auto SignedMessageWrappers = SignMessagesResult->GetMessages();
+
+		TArray<FSignedMessage> SignedMessages;
+		for (auto SignedMessage : SignedMessageWrappers)
+			SignedMessages.Add(FSignedMessage(*SignedMessage));
+		
+		Success.ExecuteIfBound(SignedMessages);
 	});
 #else
 	Failure.ExecuteIfBound("Current platform is not supported");	
@@ -337,10 +411,10 @@ void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuc
 		}));	
 }
 
-void UWalletAdapterClient::K2_SignTransactions(const TArray<FSolanaTransaction>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 	SignTransactions(Transactions,
-		FSignSuccessDelegate::CreateLambda([Success](const TArray<FSolanaTransaction>& Transactions)
+		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
 		{
 			if (!IsInGameThread())
 			{
@@ -370,10 +444,10 @@ void UWalletAdapterClient::K2_SignTransactions(const TArray<FSolanaTransaction>&
 		}));
 }
 
-void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FSolanaTransaction>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 	SignAndSendTransactions(Transactions, MinContextSlot,
-		FSignSuccessDelegate::CreateLambda([Success](const TArray<FSolanaTransaction>& Transactions)
+		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
 		{
 			if (!IsInGameThread())
 			{
@@ -385,6 +459,43 @@ void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FSolanaTransa
 			else
 			{
 				Success.ExecuteIfBound(Transactions);
+			}
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
+				Failure.ExecuteIfBound(ErrorMessage);
+			}
+		}));
+}
+
+void UWalletAdapterClient::K2_SignMessagesDetached(
+	const TArray<FByteArray>& Messages,
+	const TArray<FByteArray>& Addresses,
+	const FSignMessagesSuccessDynDelegate& Success,
+	const FFailureDynDelegate& Failure)
+{
+	SignMessagesDetached(Messages, Addresses,
+		FSignMessagesSuccessDelegate::CreateLambda([Success](const TArray<FSignedMessage>& SignedMessages)
+		{
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, SignedMessages]
+				{
+					Success.ExecuteIfBound(SignedMessages);
+				});
+			}
+			else
+			{
+				Success.ExecuteIfBound(SignedMessages);
 			}
 		}),
 		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)

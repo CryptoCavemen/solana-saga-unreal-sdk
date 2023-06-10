@@ -20,11 +20,14 @@ class UNREALWALLETADAPTER_API UMobileWalletAdapterUseCase : public UBlueprintFun
 	GENERATED_BODY()
 
 public:
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FSolanaTransaction>&, SignedTransactions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FByteArray>&, SignedTransactions);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignMessagesSuccessDynDelegate, const TArray<FSignedMessage>&, SignedMessages);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 	
 	UFUNCTION(BlueprintCallable)
 	static void SignTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
 	UFUNCTION(BlueprintCallable)
-	static void SignAndSendTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+	static void SignAndSendTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	UFUNCTION(BlueprintCallable)
+	static void SignMessages(int32 NumMessages, UWalletAdapterClient* Client, const FSignMessagesSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 };

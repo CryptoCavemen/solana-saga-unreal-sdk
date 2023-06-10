@@ -127,11 +127,34 @@ bool VerifyMemoTransactionLegacy(const TArray<uint8>& PublicKey, const TArray<ui
 		return false;
 	}	
     
-	UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Verified memo transaction signature"));
+	UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Successfully verified memo transaction signature"));
 	return true;
 }
 
-void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+bool VerifyMessage(const TArray<uint8>& SignedMessage, const TArray<uint8>& Signature, const TArray<uint8>& PublicKey, const TArray<uint8>& OriginalMessage)
+{
+	if (SignedMessage != OriginalMessage)
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Signed message differs from original message. Verifying provided signature on signed message."));
+		return false;
+	}
+	
+	bool bVerified = FCryptoUtils::VerifyMessage(Signature, SignedMessage, PublicKey);
+	if (!bVerified)
+	{
+		UE_LOG(LogWalletAdapterUseCase, Warning, TEXT("Message signature is invalid"));
+		return false;
+	}
+	
+	UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Successfully verified message signature"));
+	
+	return true;
+}
+
+void UMobileWalletAdapterUseCase::SignTransaction(
+	UWalletAdapterClient* Client,
+	const FSignSuccessDynDelegate& Success,
+	const FFailureDynDelegate& Failure)
 {
 	check(Client);
     
@@ -141,11 +164,11 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 		FString BlockHash = FRequestUtils::ParseBlockHashResponse(ResponseJsonObject);
 		UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Block Hash = %s"), *BlockHash);
 		
-		TArray<FSolanaTransaction> Transactions;
-		Transactions.Add(FSolanaTransaction(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
+		TArray<FByteArray> Transactions;
+		Transactions.Add(FByteArray(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
 		
 		Client->SignTransactions(Transactions,
-			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FSolanaTransaction>& SignedTransactions)
+			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FByteArray>& SignedTransactions)
 			{
 				AsyncTask(ENamedThreads::GameThread, [Client, Success, Failure, SignedTransactions]
 				{
@@ -181,7 +204,10 @@ void UMobileWalletAdapterUseCase::SignTransaction(UWalletAdapterClient* Client, 
 	HttpManager.Flush(EHttpFlushReason::FullFlush);
 }
 
-void UMobileWalletAdapterUseCase::SignAndSendTransaction(UWalletAdapterClient* Client, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UMobileWalletAdapterUseCase::SignAndSendTransaction(
+	UWalletAdapterClient* Client,
+	const FSignSuccessDynDelegate& Success,
+	const FFailureDynDelegate& Failure)
 {
 	check(Client);
     
@@ -192,11 +218,11 @@ void UMobileWalletAdapterUseCase::SignAndSendTransaction(UWalletAdapterClient* C
 		int32 Slot = FRequestUtils::ParseBlockHashResponseContextSlot(ResponseJsonObject);
 		UE_LOG(LogWalletAdapterUseCase, Log, TEXT("Block Hash = %s, Slot = %d"), *BlockHash, Slot);
 		
-		TArray<FSolanaTransaction> Transactions;
-		Transactions.Add(FSolanaTransaction(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
+		TArray<FByteArray> Transactions;
+		Transactions.Add(FByteArray(CreateMemoTransactionLegacy(Client->PublicKey, BlockHash)));
 		
 		Client->SignAndSendTransactions(Transactions, Slot,
-			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FSolanaTransaction>& SignedTransactions)
+			UWalletAdapterClient::FSignSuccessDelegate::CreateLambda([Client, Success, Failure](const TArray<FByteArray>& SignedTransactions)
 			{
 				AsyncTask(ENamedThreads::GameThread, [Client, Success, Failure, SignedTransactions]
 				{
@@ -227,4 +253,61 @@ void UMobileWalletAdapterUseCase::SignAndSendTransaction(UWalletAdapterClient* C
 	// Force HTTP manager to complete all requests because GameThread is paused when a wallet is opened.
 	FHttpManager& HttpManager = FHttpModule::Get().GetHttpManager();
 	HttpManager.Flush(EHttpFlushReason::FullFlush);	
+}
+
+void UMobileWalletAdapterUseCase::SignMessages(
+	int32 NumMessages,
+	UWalletAdapterClient* Client,
+	const FSignMessagesSuccessDynDelegate& Success,
+	const FFailureDynDelegate& Failure)
+{
+	check(Client);
+	check(NumMessages > 0);
+
+	TArray<FByteArray> Messages;
+	TArray<FByteArray> Addresses;
+
+	for (int32 MessageIndex = 0; MessageIndex < NumMessages; MessageIndex++)
+	{
+		FString Text = FString::Printf(TEXT("A simple test message %d"), MessageIndex);
+		TArray<uint8> Bytes;
+		Bytes.SetNumUninitialized(Text.Len());
+		StringToBytes(Text, Bytes.GetData(), Bytes.Num());
+		
+		Messages.Add(FByteArray(Bytes));
+	}
+	
+	Addresses.Add(FByteArray(Client->PublicKey));
+		
+	Client->SignMessagesDetached(Messages, Addresses,
+		UWalletAdapterClient::FSignMessagesSuccessDelegate::CreateLambda([Messages, Client, Success, Failure](const TArray<FSignedMessage>& SignedMessages)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Messages, Client, Success, Failure, SignedMessages]
+			{
+				if (Messages.Num() != SignedMessages.Num())
+				{
+					Failure.ExecuteIfBound("The number of signed messages are not equal to the number of original messages");
+					return;
+				}
+				
+				for (int32 MessageIndex = 0; MessageIndex < Messages.Num(); MessageIndex++)
+				{
+					auto SignedMessage = SignedMessages[MessageIndex];
+					if (!VerifyMessage(SignedMessage.Message, SignedMessage.Signatures[0].Data, Client->PublicKey, Messages[MessageIndex].Data))
+					{
+						Failure.ExecuteIfBound("Failed to verify the signed message");
+						return;	
+					}
+				}
+				
+				Success.ExecuteIfBound(SignedMessages);
+			});
+		}),
+		UWalletAdapterClient::FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+			{
+				Failure.ExecuteIfBound(ErrorMessage);
+			});
+		}));	
 }
