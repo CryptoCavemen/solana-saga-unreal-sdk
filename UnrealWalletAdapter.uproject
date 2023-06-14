@@ -19,6 +19,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "SeedVault",
+			"Enabled": true
+		},
+		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,
 			"TargetAllowList": [

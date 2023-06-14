@@ -29,7 +29,8 @@ public class UnrealWalletAdapter : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"OpenSSL",
-			"WalletAdapter"
+			"WalletAdapter",
+			"SeedVault"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]

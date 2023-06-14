@@ -10,7 +10,7 @@
 
 #if USE_ANDROID_JNI
 
-using namespace WalletAdapter;
+using namespace SeedVault;
 
 jclass FJavaClassObjectWrapper::StaticClass = nullptr;
 

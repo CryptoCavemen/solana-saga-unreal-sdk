@@ -12,7 +12,7 @@
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 
-namespace WalletAdapter
+namespace SeedVault
 {
 	
 /**

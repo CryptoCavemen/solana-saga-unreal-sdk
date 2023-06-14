@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+	Copyright (c) 2023 Solana Mobile Inc. 
+	Author: Sergey Makovkin (makovkin.s@gmail.com)
+	
+	SeedVault plugin additions
+-->
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+	<!-- init section is always evaluated once per architecture -->
+	<init>
+		<log text="SeedVault init"/>
+	</init>
+
+	<!-- optional updates applied to AndroidManifest.xml -->
+	<androidManifestUpdates>
+		<addPermission android:name="com.solanamobile.seedvault.ACCESS_SEED_VAULT" />
+	</androidManifestUpdates>
+
+	<!-- optional additions to proguard -->
+	<proguardAdditions>
+		<insert>
+-keep class com.solanamobile.unreal.** { *; }
+		</insert>
+	</proguardAdditions>
+
+	<prebuildCopies>
+		<copyDir src="$S(PluginDir)/java" dst="$S(BuildDir)/src" />
+	</prebuildCopies>
+
+	<gradleProperties>
+		<insert>
+			android.useAndroidX=true
+			android.enableJetifier=true
+		</insert>
+	</gradleProperties>
+
+	<buildGradleAdditions>
+		<insert>
+			android {
+				compileOptions {
+					targetCompatibility JavaVersion.VERSION_1_8
+					sourceCompatibility JavaVersion.VERSION_1_8
+				}
+			}			
+			dependencies {
+				implementation 'com.solanamobile:seedvault-wallet-sdk:0.2.7'
+			}
+		</insert>
+	</buildGradleAdditions>	
+	
+	<!-- optional additions to the GameActivity imports in GameActivity.java -->
+	<gameActivityImportAdditions>
+		<insert>
+// SolanaWallet imports
+import com.solanamobile.seedvault.Wallet;
+import com.solanamobile.seedvault.WalletContractV1;
+import com.solanamobile.unreal.WalletJavaHelper;
+		</insert>
+	</gameActivityImportAdditions>
+
+	<!-- optional additions to the GameActivity class in GameActivity.java -->
+	<gameActivityClassAdditions>
+		<insert>
+	private static final int REQUEST_AUTHORIZE_SEED_ACCESS = 0;
+	private static final int REQUEST_CREATE_NEW_SEED = 1;
+	private static final int REQUEST_IMPORT_EXISTING_SEED = 2;
+	private static final int REQUEST_SIGN_TRANSACTIONS = 3;
+	private static final int REQUEST_SIGN_MESSAGES = 4;
+	private static final int REQUEST_GET_PUBLIC_KEYS = 5;
+	private static final String KEY_PENDING_EVENT = "pendingEvent";
+			
+		</insert>
+	</gameActivityClassAdditions>
+
+	<!-- optional additions to GameActivity onCreate in GameActivity.java -->
+	<gameActivityOnCreateAdditions>
+		<insert>
+		</insert>
+	</gameActivityOnCreateAdditions>
+
+	<!-- optional additions to GameActivity onDestroy in GameActivity.java -->
+	<gameActivityOnDestroyAdditions>
+		<insert>
+		</insert>
+	</gameActivityOnDestroyAdditions>
+
+	<!-- optional additions to GameActivity onStop in GameActivity.java -->
+	<gameActivityOnStopAdditions>
+		<insert>
+		</insert>
+	</gameActivityOnStopAdditions>
+	
+	<!-- optional additions to GameActivity onPause in GameActivity.java -->
+	<gameActivityOnPauseAdditions>
+		<insert>
+		</insert>
+	</gameActivityOnPauseAdditions>
+	
+	<!-- optional additions to GameActivity onResume in GameActivity.java -->
+	<gameActivityOnResumeAdditions>
+		<insert>
+		</insert>
+	</gameActivityOnResumeAdditions>
+	
+	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
+	<gameActivityOnActivityResultAdditions>
+		<insert>
+		// Begin SeedVault onActivityResult
+		if (requestCode == REQUEST_CREATE_NEW_SEED) 
+		{
+			try
+			{
+				long authToken = Wallet.onCreateSeedResult(resultCode, data);
+				Log.debug("Seed created, AuthToken=$authToken");
+				WalletJavaHelper.onCreateSeed(true, authToken);
+			}
+			catch (Wallet.ActionFailedException e) 
+			{
+				Log.error("Seed creation failed", e);
+				WalletJavaHelper.onCreateSeed(false, -1);
+			}
+		} 
+		// End SeedVault onActivityResult
+		</insert>
+	</gameActivityOnActivityResultAdditions>
+	
+	<!-- optional libraries to load in GameActivity.java before libUE4.so -->
+	<soLoadLibrary>
+	</soLoadLibrary>
+</root>
+
