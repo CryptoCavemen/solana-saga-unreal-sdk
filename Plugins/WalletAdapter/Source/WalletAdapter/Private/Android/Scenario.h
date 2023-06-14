@@ -10,6 +10,9 @@
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
+namespace WalletAdapter
+{
+
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.Scenario 
  */
@@ -18,5 +21,7 @@ class FScenario : public FJavaClassObjectWrapper
 	DECLARE_JAVA_CLASS_OBJECT(FScenario, int32 ClientTimeoutMs);
 public:
 };
+
+}
 
 #endif

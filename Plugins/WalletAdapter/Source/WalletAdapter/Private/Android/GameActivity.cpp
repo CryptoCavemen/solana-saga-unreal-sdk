@@ -12,6 +12,8 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
+using namespace WalletAdapter;
+
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/epicgames/unreal/GameActivity", "()V")
 	StartActivityMethod = GetClassMethod("startActivity", "(Landroid/content/Intent;)V");
 	StartActivityForResultMethod = GetClassMethod("startActivityForResult", "(Landroid/content/Intent;I)V");

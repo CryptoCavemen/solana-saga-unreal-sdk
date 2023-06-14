@@ -10,6 +10,9 @@
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for java.lang.Throwable 
  */
@@ -21,5 +24,7 @@ public:
 protected:
 	FJavaClassMethod GetMessageMethod;
 };
+	
+}
 
 #endif

@@ -11,6 +11,9 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Throwable.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for com.epicgames.ue4.GameActivity 
  */
@@ -21,11 +24,12 @@ class FGameActivity : FJavaClassObjectWrapper
 public:
 	void StartActivity(const FJavaClassObjectWrapperRef& Intent, TSharedPtr<FThrowable>* OutException = nullptr);
 	void StartActivityForResult(const FJavaClassObjectWrapperRef& Intent, int32 RequestCode, TSharedPtr<FThrowable>* OutException = nullptr);
-	
+
 protected:
 	FJavaClassMethod StartActivityMethod;
 	FJavaClassMethod StartActivityForResultMethod;
 };
-
+	
+}
 
 #endif

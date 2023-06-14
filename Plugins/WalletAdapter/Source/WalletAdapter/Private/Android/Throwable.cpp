@@ -11,6 +11,8 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
+using namespace WalletAdapter;
+
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FThrowable, FJavaClassObjectWrapper, "java/lang/Throwable", "()V")
 	GetMessageMethod = GetClassMethod("getMessage", "()Ljava/lang/String;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT

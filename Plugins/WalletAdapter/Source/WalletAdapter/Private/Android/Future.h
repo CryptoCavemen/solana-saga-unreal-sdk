@@ -11,6 +11,9 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Throwable.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.Scenario 
  */
@@ -28,7 +31,7 @@ public:
 	FJavaClassObjectWrapperPtr Get(TSharedPtr<FThrowable>* OutException = nullptr);
 	/** Waits if necessary for at most the given time for the computation to complete, and then retrieves its result, if available. */
 	FJavaClassObjectWrapperPtr Get(int64 TimeoutMilliseconds, TSharedPtr<FThrowable>* OutException = nullptr);	
-	
+
 public:
 	FJavaClassMethod CancelMethod;
 	FJavaClassMethod IsCancelledMethod;
@@ -36,5 +39,7 @@ public:
 	FJavaClassMethod GetMethod;
 	FJavaClassMethod GetWithTimeoutMethod;
 };
+	
+}
 
 #endif

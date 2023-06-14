@@ -13,6 +13,9 @@
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario 
  */
@@ -31,6 +34,7 @@ protected:
 	FJavaClassMethod StartMethod;
 	FJavaClassMethod CloseMethod;
 };
-
+	
+}
 
 #endif

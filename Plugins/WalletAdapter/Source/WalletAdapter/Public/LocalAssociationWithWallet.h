@@ -18,8 +18,10 @@
 class UWalletAdapterClient;
 
 #if PLATFORM_ANDROID
-class FLocalAssociationScenario;
-class FFuture;
+namespace WalletAdapter
+{
+	class FLocalAssociationScenario;
+}
 #endif
 
 /**
@@ -60,7 +62,7 @@ public:
 	
 protected:
 #if PLATFORM_ANDROID
-	TSharedPtr<FLocalAssociationScenario> LocalAssociation;
+	TSharedPtr<WalletAdapter::FLocalAssociationScenario> LocalAssociation;
 #endif
 	UPROPERTY()
 	UWalletAdapterClient* Client;

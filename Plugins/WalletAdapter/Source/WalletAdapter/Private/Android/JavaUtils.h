@@ -10,6 +10,8 @@
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 
+namespace WalletAdapter
+{
 
 class FJavaUtils
 {
@@ -23,5 +25,7 @@ public:
 	static void VerifyException(JNIEnv* Env);
 	static void LogException(JNIEnv* Env);
 };
+
+}
 
 #endif

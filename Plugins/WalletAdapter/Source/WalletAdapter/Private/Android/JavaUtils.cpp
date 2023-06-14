@@ -7,6 +7,8 @@
 
 #if USE_ANDROID_JNI
 
+using namespace WalletAdapter;
+
 FScopedJavaObject<jstring> FJavaUtils::GetJString(const FString& String)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();

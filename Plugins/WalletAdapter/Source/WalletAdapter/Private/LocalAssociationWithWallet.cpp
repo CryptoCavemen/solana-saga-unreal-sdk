@@ -13,6 +13,7 @@
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
+using namespace WalletAdapter;
 #endif
 
 #define DEFAULT_CLIENT_TIMEOUT_MS 60000

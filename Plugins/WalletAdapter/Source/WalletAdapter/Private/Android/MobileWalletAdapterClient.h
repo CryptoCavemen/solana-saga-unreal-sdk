@@ -11,6 +11,9 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Future.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient
  */
@@ -30,7 +33,7 @@ public:
 	TSharedPtr<FFuture> SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException);
 	/** Sign messages. */
 	TSharedPtr<FFuture> SignMessagesDetached(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException);	
-	
+
 protected:
 	FJavaClassMethod AuthorizeMethod;
 	FJavaClassMethod ReauthorizeMethod;
@@ -110,5 +113,7 @@ public:
 protected:
 	FJavaClassField MessagesField;
 };
+	
+}
 
 #endif

@@ -10,6 +10,8 @@
 
 #if USE_ANDROID_JNI
 
+using namespace WalletAdapter;
+
 FJavaClassObjectWrapper::FJavaClassObjectWrapper()
 	: Object(nullptr)
 	, Class(nullptr)

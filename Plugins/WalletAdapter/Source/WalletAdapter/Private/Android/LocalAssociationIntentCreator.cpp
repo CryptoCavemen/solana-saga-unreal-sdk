@@ -15,6 +15,8 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
+using namespace WalletAdapter;
+
 static jclass Class;
 static jmethodID CreateAssociationIntentMethod;
 

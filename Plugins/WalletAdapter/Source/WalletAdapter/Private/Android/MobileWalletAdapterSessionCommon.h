@@ -10,6 +10,9 @@
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
+namespace WalletAdapter
+{
+	
 /**
  * Wrapper for com.solana.mobilewalletadapter.common.protocol.MobileWalletAdapterSessionCommon 
  */
@@ -17,5 +20,7 @@ class FMobileWalletAdapterSessionCommon : public FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterSessionCommon);
 };
+	
+}
 
 #endif

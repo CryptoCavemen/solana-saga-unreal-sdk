@@ -11,6 +11,8 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
+using namespace WalletAdapter;
+
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FFuture, FJavaClassObjectWrapper, "jvav/util/concurrent/Future", nullptr)
 	CancelMethod = GetClassMethod("cancel", "(Z)Z");
 	IsCancelledMethod = GetClassMethod("isCancelled", "()Z");

@@ -12,6 +12,9 @@
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 
+namespace WalletAdapter
+{
+	
 /**
  * Must be defined in a header file for every class derived from FJavaClassObjectWrapper
  */
@@ -50,12 +53,12 @@ ImplClass::ImplClass(jobject JObject)\
 ImplClass* ImplClass::Construct(jobject JObject, ...)\
 {\
 	ImplClass* Object = JObject ? new ImplClass(JObject) : new ImplClass();\
-\
+	\
 	va_list Args;\
 	va_start(Args, JObject);\
 	Object->PostConstruct(JavaClassName, JavaCtorSig, Args);\
 	va_end(Args);\
-\
+	\
 	return Object;\
 }\
 \
@@ -93,7 +96,7 @@ public:
 
 	FJavaClassMethod GetClassMethod(const char* MethodName, const char* FuncSig) const;
 	FJavaClassField GetClassField(const char* FieldName, const char* FuncSig) const;
-	
+
 	template<typename ReturnType>
 	ReturnType CallMethod(FJavaClassMethod Method, ...);
 
@@ -158,5 +161,7 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 
 typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
 typedef TSharedPtr<FJavaClassObjectWrapper> FJavaClassObjectWrapperPtr;
+	
+}
 
 #endif

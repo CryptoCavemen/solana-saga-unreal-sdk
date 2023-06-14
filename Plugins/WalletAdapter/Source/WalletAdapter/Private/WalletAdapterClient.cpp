@@ -15,6 +15,8 @@
 
 #if PLATFORM_ANDROID
 
+using namespace WalletAdapter;
+
 FSignedMessage::FSignedMessage(const FSignedMessageWrapper& SignedMessage)
 {
 	Message = SignedMessage.GetMessage();
