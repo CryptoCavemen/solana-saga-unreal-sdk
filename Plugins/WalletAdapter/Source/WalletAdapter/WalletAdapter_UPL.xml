@@ -3,7 +3,7 @@
 	Copyright (c) 2023 Solana Mobile Inc. 
 	Author: Sergey Makovkin (makovkin.s@gmail.com)
 	
-	SolanaWallet plugin additions
+	WalletAdapter plugin additions
 -->
 <root xmlns:android="http://schemas.android.com/apk/res/android">
 	<!-- init section is always evaluated once per architecture -->
@@ -92,22 +92,6 @@
 	<!-- optional additions to GameActivity onActivityResult in GameActivity.java -->
 	<gameActivityOnActivityResultAdditions>
 		<insert>
-		// Begin WalletAdapter onActivityResult
-		if (requestCode == 55)
-		{
-			try
-			{
-				//long authToken = Wallet.onCreateSeedResult(resultCode, data);
-				Log.debug("Assoсiation created");
-				//WalletJavaHelper.onCreateSeed(true, authToken);
-			}
-			catch (Throwable e)
-			{
-				Log.error("Assoсiation creation failed", e);
-				//WalletJavaHelper.onCreateSeed(false, -1);
-			}
-		}
-		// End WalletAdapter onActivityResult
 		</insert>
 	</gameActivityOnActivityResultAdditions>
 	
