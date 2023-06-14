@@ -101,7 +101,7 @@ FJavaClassMethod FJavaClassObjectWrapper::GetClassStaticMethod(const char* Metho
 	check(StaticClass);
 	
 	FJavaClassMethod Method;
-	Method.Method = Env->GetMethodID(StaticClass, MethodName, FuncSig);
+	Method.Method = Env->GetStaticMethodID(StaticClass, MethodName, FuncSig);
 	Method.Name = MethodName;
 	Method.Signature = FuncSig;
 	// Is method valid?
@@ -115,7 +115,7 @@ FJavaClassField FJavaClassObjectWrapper::GetClassStaticField(const char* FieldNa
 	check(StaticClass);
 	
 	FJavaClassField Field;
-	Field.Field = Env->GetFieldID(StaticClass, FieldName, FuncSig);
+	Field.Field = Env->GetStaticFieldID(StaticClass, FieldName, FuncSig);
 	Field.Name = FieldName;
 	Field.Signature = FuncSig;
 	// Is field valid?
