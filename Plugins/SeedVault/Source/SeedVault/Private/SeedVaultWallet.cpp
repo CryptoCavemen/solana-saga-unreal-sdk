@@ -64,21 +64,3 @@ void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FCreateSeedDy
 	}
 #endif	
 }
-
-void USeedVaultWallet::OnCreateSeedSuccess(int64 AuthToken)
-{
-	UE_LOG(LogSeedVault, Log, TEXT("Seed created: AuthToken = %lld"), AuthToken);
-
-	AsyncTask(ENamedThreads::GameThread, [AuthToken] {
-		CreateSeedSuccess.ExecuteIfBound(AuthToken);
-	});
-}
-
-void USeedVaultWallet::OnCreateSeedFailure(const FString& ErrorMessage)
-{
-	UE_LOG(LogSeedVault, Error, TEXT("Seed creation failed"));
-
-	AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
-		CreateSeedFailure.ExecuteIfBound(ErrorMessage);
-	});	
-}

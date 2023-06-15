@@ -18,30 +18,22 @@ enum class EWalletContractV1 : uint8
 };
 
 /**
- * Wrapper for com/solanamobile/seedvault/Wallet.java. 
+ * The main class that is used to access Seed Vault.
  */
 UCLASS()
 class SEEDVAULT_API USeedVaultWallet : public UBlueprintFunctionLibrary
 {
-	friend class FSeedVaultModule;
 	GENERATED_BODY()
-protected:
-	/** Initialize java objects and cache them for further usage. Called when the module is loaded. */
-	static void StaticConstruct();
 
 public:
-
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FCreateSeedDynDelegate, int64, AuthToken);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 	
 	UFUNCTION(BlueprintCallable)
 	static void CreateSeed(EWalletContractV1 Purpose, const FCreateSeedDynDelegate& Success, const FFailureDynDelegate& Failure);
-	static void OnCreateSeedSuccess(int64 AuthToken);
-	static void OnCreateSeedFailure(const FString& ErrorMessage);
 
-protected:
-	
+public:
 	static FCreateSeedDynDelegate CreateSeedSuccess;
 	static FFailureDynDelegate CreateSeedFailure;
 };

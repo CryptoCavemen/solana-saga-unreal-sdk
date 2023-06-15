@@ -15,6 +15,9 @@
 namespace SeedVault
 {
 
+/**
+ * Wrapper for com/solanamobile/seedvault/Wallet.java. 
+ */
 class FWallet : FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT_STATIC()
