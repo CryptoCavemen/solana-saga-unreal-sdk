@@ -4,19 +4,26 @@
 //
 
 #include "Android/Defines.h"
+#include "Android/JavaUtils.h"
 
 #if PLATFORM_ANDROID
-#include "Wallet.h"
+#include "SeedVaultWallet.h"
 #include "Android/AndroidJNI.h"
 #include "Android/AndroidPlatform.h"
 
+using namespace SeedVault;
+
 extern "C"
 {
-	// Functions that are called on Android lifecycle events.
-	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeed(JNIEnv* LocalJNIEnv, jobject LocalThis, jboolean bSuccess, jlong AuthToken)
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeedSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)
 	{
-		UWallet::OnCreateSeed(bSuccess, AuthToken);
+		USeedVaultWallet::OnCreateSeedSuccess(AuthToken);
 	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeedFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		USeedVaultWallet::OnCreateSeedFailure(FJavaUtils::JUriToString(errorMessage));
+	}	
 }
 
 #endif

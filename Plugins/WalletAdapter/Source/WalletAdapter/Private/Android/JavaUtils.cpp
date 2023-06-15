@@ -5,7 +5,7 @@
 
 #include "JavaUtils.h"
 
-#if USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 
 using namespace WalletAdapter;
 

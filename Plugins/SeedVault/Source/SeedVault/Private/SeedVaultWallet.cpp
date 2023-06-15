@@ -3,7 +3,8 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "Wallet.h"
+#include "SeedVaultWallet.h"
+#include "SeedVault.h"
 #include "Android/Defines.h"
 #include "Android/GameActivity.h"
 #include "Android/Wallet.h"
@@ -21,7 +22,8 @@ using namespace SeedVault;
 #endif
 
 
-UWallet::FCreateSeedCallback UWallet::OnCreateSeedCallback;
+USeedVaultWallet::FCreateSeedDynDelegate USeedVaultWallet::CreateSeedSuccess;
+USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::CreateSeedFailure;
 
 
 enum class EActivityRequestCode
@@ -35,18 +37,19 @@ enum class EActivityRequestCode
 };
 
 
-void UWallet::CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 Purpose)
+void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FCreateSeedDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 #if PLATFORM_ANDROID
 	UE_LOG(LogSeedVault, Log, TEXT("CreateSeed: Purpose = %d"), Purpose);
-	OnCreateSeedCallback = FinishCallback;
+	CreateSeedSuccess = Success;
+	CreateSeedFailure = Failure;
 
 	TSharedPtr<FThrowable> Exception;
 	FJavaClassObjectWrapperPtr Intent = FWallet::CreateSeed((int32)Purpose, &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
-		//Failure.ExecuteIfBound(Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 		return;
 	}
 
@@ -57,22 +60,25 @@ void UWallet::CreateSeed(FCreateSeedCallback FinishCallback, EWalletContractV1 P
 	if (Exception)
 	{
 		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
 	}
 #endif	
 }
 
-void UWallet::OnCreateSeed(bool bSuccess, int64 AuthToken)
+void USeedVaultWallet::OnCreateSeedSuccess(int64 AuthToken)
 {
-	if (bSuccess)
-	{
-		UE_LOG(LogSeedVault, Log, TEXT("Seed created: AuthToken = %lld"), AuthToken);
-	}
-	else
-	{
-		UE_LOG(LogSeedVault, Error, TEXT("Seed creation failed"));		
-	}
+	UE_LOG(LogSeedVault, Log, TEXT("Seed created: AuthToken = %lld"), AuthToken);
 
-	AsyncTask(ENamedThreads::GameThread, [&bSuccess, &AuthToken] {
-		OnCreateSeedCallback.ExecuteIfBound(bSuccess, AuthToken);
+	AsyncTask(ENamedThreads::GameThread, [AuthToken] {
+		CreateSeedSuccess.ExecuteIfBound(AuthToken);
 	});
+}
+
+void USeedVaultWallet::OnCreateSeedFailure(const FString& ErrorMessage)
+{
+	UE_LOG(LogSeedVault, Error, TEXT("Seed creation failed"));
+
+	AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+		CreateSeedFailure.ExecuteIfBound(ErrorMessage);
+	});	
 }

@@ -7,7 +7,7 @@
 
 #include "CoreMinimal.h"
 #include "Defines.h"
-#if USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 #include "Android/AndroidJava.h"
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Defines.h"
-#if USE_ANDROID_JNI
+#if PLATFORM_ANDROID
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 

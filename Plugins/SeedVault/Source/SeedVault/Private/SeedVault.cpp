@@ -5,7 +5,7 @@
 
 #include "SeedVault.h"
 #include "Android/Wallet.h"
-#include "Wallet.h"
+#include "SeedVaultWallet.h"
 
 DEFINE_LOG_CATEGORY(LogSeedVault);
 

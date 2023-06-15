@@ -110,16 +110,14 @@ import com.solanamobile.unreal.WalletJavaHelper;
 		{
 			try
 			{
-				long authToken = Wallet.onCreateSeedResult(resultCode, data);
-				Log.debug("Seed created, AuthToken=$authToken");
-				WalletJavaHelper.onCreateSeed(true, authToken);
+				long authToken = Wallet.onCreateSeedResult(resultCode, data);				
+				WalletJavaHelper.onCreateSeedSuccess(authToken);
 			}
 			catch (Wallet.ActionFailedException e) 
 			{
-				Log.error("Seed creation failed", e);
-				WalletJavaHelper.onCreateSeed(false, -1);
+				WalletJavaHelper.onCreateSeedFailure(e.getMessage());
 			}
-		} 
+		}
 		// End SeedVault onActivityResult
 		</insert>
 	</gameActivityOnActivityResultAdditions>
