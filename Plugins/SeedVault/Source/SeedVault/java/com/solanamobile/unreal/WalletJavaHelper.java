@@ -16,4 +16,7 @@ public final class WalletJavaHelper
 
     public static native void onCreateSeedSuccess(long authToken);
     public static native void onCreateSeedFailure(String errorMessage);
+    
+    public static native void onImportSeedSuccess(long authToken);
+    public static native void onImportSeedFailure(String errorMessage);    
 }

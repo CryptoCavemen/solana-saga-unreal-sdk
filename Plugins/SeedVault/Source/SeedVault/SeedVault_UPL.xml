@@ -118,6 +118,18 @@ import com.solanamobile.unreal.WalletJavaHelper;
 				WalletJavaHelper.onCreateSeedFailure(e.getMessage());
 			}
 		}
+		else if (requestCode == REQUEST_IMPORT_EXISTING_SEED)
+		{
+			try
+			{
+				long authToken = Wallet.onImportSeedResult(resultCode, data);
+				WalletJavaHelper.onImportSeedSuccess(authToken);
+			}
+			catch (Wallet.ActionFailedException e)
+			{
+				WalletJavaHelper.onImportSeedFailure(e.getMessage());
+			}			
+		}
 		// End SeedVault onActivityResult
 		</insert>
 	</gameActivityOnActivityResultAdditions>

@@ -37,7 +37,30 @@ extern "C"
 			USeedVaultWallet::CreateSeedSuccess.Unbind();
 			USeedVaultWallet::CreateSeedFailure.Unbind();
 		});
-	}	
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onImportSeedSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)
+	{
+		UE_LOG(LogSeedVault, Log, TEXT("Seed imported: AuthToken = %lld"), AuthToken);
+
+		AsyncTask(ENamedThreads::GameThread, [AuthToken] {
+			USeedVaultWallet::ImportSeedSuccess.Execute(AuthToken);
+			USeedVaultWallet::ImportSeedSuccess.Unbind();
+			USeedVaultWallet::ImportSeedFailure.Unbind();
+		});
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onImportSeedFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		FString ErrorMessage = FJavaHelper::FStringFromLocalRef(LocalJNIEnv, errorMessage);
+		UE_LOG(LogSeedVault, Error, TEXT("Seed import failed: %s"), *ErrorMessage);
+		
+		AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+			USeedVaultWallet::ImportSeedFailure.Execute(ErrorMessage);
+			USeedVaultWallet::ImportSeedSuccess.Unbind();
+			USeedVaultWallet::ImportSeedFailure.Unbind();
+		});
+	}		
 }
 
 #endif
