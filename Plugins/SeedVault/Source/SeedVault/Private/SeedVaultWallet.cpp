@@ -44,6 +44,12 @@ enum class EActivityRequestCode
 void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 #if PLATFORM_ANDROID
+	if (AuthorizeSeedSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
 	UE_LOG(LogSeedVault, Log, TEXT("AuthorizeSeed: Purpose = %d"), Purpose);
 	AuthorizeSeedSuccess = Success;
 	AuthorizeSeedFailure = Failure;
@@ -72,6 +78,12 @@ void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWi
 void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 #if PLATFORM_ANDROID
+	if (CreateSeedSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
 	UE_LOG(LogSeedVault, Log, TEXT("CreateSeed: Purpose = %d"), Purpose);
 	CreateSeedSuccess = Success;
 	CreateSeedFailure = Failure;
@@ -100,6 +112,12 @@ void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithT
 void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
 {
 #if PLATFORM_ANDROID
+	if (ImportSeedSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
 	UE_LOG(LogSeedVault, Log, TEXT("ImportSeed: Purpose = %d"), Purpose);
 	ImportSeedSuccess = Success;
 	ImportSeedFailure = Failure;
