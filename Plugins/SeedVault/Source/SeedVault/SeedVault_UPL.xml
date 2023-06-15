@@ -106,7 +106,19 @@ import com.solanamobile.unreal.WalletJavaHelper;
 	<gameActivityOnActivityResultAdditions>
 		<insert>
 		// Begin SeedVault onActivityResult
-		if (requestCode == REQUEST_CREATE_NEW_SEED) 
+		if (requestCode == REQUEST_AUTHORIZE_SEED_ACCESS)
+		{
+			try
+			{
+				long authToken = Wallet.onAuthorizeSeedResult(resultCode, data);
+				WalletJavaHelper.onAuthorizeSeedSuccess(authToken);
+			}
+			catch (Wallet.ActionFailedException e)
+			{
+				WalletJavaHelper.onAuthorizeSeedFailure(e.getMessage());
+			}
+		}			
+		else if (requestCode == REQUEST_CREATE_NEW_SEED) 
 		{
 			try
 			{

@@ -14,6 +14,9 @@ public final class WalletJavaHelper
     //    mParent = unrealActivity;
     //}
 
+    public static native void onAuthorizeSeedSuccess(long authToken);
+    public static native void onAuthorizeSeedFailure(String errorMessage);
+    
     public static native void onCreateSeedSuccess(long authToken);
     public static native void onCreateSeedFailure(String errorMessage);
     

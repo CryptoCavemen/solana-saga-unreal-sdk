@@ -22,6 +22,8 @@ using namespace SeedVault;
 #endif
 
 
+USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::AuthorizeSeedSuccess;
+USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::AuthorizeSeedFailure;
 USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::CreateSeedSuccess;
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::CreateSeedFailure;
 USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::ImportSeedSuccess;
@@ -38,6 +40,34 @@ enum class EActivityRequestCode
 	REQUEST_GET_PUBLIC_KEYS = 5
 };
 
+
+void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	UE_LOG(LogSeedVault, Log, TEXT("AuthorizeSeed: Purpose = %d"), Purpose);
+	AuthorizeSeedSuccess = Success;
+	AuthorizeSeedFailure = Failure;
+
+	TSharedPtr<FThrowable> Exception;
+	FJavaClassObjectWrapperPtr Intent = FWallet::AuthorizeSeed((int32)Purpose, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(Intent.IsValid());
+	
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_AUTHORIZE_SEED_ACCESS, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+	}
+#endif	
+}
 
 void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
 {

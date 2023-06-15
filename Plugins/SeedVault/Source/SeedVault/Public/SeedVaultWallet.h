@@ -29,13 +29,17 @@ public:
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSuccessWithTokenDynDelegate, int64, AuthToken);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
-	
+
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static void AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);	
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static void CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static void ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);	
 
 public:
+	static FSuccessWithTokenDynDelegate AuthorizeSeedSuccess;
+	static FFailureDynDelegate AuthorizeSeedFailure;
 	static FSuccessWithTokenDynDelegate CreateSeedSuccess;
 	static FFailureDynDelegate CreateSeedFailure;
 	static FSuccessWithTokenDynDelegate ImportSeedSuccess;

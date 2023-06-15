@@ -16,6 +16,29 @@ using namespace SeedVault;
 
 extern "C"
 {
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onAuthorizeSeedSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)
+	{
+		UE_LOG(LogSeedVault, Log, TEXT("Seed authorized: AuthToken = %lld"), AuthToken);
+
+		AsyncTask(ENamedThreads::GameThread, [AuthToken] {
+			USeedVaultWallet::AuthorizeSeedSuccess.Execute(AuthToken);
+			USeedVaultWallet::AuthorizeSeedSuccess.Unbind();
+			USeedVaultWallet::AuthorizeSeedFailure.Unbind();
+		});
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onAuthorizeSeedFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		FString ErrorMessage = FJavaHelper::FStringFromLocalRef(LocalJNIEnv, errorMessage);
+		UE_LOG(LogSeedVault, Error, TEXT("Seed authorization failed: %s"), *ErrorMessage);
+		
+		AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+			USeedVaultWallet::AuthorizeSeedFailure.Execute(ErrorMessage);
+			USeedVaultWallet::AuthorizeSeedSuccess.Unbind();
+			USeedVaultWallet::AuthorizeSeedFailure.Unbind();
+		});
+	}
+	
 	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onCreateSeedSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)
 	{
 		UE_LOG(LogSeedVault, Log, TEXT("Seed created: AuthToken = %lld"), AuthToken);
