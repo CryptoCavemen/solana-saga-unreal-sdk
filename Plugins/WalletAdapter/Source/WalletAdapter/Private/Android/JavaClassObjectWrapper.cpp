@@ -355,6 +355,29 @@ void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, F
 }
 
 template<>
+bool FJavaClassObjectWrapper::CallThrowableMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	bool RetVal = Env->CallBooleanMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+	
+	return RetVal;
+}
+
+template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -385,7 +408,7 @@ void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Except
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	Env->CallVoidMethodV(StaticClass, Method.Method, Params);
+	Env->CallStaticVoidMethodV(StaticClass, Method.Method, Params);
 	va_end(Params);
 	
 	if (Env->ExceptionCheck())
@@ -397,7 +420,30 @@ void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Except
 	else
 	{
 		Exception = nullptr;
-	}	
+	}
+}
+
+template<>
+bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	bool RetVal = Env->CallStaticBooleanMethodV(StaticClass, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+
+	return RetVal;
 }
 
 template<>
@@ -537,4 +583,3 @@ FJavaClassObjectWrapper::operator bool() const
 }
 
 #endif
-

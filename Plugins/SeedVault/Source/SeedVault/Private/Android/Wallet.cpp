@@ -17,11 +17,13 @@ using namespace SeedVault;
 FJavaClassMethod FWallet::AuthorizeSeedMethod;
 FJavaClassMethod FWallet::CreateSeedMethod;
 FJavaClassMethod FWallet::ImportSeedMethod;
+FJavaClassMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wallet")
 	AuthorizeSeedMethod = GetClassStaticMethod("authorizeSeed", "(I)Landroid/content/Intent;");
 	CreateSeedMethod = GetClassStaticMethod("createSeed", "(I)Landroid/content/Intent;");
 	ImportSeedMethod = GetClassStaticMethod("importSeed", "(I)Landroid/content/Intent;");
+	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod("hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
 
 FJavaClassObjectWrapperPtr FWallet::AuthorizeSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException)
@@ -104,4 +106,23 @@ FJavaClassObjectWrapperPtr FWallet::ImportSeed(int32 Purpose, TSharedPtr<FThrowa
 	
 	return Intent;
 }
+
+bool FWallet::HasUnauthorizedSeedsForPurpose(FJavaClassObjectWrapperRef Context, int32 Purpose, TSharedPtr<FThrowable>* OutException)
+{
+	bool Result;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		Result = CallThrowableStaticMethod<bool>(JThrowable, HasUnauthorizedSeedsForPurposeMethod, **Context, Purpose);
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	}
+	else
+	{
+		Result = CallStaticMethod<bool>(HasUnauthorizedSeedsForPurposeMethod, **Context, Purpose);
+	}
+	
+	return Result;
+}
+
 #endif

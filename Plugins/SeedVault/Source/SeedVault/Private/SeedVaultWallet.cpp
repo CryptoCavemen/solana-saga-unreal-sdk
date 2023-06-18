@@ -142,3 +142,22 @@ void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithT
 	}
 #endif	
 }
+
+bool USeedVaultWallet::HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	bool Result = FWallet::HasUnauthorizedSeedsForPurpose(AppContext, (int32)Purpose, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during HasUnauthorizedSeedsForPurpose call: %s"), *Exception->GetMessage());
+		return false;
+	}
+	return Result;
+#endif
+
+	return false;
+}

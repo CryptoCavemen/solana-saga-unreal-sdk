@@ -163,6 +163,10 @@ private:
 };
 
 
+//
+// METHODS
+//
+
 template<>
 void FJavaClassObjectWrapper::CallMethod<void>(FJavaClassMethod Method, ...);
 
@@ -184,6 +188,10 @@ int64 FJavaClassObjectWrapper::CallMethod<int64>(FJavaClassMethod Method, ...);
 template<>
 FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ...);
 
+//
+// STATIC METHODS
+//
+	
 template<>
 void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassMethod Method, ...);
 
@@ -205,18 +213,34 @@ int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassMethod Method, 
 template<>
 FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassMethod Method, ...);	
 
+//
+// THROWABLE METHODS
+//
+	
 template<>
 void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
 template<>
+bool FJavaClassObjectWrapper::CallThrowableMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...);
+
+template<>
 jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
+//
+// THROWABLE STATIC METHODS
+//
+	
 template<>
 void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
 template<>
+bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...);
+
+template<>
 jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
 
+
+// Helper types
 typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
 typedef TSharedPtr<FJavaClassObjectWrapper> FJavaClassObjectWrapperPtr;
 	
