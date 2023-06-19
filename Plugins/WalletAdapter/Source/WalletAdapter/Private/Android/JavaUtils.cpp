@@ -78,6 +78,25 @@ FString FJavaUtils::JUriToString(jobject JUri)
 	return FJavaHelper::FStringFromLocalRef(Env, JString);
 }
 
+TArray<uint8> FJavaUtils::JByteArrayToTArray(jbyteArray JByteArray)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
+	jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
+	int32 ArraySize = Env->GetArrayLength(JByteArray);
+
+	TArray<uint8> ByteArray;
+	
+	if (JByteArray != nullptr)
+	{
+		ByteArray.SetNumUninitialized(ArraySize);
+		memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
+		Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
+	}
+	
+	return ByteArray;
+}
+
 void FJavaUtils::VerifyException(JNIEnv* Env)
 {
 	if (Env->ExceptionCheck())

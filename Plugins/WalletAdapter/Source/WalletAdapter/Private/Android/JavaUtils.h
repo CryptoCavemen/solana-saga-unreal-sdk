@@ -21,6 +21,7 @@ public:
 	static FScopedJavaObject<jbyteArray> GetByteArray(const TArray<uint8>& Bytes);
 	static FScopedJavaObject<jobjectArray> GetArrayOfByteArray(const TArray<TArray<uint8>>& ByteArray);
 	static FString JUriToString(jobject JUri);
+	static TArray<uint8> JByteArrayToTArray(jbyteArray JByteArray);
 	
 	static void VerifyException(JNIEnv* Env);
 	static void LogException(JNIEnv* Env);

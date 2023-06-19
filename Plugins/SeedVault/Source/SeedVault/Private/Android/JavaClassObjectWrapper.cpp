@@ -524,18 +524,8 @@ TArray<uint8> FJavaClassObjectWrapper::GetByteArrayField(FJavaClassField Field) 
 	jbyteArray JByteArray = static_cast<jbyteArray>(Env->GetObjectField(Object, Field.Field));
 	FJavaUtils::VerifyException(Env);
 	
-	jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
-	int32 ArraySize = Env->GetArrayLength(JByteArray);
-
-	TArray<uint8> ByteArray;
-	
-	if (JByteArray != nullptr)
-	{
-		ByteArray.SetNumUninitialized(ArraySize);
-		memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
-		Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
-	}
-	
+	TArray<uint8> ByteArray = FJavaUtils::JByteArrayToTArray(JByteArray);	
+		
 	Env->DeleteLocalRef(JByteArray);
 	
 	return ByteArray;

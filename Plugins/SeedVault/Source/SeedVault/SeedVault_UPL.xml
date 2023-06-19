@@ -140,6 +140,30 @@ import com.solanamobile.unreal.WalletJavaHelper;
 			catch (Wallet.ActionFailedException e)
 			{
 				WalletJavaHelper.onImportSeedFailure(e.getMessage());
+			}
+		}
+		else if (requestCode == REQUEST_SIGN_TRANSACTIONS)
+		{
+			try
+			{
+				ArrayList &lt;SigningResponse&gt; signingResponses = Wallet.onSignTransactionsResult(resultCode, data);
+				WalletJavaHelper.onSignTransactionsSuccess(signingResponses);
+			}
+			catch (Wallet.ActionFailedException e)
+			{
+				WalletJavaHelper.onSignTransactionsFailure(e.getMessage());
+			}
+		}
+		else if (requestCode == REQUEST_SIGN_MESSAGES)
+		{
+			try
+			{
+				ArrayList &lt;SigningResponse&gt; signingResponses = Wallet.onSignMessagesResult(resultCode, data);
+				WalletJavaHelper.onSignMessagesSuccess(signingResponses);
+			}
+			catch (Wallet.ActionFailedException e)
+			{
+				WalletJavaHelper.onSignMessagesFailure(e.getMessage());
 			}			
 		}
 		// End SeedVault onActivityResult

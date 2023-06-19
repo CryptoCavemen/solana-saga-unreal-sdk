@@ -20,6 +20,9 @@ namespace SeedVault
  */
 class FWallet : FJavaClassObjectWrapper
 {
+private:
+	FWallet() {}
+	
 	DECLARE_JAVA_CLASS_OBJECT_STATIC()
 public:
 	/**
@@ -27,10 +30,8 @@ public:
 	 * should be used with {@link Activity#startActivityForResult(Intent, int)}, and the result (as
 	 * returned to {@link Activity#onActivityResult(int, int, Intent)}) should be used as parameters
 	 * to {@link #onAuthorizeSeedResult(int, Intent)}.
-	 * @param Purpose the purpose for which the seed will be used. One of the
-	 *      {@code WalletContractV1.PURPOSE_*} constants.
-	 * @return an {@link Intent} suitable for usage with
-	 *      {@link Activity#startActivityForResult(Intent, int)}
+	 * @param Purpose the purpose for which the seed will be used.
+	 * @return an {@link Intent} suitable for usage with Activity#startActivityForResult(Intent, int)
 	 */	
 	static FJavaClassObjectWrapperPtr AuthorizeSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);
 
@@ -39,10 +40,8 @@ public:
 	 * should be used with {@link Activity#startActivityForResult(Intent, int)}, and the result (as
 	 * returned to {@link Activity#onActivityResult(int, int, Intent)}) should be used as parameters
 	 * to {@link #onCreateSeedResult(int, Intent)}.
-	 * @param Purpose the purpose for which the seed will be used. One of the
-	 *      {@code WalletContractV1.PURPOSE_*} constants.
-	 * @return an {@link Intent} suitable for usage with
-	 *      {@link Activity#startActivityForResult(Intent, int)}
+	 * @param Purpose the purpose for which the seed will be used.
+	 * @return an {@link Intent} suitable for usage with Activity#startActivityForResult(Intent, int)
 	 */	
 	static FJavaClassObjectWrapperPtr CreateSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);
 
@@ -51,13 +50,39 @@ public:
 	 * should be used with {@link Activity#startActivityForResult(Intent, int)}, and the result (as
 	 * returned to {@link Activity#onActivityResult(int, int, Intent)}) should be used as parameters
 	 * to {@link #onImportSeedResult(int, Intent)}.
-	 * @param Purpose the purpose for which the seed will be used. One of the
-	 *      {@code WalletContractV1.PURPOSE_*} constants.
-	 * @return an {@link Intent} suitable for usage with
-	 *      {@link Activity#startActivityForResult(Intent, int)}
+	 * @param Purpose the purpose for which the seed will be used.
+	 * @return an {@link Intent} suitable for usage with Activity#startActivityForResult(Intent, int)
 	 */	
 	static FJavaClassObjectWrapperPtr ImportSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);
 
+    /**
+     * Request that the provided transaction be signed (with whatever method is appropriate for the
+     * purpose originally specified for this auth token). The returned Intent should be used
+     * with Activity#startActivityForResult(Intent, int), and the result (as returned to
+     * Activity#onActivityResult(int, int, Intent)) should be used as parameters to
+     * OnSignTransactionsResult(int, Intent).
+     * @param AuthToken the auth token for the seed with which to perform transaction signing
+     * @param DerivationPath a BipDerivationPath representing the account with which to
+     *      sign this transaction
+     * @param Transaction a byte[] containing the transaction to be signed
+     * @return an Intent suitable for usage with Activity#startActivityForResult(Intent, int)
+     */
+    static FJavaClassObjectWrapperPtr SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction, TSharedPtr<FThrowable>* OutException = nullptr);
+	
+	/**
+	 * Request that the provided message be signed (with whatever method is appropriate for the
+	 * purpose originally specified for this auth token). The returned Intent should be used
+	 * with {@link Activity#startActivityForResult(Intent, int)}, and the result (as returned to
+	 * {@link Activity#onActivityResult(int, int, Intent)}) should be used as parameters to
+	 * {@link #onSignMessagesResult(int, Intent)}.
+	 * @param AuthToken the auth token for the seed with which to perform message signing
+	 * @param DerivationPath a BipDerivationPath representing the account with which to
+	 *      sign this message
+	 * @param Message a byte[] containing the message to be signed
+	 * @return an Intent suitable for usage with Activity#startActivityForResult(Intent, int)
+	 */
+	static FJavaClassObjectWrapperPtr SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, TSharedPtr<FThrowable>* OutException = nullptr);	
+	
 	/**
 	 * Deauthorize the specified seed for the current app
 	 * @param Context the Context in which to perform this request
@@ -80,6 +105,8 @@ protected:
 	static FJavaClassMethod AuthorizeSeedMethod;
 	static FJavaClassMethod CreateSeedMethod;
 	static FJavaClassMethod ImportSeedMethod;
+	static FJavaClassMethod SignTransactionMethod;
+	static FJavaClassMethod SignMessageMethod;
 	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
 };

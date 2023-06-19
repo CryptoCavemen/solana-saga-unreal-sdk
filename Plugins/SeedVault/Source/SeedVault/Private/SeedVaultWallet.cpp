@@ -28,6 +28,10 @@ USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::CreateSeedSucce
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::CreateSeedFailure;
 USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::ImportSeedSuccess;
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::ImportSeedFailure;
+USeedVaultWallet::FSignSuccessDynDelegate USeedVaultWallet::SignTransactionsSuccess;
+USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::SignTransactionsFailure;
+USeedVaultWallet::FSignSuccessDynDelegate USeedVaultWallet::SignMessagesSuccess;
+USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::SignMessagesFailure;
 
 
 enum class EActivityRequestCode
@@ -72,7 +76,7 @@ void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWi
 		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
 		Failure.ExecuteIfBound(Exception->GetMessage());
 	}
-#endif	
+#endif
 }
 
 void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
@@ -106,7 +110,7 @@ void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithT
 		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
 		Failure.ExecuteIfBound(Exception->GetMessage());
 	}
-#endif	
+#endif
 }
 
 void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
@@ -135,6 +139,76 @@ void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithT
 	
 	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_IMPORT_EXISTING_SEED, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+	}
+#endif
+}
+
+void USeedVaultWallet::SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction,
+	const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	if (SignTransactionsSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
+	UE_LOG(LogSeedVault, Log, TEXT("SignTransaction request: AuthToken = %d, DerivationPath = '%s'"), AuthToken, *DerivationPath);
+	SignTransactionsSuccess = Success;
+	SignTransactionsFailure = Failure;
+
+	TSharedPtr<FThrowable> Exception;
+	FJavaClassObjectWrapperPtr Intent = FWallet::SignTransaction(AuthToken, DerivationPath, Transaction, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(Intent.IsValid());
+	
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_SIGN_TRANSACTIONS, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+	}
+#endif
+}
+
+void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message,
+	const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	if (SignMessagesSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
+	UE_LOG(LogSeedVault, Log, TEXT("SignMessage request: AuthToken = %d, DerivationPath = '%s'"), AuthToken, *DerivationPath);
+	SignMessagesSuccess = Success;
+	SignMessagesFailure = Failure;
+
+	TSharedPtr<FThrowable> Exception;
+	FJavaClassObjectWrapperPtr Intent = FWallet::SignMessage(AuthToken, DerivationPath, Message, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(Intent.IsValid());
+	
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_SIGN_MESSAGES, &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());

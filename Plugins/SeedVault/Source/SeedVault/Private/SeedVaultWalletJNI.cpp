@@ -8,6 +8,8 @@
 #if PLATFORM_ANDROID
 #include "SeedVaultWallet.h"
 #include "SeedVault.h"
+#include "Android/SigningResponseWrapper.h"
+#include "Android/ArrayList.h"
 #include "Android/JavaUtils.h"
 #include "Android/AndroidJNI.h"
 #include "Android/AndroidPlatform.h"
@@ -83,7 +85,93 @@ extern "C"
 			USeedVaultWallet::ImportSeedSuccess.Unbind();
 			USeedVaultWallet::ImportSeedFailure.Unbind();
 		});
-	}		
+	}
+
+	TArray<FSigningResponse> JSigningResponsesToFSigningResponses(jobject JSigningResponses)
+	{
+		TArray<FSigningResponse> FSigningResponses;
+		
+		auto SigningResponses = FArrayList::MakeFromExistingObject(JSigningResponses);
+
+		int32 NumSigningResponses = SigningResponses->Size();
+		for (int32 ResponseIndex = 0; ResponseIndex < NumSigningResponses; ResponseIndex++)
+		{
+			auto SigningResponse = FSigningResponseWrapper::MakeFromExistingObject(**SigningResponses->Get(ResponseIndex));
+			FSigningResponse FSigningResponse;
+
+			auto Signatures = SigningResponse->GetSignatures();
+			int32 NumSignatures = Signatures->Size();
+			for (int32 SignatureIndex = 0; SignatureIndex < NumSignatures; SignatureIndex++)
+			{
+				auto JSignature = Signatures->Get(SignatureIndex);
+				TArray<uint8> Signature = FJavaUtils::JByteArrayToTArray((jbyteArray)**JSignature);
+				FSigningResponse.Signatures.Add(Signature);
+			}
+			
+			auto ResolvedDerivationPaths = SigningResponse->GetResolvedDerivationPaths();
+			int32 NumResolvedDerivationPaths = ResolvedDerivationPaths->Size();
+			for (int32 PathIndex = 0; PathIndex < NumResolvedDerivationPaths; PathIndex++)
+			{
+				auto JPath = ResolvedDerivationPaths->Get(PathIndex);
+				FString Path = FJavaUtils::JUriToString(**JPath);
+				FSigningResponse.ResolvedDerivationPaths.Add(Path);
+			}
+			
+			FSigningResponses.Add(FSigningResponse);
+		}
+
+		return FSigningResponses;
+	}
+
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onSignTransactionsSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jobject signingResponses)
+	{
+		UE_LOG(LogSeedVault, Log, TEXT("Signed transactions successfully"));
+
+		TArray<FSigningResponse> FSigningResponses = JSigningResponsesToFSigningResponses(signingResponses);
+		
+		AsyncTask(ENamedThreads::GameThread, [FSigningResponses] {
+			USeedVaultWallet::SignTransactionsSuccess.Execute(FSigningResponses);
+			USeedVaultWallet::SignTransactionsSuccess.Unbind();
+			USeedVaultWallet::SignTransactionsFailure.Unbind();
+		});		
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onSignTransactionsFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		FString ErrorMessage = FJavaHelper::FStringFromLocalRef(LocalJNIEnv, errorMessage);
+		UE_LOG(LogSeedVault, Error, TEXT("Transactions signing failed: %s"), *ErrorMessage);
+		
+		AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+			USeedVaultWallet::SignTransactionsFailure.Execute(ErrorMessage);
+			USeedVaultWallet::SignTransactionsSuccess.Unbind();
+			USeedVaultWallet::SignTransactionsFailure.Unbind();
+		});
+	}
+
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onSignMessagesSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jobject signingResponses)
+	{
+		UE_LOG(LogSeedVault, Log, TEXT("Signed messages successfully"));
+		
+		TArray<FSigningResponse> FSigningResponses = JSigningResponsesToFSigningResponses(signingResponses);
+
+		AsyncTask(ENamedThreads::GameThread, [FSigningResponses] {
+			USeedVaultWallet::SignMessagesSuccess.Execute(FSigningResponses);
+			USeedVaultWallet::SignMessagesSuccess.Unbind();
+			USeedVaultWallet::SignMessagesFailure.Unbind();
+		});			
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onSignMessagesFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		FString ErrorMessage = FJavaHelper::FStringFromLocalRef(LocalJNIEnv, errorMessage);
+		UE_LOG(LogSeedVault, Error, TEXT("Messages signing failed: %s"), *ErrorMessage);
+		
+		AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+			USeedVaultWallet::SignMessagesFailure.Execute(ErrorMessage);
+			USeedVaultWallet::SignMessagesSuccess.Unbind();
+			USeedVaultWallet::SignMessagesFailure.Unbind();
+		});
+	}	
 }
 
 #endif

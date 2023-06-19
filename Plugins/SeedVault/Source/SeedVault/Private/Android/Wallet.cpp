@@ -6,6 +6,7 @@
 #include "Wallet.h"
 
 #if PLATFORM_ANDROID
+#include "JavaUtils.h"
 #include "Android/JavaClassObjectWrapper.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
@@ -17,6 +18,8 @@ using namespace SeedVault;
 FJavaClassMethod FWallet::AuthorizeSeedMethod;
 FJavaClassMethod FWallet::CreateSeedMethod;
 FJavaClassMethod FWallet::ImportSeedMethod;
+FJavaClassMethod FWallet::SignTransactionMethod;
+FJavaClassMethod FWallet::SignMessageMethod;
 FJavaClassMethod FWallet::DeauthorizeSeedMethod;
 FJavaClassMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
 
@@ -24,6 +27,8 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wa
 	AuthorizeSeedMethod = GetClassStaticMethod("authorizeSeed", "(I)Landroid/content/Intent;");
 	CreateSeedMethod = GetClassStaticMethod("createSeed", "(I)Landroid/content/Intent;");
 	ImportSeedMethod = GetClassStaticMethod("importSeed", "(I)Landroid/content/Intent;");
+	SignTransactionMethod = GetClassStaticMethod("signTransaction", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
+	SignMessageMethod = GetClassStaticMethod("signMessage", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
 	DeauthorizeSeedMethod = GetClassStaticMethod("deauthorizeSeed", "(Landroid/content/Context;J)V");
 	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod("hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
@@ -103,6 +108,72 @@ FJavaClassObjectWrapperPtr FWallet::ImportSeed(int32 Purpose, TSharedPtr<FThrowa
 	else
 	{
 		jobject JIntent = CallStaticMethod<jobject>(ImportSeedMethod, Purpose);
+		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+	}
+	
+	return Intent;
+}
+
+FJavaClassObjectWrapperPtr FWallet::SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction, TSharedPtr<FThrowable>* OutException)
+{
+	FJavaClassObjectWrapperPtr Intent;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		jobject JIntent = CallThrowableStaticMethod<jobject>(JThrowable, SignTransactionMethod,
+			AuthToken,
+			!DerivationPath.IsEmpty() ? *FJavaUtils::GetJUri(DerivationPath) : nullptr,
+			*FJavaUtils::GetByteArray(Transaction));
+		if (JThrowable)
+		{
+			*OutException = MakeShareable(FThrowable::Construct(JThrowable));
+		}
+		else
+		{
+			*OutException = nullptr;
+			Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+		}
+	}
+	else
+	{
+		jobject JIntent = CallStaticMethod<jobject>(SignTransactionMethod,
+			AuthToken,
+			!DerivationPath.IsEmpty() ? *FJavaUtils::GetJUri(DerivationPath) : nullptr,
+			*FJavaUtils::GetByteArray(Transaction));
+		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+	}
+	
+	return Intent;
+}
+
+FJavaClassObjectWrapperPtr FWallet::SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, TSharedPtr<FThrowable>* OutException)
+{
+	FJavaClassObjectWrapperPtr Intent;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		jobject JIntent = CallThrowableStaticMethod<jobject>(JThrowable, SignMessageMethod,
+			AuthToken,
+			!DerivationPath.IsEmpty() ? *FJavaUtils::GetJUri(DerivationPath) : nullptr,
+			*FJavaUtils::GetByteArray(Message));
+		if (JThrowable)
+		{
+			*OutException = MakeShareable(FThrowable::Construct(JThrowable));
+		}
+		else
+		{
+			*OutException = nullptr;
+			Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+		}
+	}
+	else
+	{
+		jobject JIntent = CallStaticMethod<jobject>(SignMessageMethod,
+			AuthToken,
+			!DerivationPath.IsEmpty() ? *FJavaUtils::GetJUri(DerivationPath) : nullptr,
+			*FJavaUtils::GetByteArray(Message));
 		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
 	}
 	
