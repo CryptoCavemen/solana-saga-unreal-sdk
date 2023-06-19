@@ -143,6 +143,18 @@ void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithT
 #endif	
 }
 
+bool USeedVaultWallet::DeauthorizeSeed(int64 AuthToken)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	return FWallet::DeauthorizeSeed(AppContext, AuthToken, &Exception);
+#endif
+	return false;
+}
+
 bool USeedVaultWallet::HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose)
 {
 #if PLATFORM_ANDROID

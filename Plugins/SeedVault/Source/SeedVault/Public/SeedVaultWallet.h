@@ -37,6 +37,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static void ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);
 	UFUNCTION(BlueprintCallable, Category="Solana")
+	static bool DeauthorizeSeed(int64 AuthToken);
+	UFUNCTION(BlueprintCallable, Category="Solana")
 	static bool HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose);	
 
 public:

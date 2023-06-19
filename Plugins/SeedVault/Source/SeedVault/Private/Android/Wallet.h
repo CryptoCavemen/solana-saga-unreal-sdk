@@ -59,6 +59,14 @@ public:
 	static FJavaClassObjectWrapperPtr ImportSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);
 
 	/**
+	 * Deauthorize the specified seed for the current app
+	 * @param Context the Context in which to perform this request
+	 * @param AuthToken the auth token of the seed to deauthorize
+	 * @param OutException NotModifiedException if the seed was not authorized for this app
+	 */	
+	static bool DeauthorizeSeed(FJavaClassObjectWrapperRef Context, int64 AuthToken, TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
 	 * Test whether there are any unauthorized seeds with the specified purpose available for the
 	 * current app
 	 * @param Context the context in which to perform this request
@@ -72,6 +80,7 @@ protected:
 	static FJavaClassMethod AuthorizeSeedMethod;
 	static FJavaClassMethod CreateSeedMethod;
 	static FJavaClassMethod ImportSeedMethod;
+	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
 };
 	
