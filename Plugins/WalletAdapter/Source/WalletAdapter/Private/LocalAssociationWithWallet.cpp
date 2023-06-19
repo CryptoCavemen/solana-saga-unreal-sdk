@@ -101,8 +101,13 @@ bool ULocalAssociationWithWallet::OpenWallet(const FString& UriPrefix)
 	
 	LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
-
-	Activity->StartActivity(AssociationIntent, &Exception);
+	if (!AssociationIntent.IsValid())
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());
+		return false;
+	}
+	
+	Activity->StartActivity(AssociationIntent.ToSharedRef(), &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());

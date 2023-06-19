@@ -12,21 +12,24 @@
 
 namespace WalletAdapter
 {
-	
+
+class FThrowable;
 class FMobileWalletAdapterSession;
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.FLocalAssociationIntentCreator 
  */
-class FLocalAssociationIntentCreator	
+class FLocalAssociationIntentCreator : FJavaClassObjectWrapper
 {
 private:
 	FLocalAssociationIntentCreator() {}
+	
+	DECLARE_JAVA_CLASS_OBJECT_STATIC()
 public:
-	/** Initialize java objects and cache them for further usage. Called when the module is loaded. */
-	static void StaticConstruct();	
+	static FJavaClassObjectWrapperPtr CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session, TSharedPtr<FThrowable>* OutException = nullptr);
 
-	static FJavaClassObjectWrapperRef CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session);	
+protected:
+	static FJavaClassMethod CreateAssociationIntentMethod;
 };
 	
 }
