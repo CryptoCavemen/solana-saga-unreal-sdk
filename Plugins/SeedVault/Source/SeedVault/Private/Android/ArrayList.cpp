@@ -14,9 +14,20 @@
 using namespace SeedVault;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FArrayList, FJavaClassObjectWrapper, "java/util/ArrayList", "()V")
+	AddMethod = GetClassMethod("add", "(Ljava/lang/Object;)Z");
 	GetMethod = GetClassMethod("get", "(I)Ljava/lang/Object;");
 	SizeMethod = GetClassMethod("size", "()I");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+bool FArrayList::Add(FJavaClassObjectWrapperRef Element)
+{
+	return CallMethod<bool>(AddMethod, **Element);
+}
+
+bool FArrayList::Add(jobject Element)
+{
+	return CallMethod<bool>(AddMethod, Element);
+}
 
 FJavaClassObjectWrapperRef FArrayList::Get(int32 Index)
 {

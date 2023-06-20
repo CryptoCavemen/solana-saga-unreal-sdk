@@ -52,8 +52,7 @@
 	<gameActivityImportAdditions>
 		<insert>
 // SolanaWallet imports
-import com.solanamobile.seedvault.Wallet;
-import com.solanamobile.seedvault.WalletContractV1;
+import com.solanamobile.seedvault.*;
 import com.solanamobile.unreal.WalletJavaHelper;
 		</insert>
 	</gameActivityImportAdditions>
@@ -165,6 +164,18 @@ import com.solanamobile.unreal.WalletJavaHelper;
 			{
 				WalletJavaHelper.onSignMessagesFailure(e.getMessage());
 			}			
+		}
+		else if (requestCode == REQUEST_GET_PUBLIC_KEYS)
+		{
+			try
+			{
+				ArrayList &lt;PublicKeyResponse&gt; publicKeysResponses = Wallet.onRequestPublicKeysResult(resultCode, data);
+				WalletJavaHelper.onRequestPublicKeysSuccess(publicKeysResponses);
+			}
+			catch (Wallet.ActionFailedException e)
+			{
+				WalletJavaHelper.onRequestPublicKeysFailure(e.getMessage());
+			}
 		}
 		// End SeedVault onActivityResult
 		</insert>

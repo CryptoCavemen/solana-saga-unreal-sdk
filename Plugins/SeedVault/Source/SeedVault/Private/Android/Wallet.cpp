@@ -5,6 +5,8 @@
 
 #include "Wallet.h"
 
+#include "ArrayList.h"
+
 #if PLATFORM_ANDROID
 #include "JavaUtils.h"
 #include "Android/JavaClassObjectWrapper.h"
@@ -20,6 +22,7 @@ FJavaClassMethod FWallet::CreateSeedMethod;
 FJavaClassMethod FWallet::ImportSeedMethod;
 FJavaClassMethod FWallet::SignTransactionMethod;
 FJavaClassMethod FWallet::SignMessageMethod;
+FJavaClassMethod FWallet::RequestPublicKeysMethod;
 FJavaClassMethod FWallet::DeauthorizeSeedMethod;
 FJavaClassMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
 
@@ -29,6 +32,7 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wa
 	ImportSeedMethod = GetClassStaticMethod("importSeed", "(I)Landroid/content/Intent;");
 	SignTransactionMethod = GetClassStaticMethod("signTransaction", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
 	SignMessageMethod = GetClassStaticMethod("signMessage", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
+	RequestPublicKeysMethod = GetClassStaticMethod("requestPublicKeys", "(JLjava/util/ArrayList;)Landroid/content/Intent;");
 	DeauthorizeSeedMethod = GetClassStaticMethod("deauthorizeSeed", "(Landroid/content/Context;J)V");
 	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod("hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
@@ -177,6 +181,44 @@ FJavaClassObjectWrapperPtr FWallet::SignMessage(int64 AuthToken, const FString& 
 		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
 	}
 	
+	return Intent;
+}
+
+FJavaClassObjectWrapperPtr FWallet::RequestPublicKey(int64 AuthToken, const FString& DerivationPath, TSharedPtr<FThrowable>* OutException)
+{
+	TArray<FString> DerivationPaths;
+	DerivationPaths.Add(DerivationPath);
+	return RequestPublicKeys(AuthToken, DerivationPaths, OutException);
+}
+
+FJavaClassObjectWrapperPtr FWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, TSharedPtr<FThrowable>* OutException)
+{
+	FJavaClassObjectWrapperPtr Intent;
+
+	TSharedRef<FArrayList> JDerivationPaths(FArrayList::Construct(nullptr));
+	for (auto& DerivationPath : DerivationPaths)
+		JDerivationPaths->Add(*FJavaUtils::GetJUri(DerivationPath));
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		jobject JIntent = CallThrowableStaticMethod<jobject>(JThrowable, RequestPublicKeysMethod, AuthToken, **JDerivationPaths);
+		if (JThrowable)
+		{
+			*OutException = MakeShareable(FThrowable::Construct(JThrowable));
+		}
+		else
+		{
+			*OutException = nullptr;
+			Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+		}
+	}
+	else
+	{	
+		jobject JIntent = CallStaticMethod<jobject>(RequestPublicKeysMethod, AuthToken, **JDerivationPaths);
+		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+	}
+
 	return Intent;
 }
 

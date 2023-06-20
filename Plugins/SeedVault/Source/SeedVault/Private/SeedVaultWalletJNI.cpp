@@ -9,6 +9,7 @@
 #include "SeedVaultWallet.h"
 #include "SeedVault.h"
 #include "Android/SigningResponseWrapper.h"
+#include "Android/PublicKeyResponseWrapper.h"
 #include "Android/ArrayList.h"
 #include "Android/JavaUtils.h"
 #include "Android/AndroidJNI.h"
@@ -171,7 +172,47 @@ extern "C"
 			USeedVaultWallet::SignMessagesSuccess.Unbind();
 			USeedVaultWallet::SignMessagesFailure.Unbind();
 		});
-	}	
+	}
+
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onRequestPublicKeysSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jobject publicKeyResponses)
+	{
+		UE_LOG(LogSeedVault, Log, TEXT("Public keys request succeeded"));
+
+		TArray<FPublicKeyResponse> FPublicKeyResponses;
+		
+		auto PublicKeyResponses = FArrayList::MakeFromExistingObject(publicKeyResponses);
+
+		int32 NumPublicKeyResponses = PublicKeyResponses->Size();
+		for (int32 ResponseIndex = 0; ResponseIndex < NumPublicKeyResponses; ResponseIndex++)
+		{
+			auto PublicKeyResponse = FPublicKeyResponseWrapper::MakeFromExistingObject(**PublicKeyResponses->Get(ResponseIndex));
+
+			FPublicKeyResponse FPublicKeyResponse;
+			FPublicKeyResponse.PublicKey = PublicKeyResponse->GetPublicKey();
+			FPublicKeyResponse.PublicKeyEncoded = PublicKeyResponse->GetPublicKeyEncoded();
+			FPublicKeyResponse.ResolvedDerivationPath = PublicKeyResponse->GetResolvedDerivationPath();
+					
+			FPublicKeyResponses.Add(FPublicKeyResponse);
+		}
+
+		AsyncTask(ENamedThreads::GameThread, [FPublicKeyResponses] {
+			USeedVaultWallet::GetPublicKeysSuccess.Execute(FPublicKeyResponses);
+			USeedVaultWallet::GetPublicKeysSuccess.Unbind();
+			USeedVaultWallet::GetPublicKeysFailure.Unbind();
+		});			
+	}
+	
+	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onRequestPublicKeysFailure(JNIEnv* LocalJNIEnv, jobject LocalThis, jstring errorMessage)
+	{
+		FString ErrorMessage = FJavaHelper::FStringFromLocalRef(LocalJNIEnv, errorMessage);
+		UE_LOG(LogSeedVault, Error, TEXT("Public keys request failed: %s"), *ErrorMessage);
+		
+		AsyncTask(ENamedThreads::GameThread, [ErrorMessage] {
+			USeedVaultWallet::GetPublicKeysFailure.Execute(ErrorMessage);
+			USeedVaultWallet::GetPublicKeysSuccess.Unbind();
+			USeedVaultWallet::GetPublicKeysFailure.Unbind();
+		});
+	}
 }
 
 #endif

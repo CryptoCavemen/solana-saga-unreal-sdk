@@ -82,7 +82,35 @@ public:
 	 * @return an Intent suitable for usage with Activity#startActivityForResult(Intent, int)
 	 */
 	static FJavaClassObjectWrapperPtr SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, TSharedPtr<FThrowable>* OutException = nullptr);	
+
+	/**
+	 * Request the public key for a given {@link BipDerivationPath} of a seed. The returned
+	 * {@link Intent} should be used with {@link Activity#startActivityForResult(Intent, int)}, and
+	 * the result (as returned to {@link Activity#onActivityResult(int, int, Intent)}) should be
+	 * used as parameters to {@link #onRequestPublicKeysResult(int, Intent)}. If the public key is
+	 * not present in the results of {@link #getAccounts(Context, long, String[])}, the user will be
+	 * asked to authorize access to this public key.
+	 * @param AuthToken the auth token for the seed with which to request a public key
+	 * @param DerivationPath a {@link BipDerivationPath} representing the account from which to
+	 *      request the public key
+	 * @return an Intent suitable for usage with Activity#startActivityForResult
+	 */
+	static FJavaClassObjectWrapperPtr RequestPublicKey(int64 AuthToken, const FString& DerivationPath, TSharedPtr<FThrowable>* OutException = nullptr);
 	
+	/**
+	 * Request the public keys for a set of {@link BipDerivationPath}s of a seed. The returned
+	 * {@link Intent} should be used with {@link Activity#startActivityForResult(Intent, int)}, and
+	 * the result (as returned to {@link Activity#onActivityResult(int, int, Intent)}) should be
+	 * used as parameters to {@link #onRequestPublicKeysResult(int, Intent)}. If the public keys are
+	 * not present in the results of {@link #getAccounts(Context, long, String[])}, the user will be
+	 * asked to authorize access to these public keys.
+	 * @param AuthToken the auth token for the seed with which to request a public key
+	 * @param DerivationPaths an {@link ArrayList} of {@link BipDerivationPath}s representing the
+	 *      accounts from which to request the public keys
+	 * @return an Intent suitable for usage with Activity#startActivityForResult
+	 */	
+	static FJavaClassObjectWrapperPtr RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, TSharedPtr<FThrowable>* OutException = nullptr);
+
 	/**
 	 * Deauthorize the specified seed for the current app
 	 * @param Context the Context in which to perform this request
@@ -107,6 +135,7 @@ protected:
 	static FJavaClassMethod ImportSeedMethod;
 	static FJavaClassMethod SignTransactionMethod;
 	static FJavaClassMethod SignMessageMethod;
+	static FJavaClassMethod RequestPublicKeysMethod;
 	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
 };

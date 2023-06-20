@@ -20,9 +20,12 @@ class FArrayList : public FJavaClassObjectWrapper
 {
 	DECLARE_JAVA_CLASS_OBJECT(FArrayList);
 public:
+	bool Add(FJavaClassObjectWrapperRef Element);
+	bool Add(jobject Element);
 	FJavaClassObjectWrapperRef Get(int32 Index);
 	int32 Size();
 protected:
+	FJavaClassMethod AddMethod;
 	FJavaClassMethod GetMethod;
 	FJavaClassMethod SizeMethod;
 };

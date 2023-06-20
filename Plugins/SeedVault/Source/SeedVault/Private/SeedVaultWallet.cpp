@@ -32,6 +32,8 @@ USeedVaultWallet::FSignSuccessDynDelegate USeedVaultWallet::SignTransactionsSucc
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::SignTransactionsFailure;
 USeedVaultWallet::FSignSuccessDynDelegate USeedVaultWallet::SignMessagesSuccess;
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::SignMessagesFailure;
+USeedVaultWallet::FGetPublicKeysSuccessDynDelegate USeedVaultWallet::GetPublicKeysSuccess;
+USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::GetPublicKeysFailure;
 
 
 enum class EActivityRequestCode
@@ -214,7 +216,76 @@ void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPat
 		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
 		Failure.ExecuteIfBound(Exception->GetMessage());
 	}
-#endif	
+#endif
+}
+
+void USeedVaultWallet::RequestPublicKey(int64 AuthToken, const FString& DerivationPath, const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	if (GetPublicKeysSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
+	UE_LOG(LogSeedVault, Log, TEXT("Public keys request: AuthToken = %d, DerivationPath = '%s'"), AuthToken, *DerivationPath);
+	GetPublicKeysSuccess = Success;
+	GetPublicKeysFailure = Failure;
+
+	TSharedPtr<FThrowable> Exception;
+	FJavaClassObjectWrapperPtr Intent = FWallet::RequestPublicKey(AuthToken, DerivationPath, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(Intent.IsValid());
+	
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_GET_PUBLIC_KEYS, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+	}
+#endif
+}
+
+void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths,
+                                         const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	if (GetPublicKeysSuccess.IsBound())
+	{
+		UE_LOG(LogSeedVault, Warning, TEXT("Received a request while another is pending"));
+		return;
+	}
+	
+	UE_LOG(LogSeedVault, Log, TEXT("Public keys request: AuthToken = %d"), AuthToken);
+	GetPublicKeysSuccess = Success;
+	GetPublicKeysFailure = Failure;
+
+	TSharedPtr<FThrowable> Exception;
+	FJavaClassObjectWrapperPtr Intent = FWallet::RequestPublicKeys(AuthToken, DerivationPaths, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during intent creation: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(Intent.IsValid());
+	
+	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_GET_PUBLIC_KEYS, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to start the activity: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+	}
+#endif
 }
 
 bool USeedVaultWallet::DeauthorizeSeed(int64 AuthToken)

@@ -4,7 +4,9 @@
 //
 
 package com.solanamobile.unreal;
-import com.solanamobile.seedvault;
+
+import com.solanamobile.seedvault.*;
+import java.util.ArrayList;
 
 public final class WalletJavaHelper 
 {
@@ -27,5 +29,8 @@ public final class WalletJavaHelper
     public static native void onSignTransactionsFailure(String errorMessage);
     
     public static native void onSignMessagesSuccess(ArrayList<SigningResponse> signingResponses);
-    public static native void onSignMessagesFailure(String errorMessage);    
+    public static native void onSignMessagesFailure(String errorMessage);
+    
+    public static native void onRequestPublicKeysSuccess(ArrayList<PublicKeyResponse> publicKeyResponses);
+    public static native void onRequestPublicKeysFailure(String errorMessage);
 }

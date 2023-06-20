@@ -47,6 +47,22 @@ struct FSigningResponse
 };
 
 /**
+ * FPublicKeyResponse
+ */
+USTRUCT(BlueprintType)
+struct FPublicKeyResponse
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite)
+	TArray<uint8> PublicKey;
+	UPROPERTY(BlueprintReadWrite)
+	FString PublicKeyEncoded;
+	UPROPERTY(BlueprintReadWrite)
+	FString ResolvedDerivationPath;
+};
+
+/**
  * The main class that is used to access Seed Vault.
  */
 UCLASS()
@@ -58,6 +74,7 @@ public:
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSuccessWithTokenDynDelegate, int64, AuthToken);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, TArray<FSigningResponse>, SigningResponses);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetPublicKeysSuccessDynDelegate, TArray<FPublicKeyResponse>, PublicKeyResponses);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 
 	/** Request authorization of a new seed for the specified purpose. */
@@ -80,7 +97,17 @@ public:
 	/** Request that the provided transaction be signed. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static void SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message,
-		const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+		const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+
+	/** Request the public key for a given BipDerivationPath of a seed. */
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static void RequestPublicKey(int64 AuthToken, const FString& DerivationPaths,
+		const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	
+	/** Request the public keys for a set of BipDerivationPaths of a seed. */
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static void RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths,
+		const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
 		
 	/** Deauthorize the specified seed for the current app. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
@@ -101,4 +128,6 @@ public:
 	static FFailureDynDelegate SignTransactionsFailure;
 	static FSignSuccessDynDelegate SignMessagesSuccess;
 	static FFailureDynDelegate SignMessagesFailure;
+	static FGetPublicKeysSuccessDynDelegate GetPublicKeysSuccess;
+	static FFailureDynDelegate GetPublicKeysFailure;	
 };
