@@ -6,16 +6,17 @@
 #include "LocalAssociationIntentCreator.h"
 
 #if PLATFORM_ANDROID
-#include "JavaUtils.h"
-#include "MobileWalletAdapterSession.h"
-#include "Throwable.h"
-#include "WalletAdapter.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-using namespace WalletAdapter;
+#include "Android/JavaUtils.h"
+#include "Android/Throwable.h"
+
+#include "MobileWalletAdapterSession.h"
+#include "WalletAdapter.h"
+
 
 FJavaClassMethod FLocalAssociationIntentCreator::CreateAssociationIntentMethod;
 

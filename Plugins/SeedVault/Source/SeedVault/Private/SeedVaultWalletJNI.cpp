@@ -15,8 +15,6 @@
 #include "Android/AndroidJNI.h"
 #include "Android/AndroidPlatform.h"
 
-using namespace SeedVault;
-
 extern "C"
 {
 	JNI_METHOD void Java_com_solanamobile_unreal_WalletJavaHelper_onAuthorizeSeedSuccess(JNIEnv* LocalJNIEnv, jobject LocalThis, jlong AuthToken)

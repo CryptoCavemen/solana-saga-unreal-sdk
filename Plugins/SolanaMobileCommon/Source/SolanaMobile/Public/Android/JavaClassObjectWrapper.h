@@ -7,14 +7,12 @@
 
 #include "CoreMinimal.h"
 #include "Defines.h"
+
 #if PLATFORM_ANDROID
 #include "Android/AndroidJava.h"
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 
-namespace SeedVault
-{
-	
 /**
  * Must be defined in a header file for every class derived from FJavaClassObjectWrapper
  */
@@ -248,7 +246,5 @@ jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& 
 // Helper types
 typedef TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapperRef;
 typedef TSharedPtr<FJavaClassObjectWrapper> FJavaClassObjectWrapperPtr;
-	
-}
 
 #endif

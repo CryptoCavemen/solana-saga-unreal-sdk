@@ -3,7 +3,7 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "GameActivity.h"
+#include "Android/GameActivity.h"
 
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
@@ -11,8 +11,6 @@
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
-
-using namespace SeedVault;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/epicgames/unreal/GameActivity", "()V")
 	GetApplicationContextMethod = GetClassMethod("getApplicationContext", "()Landroid/content/Context;");

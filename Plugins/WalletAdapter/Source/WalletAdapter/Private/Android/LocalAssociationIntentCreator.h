@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-
-namespace WalletAdapter
-{
 
 class FThrowable;
 class FMobileWalletAdapterSession;
@@ -31,7 +28,5 @@ public:
 protected:
 	static FJavaClassMethod CreateAssociationIntentMethod;
 };
-	
-}
 
 #endif

@@ -5,15 +5,12 @@
 
 #include "PublicKeyResponseWrapper.h"
 
-#include "JavaUtils.h"
-
 #if PLATFORM_ANDROID
+#include "Android/JavaUtils.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
-
-using namespace SeedVault;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FPublicKeyResponseWrapper, FJavaClassObjectWrapper, "com/solanamobile/seedvault/PublicKeyResponse", "([BLjava/lang/String;Landroid/net/Uri;)V")
 	ResolvedDerivationPathField = GetClassField("resolvedDerivationPath", "Landroid/net/Uri;");

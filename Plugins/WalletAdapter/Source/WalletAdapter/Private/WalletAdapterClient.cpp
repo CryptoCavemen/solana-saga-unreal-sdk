@@ -5,17 +5,16 @@
 
 #include "WalletAdapterClient.h"
 #include "WalletAdapter.h"
+
+#if PLATFORM_ANDROID
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationScenario.h"
 #include "Android/MobileWalletAdapterClient.h"
 
-#if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #endif
 
 #if PLATFORM_ANDROID
-
-using namespace WalletAdapter;
 
 FSignedMessage::FSignedMessage(const FSignedMessageWrapper& SignedMessage)
 {

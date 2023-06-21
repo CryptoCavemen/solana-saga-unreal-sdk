@@ -7,37 +7,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Data.h"
 #include "WalletAdapterClient.generated.h"
 
-// __RESHARPER__ is only defined while in IDE. Used to help editing this file with proper highlighting.
-#ifdef __RESHARPER__
-	#define PLATFORM_ANDROID 1
-	#define USE_ANDROID_JNI 1
-#endif
-
 #if PLATFORM_ANDROID
-namespace WalletAdapter
-{
-	class FMobileWalletAdapterClient;
-	class FSignedMessageWrapper;
-}
+class FMobileWalletAdapterClient;
+class FSignedMessageWrapper;
 #endif
-
-
-/**
- * FByteArray
- */
-USTRUCT(BlueprintType)
-struct FByteArray
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite)
-	TArray<uint8> Data;
-	
-	FByteArray() {}
-	FByteArray(const TArray<uint8>& InData) : Data(InData) {}
-};
 
 
 /**
@@ -58,7 +34,7 @@ struct FSignedMessage
 	FSignedMessage() {}
 	
 #if PLATFORM_ANDROID
-	FSignedMessage(const WalletAdapter::FSignedMessageWrapper& SignedMessage);
+	FSignedMessage(const FSignedMessageWrapper& SignedMessage);
 #endif	
 };
 
@@ -73,7 +49,7 @@ class WALLETADAPTER_API UWalletAdapterClient : public UObject
 	
 public:
 #if PLATFORM_ANDROID
-	void SetClientImpl(const TSharedPtr<WalletAdapter::FMobileWalletAdapterClient>& InClient);
+	void SetClientImpl(const TSharedPtr<FMobileWalletAdapterClient>& InClient);
 #endif
 
 public:
@@ -135,6 +111,6 @@ public:
 	
 protected:
 #if PLATFORM_ANDROID
-	TSharedPtr<WalletAdapter::FMobileWalletAdapterClient> Client;
+	TSharedPtr<FMobileWalletAdapterClient> Client;
 #endif
 };

@@ -10,9 +10,6 @@
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace SeedVault
-{
-	
 /**
  * Wrapper for android.database.Cursor 
  */
@@ -38,7 +35,5 @@ protected:
 	FJavaClassMethod GetLongMethod;
 	FJavaClassMethod CloseMethod;
 };
-	
-}
 
 #endif

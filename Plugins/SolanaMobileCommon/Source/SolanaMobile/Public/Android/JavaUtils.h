@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #if PLATFORM_ANDROID
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
-
-namespace SeedVault
-{
 
 class FJavaUtils
 {
@@ -26,7 +23,5 @@ public:
 	static void VerifyException(JNIEnv* Env);
 	static void LogException(JNIEnv* Env);
 };
-
-}
 
 #endif

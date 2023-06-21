@@ -9,19 +9,10 @@
 #include "UObject/Object.h"
 #include "LocalAssociationWithWallet.generated.h"
 
-// __RESHARPER__ is only defined while in IDE. Used to help editing this file with proper highlighting.
-#ifdef __RESHARPER__
-	#define PLATFORM_ANDROID 1
-	#define USE_ANDROID_JNI 1
-#endif
-
 class UWalletAdapterClient;
 
 #if PLATFORM_ANDROID
-namespace WalletAdapter
-{
-	class FLocalAssociationScenario;
-}
+class FLocalAssociationScenario;
 #endif
 
 /**
@@ -62,7 +53,7 @@ public:
 	
 protected:
 #if PLATFORM_ANDROID
-	TSharedPtr<WalletAdapter::FLocalAssociationScenario> LocalAssociation;
+	TSharedPtr<FLocalAssociationScenario> LocalAssociation;
 #endif
 	UPROPERTY()
 	UWalletAdapterClient* Client;

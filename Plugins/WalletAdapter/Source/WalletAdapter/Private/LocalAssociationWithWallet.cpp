@@ -6,14 +6,14 @@
 #include "LocalAssociationWithWallet.h"
 #include "WalletAdapterClient.h"
 #include "WalletAdapter.h"
+
+#if PLATFORM_ANDROID
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationScenario.h"
 #include "Android/LocalAssociationIntentCreator.h"
 #include "Android/MobileWalletAdapterClient.h"
 
-#if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
-using namespace WalletAdapter;
 #endif
 
 #define DEFAULT_CLIENT_TIMEOUT_MS 60000

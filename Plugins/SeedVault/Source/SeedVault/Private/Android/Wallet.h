@@ -5,15 +5,13 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 
 #if PLATFORM_ANDROID
-#include "Throwable.h"
-#include "JavaClassObjectWrapper.h"
+#include "Android/Throwable.h"
+#include "Android/JavaClassObjectWrapper.h"
 
-namespace SeedVault
-{
 
 /**
  * Wrapper for com/solanamobile/seedvault/Wallet.java. 
@@ -139,7 +137,5 @@ protected:
 	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
 };
-	
-}
 
 #endif

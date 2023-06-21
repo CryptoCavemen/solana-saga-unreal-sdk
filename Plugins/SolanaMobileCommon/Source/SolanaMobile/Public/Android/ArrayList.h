@@ -7,12 +7,10 @@
 
 #include "Defines.h"
 #include "CoreMinimal.h"
+
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace SeedVault
-{
-	
 /**
  * Wrapper for java.util.ArrayList 
  */
@@ -29,7 +27,5 @@ protected:
 	FJavaClassMethod GetMethod;
 	FJavaClassMethod SizeMethod;
 };
-	
-}
 
 #endif

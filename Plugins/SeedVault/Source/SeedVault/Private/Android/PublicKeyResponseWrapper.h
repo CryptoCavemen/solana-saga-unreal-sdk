@@ -5,13 +5,10 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-
-namespace SeedVault
-{
 	
 /**
  * Wrapper for com/solanamobile/seedvault/PublicKeyResponse.java. 
@@ -28,7 +25,5 @@ protected:
 	FJavaClassMethod GetPublicKeyMethod;
 	FJavaClassMethod GetPublicKeyEncodedMethod;
 };
-	
-}
 
 #endif

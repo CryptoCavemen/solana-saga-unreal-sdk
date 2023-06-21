@@ -11,8 +11,6 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-using namespace WalletAdapter;
-
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FLocalAssociationScenario, FScenario, "com/solana/mobilewalletadapter/clientlib/scenario/LocalAssociationScenario", "(I)V", int ClientTimeoutMs)
 	GetPortMethod = GetClassMethod("getPort", "()I");
 	GetSessionMethod = GetClassMethod("getSession", "()Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;");

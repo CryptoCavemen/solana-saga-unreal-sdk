@@ -12,7 +12,7 @@ DEFINE_LOG_CATEGORY(LogSeedVault);
 void FSeedVaultModule::StartupModule()
 {
 #if PLATFORM_ANDROID
-	SeedVault::FWallet::StaticConstruct();
+	FWallet::StaticConstruct();
 #endif
 }
 

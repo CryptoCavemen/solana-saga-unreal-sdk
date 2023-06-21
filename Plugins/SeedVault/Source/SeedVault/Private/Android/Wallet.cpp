@@ -5,17 +5,14 @@
 
 #include "Wallet.h"
 
-#include "ArrayList.h"
-
 #if PLATFORM_ANDROID
-#include "JavaUtils.h"
+#include "Android/ArrayList.h"
+#include "Android/JavaUtils.h"
 #include "Android/JavaClassObjectWrapper.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
-
-using namespace SeedVault;
 
 FJavaClassMethod FWallet::AuthorizeSeedMethod;
 FJavaClassMethod FWallet::CreateSeedMethod;

@@ -3,15 +3,13 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "ArrayList.h"
+#include "Android/ArrayList.h"
 
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
-
-using namespace SeedVault;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FArrayList, FJavaClassObjectWrapper, "java/util/ArrayList", "()V")
 	AddMethod = GetClassMethod("add", "(Ljava/lang/Object;)Z");

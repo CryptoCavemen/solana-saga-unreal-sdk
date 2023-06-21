@@ -6,13 +6,10 @@
 #include "SigningResponseWrapper.h"
 
 #if PLATFORM_ANDROID
-#include "ArrayList.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
-
-using namespace SeedVault;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FSigningResponseWrapper, FJavaClassObjectWrapper, "com/solanamobile/seedvault/SigningResponse", "(Ljava/util/List;Ljava/util/List;)V")
 	GetSignaturesMethod = GetClassMethod("getSignatures", "()Ljava/util/List;");

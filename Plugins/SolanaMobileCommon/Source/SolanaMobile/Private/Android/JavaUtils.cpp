@@ -3,11 +3,10 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "JavaUtils.h"
+#include "Android/JavaUtils.h"
+#include "SolanaMobile.h"
 
 #if PLATFORM_ANDROID
-
-using namespace SeedVault;
 
 FScopedJavaObject<jstring> FJavaUtils::GetJString(const FString& String)
 {
@@ -113,7 +112,7 @@ void FJavaUtils::LogException(JNIEnv* Env)
 	{
 		Env->ExceptionDescribe();
 		Env->ExceptionClear();
-		UE_LOG(LogAndroid, Warning, TEXT("Java JNI call failed with an exception."));
+		UE_LOG(LogSolanaMobile, Warning, TEXT("Java JNI call failed with an exception."));
 	}	
 }
 

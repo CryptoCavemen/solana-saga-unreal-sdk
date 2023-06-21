@@ -6,30 +6,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Android/Defines.h"
+#include "Data.h"
 #if PLATFORM_ANDROID
 #include "Android/AndroidJNI.h"
 #endif
+
 #include "SeedVaultWallet.generated.h"
 
 UENUM(BlueprintType)
 enum class EWalletContractV1 : uint8
 {
 	PURPOSE_SIGN_SOLANA_TRANSACTION = 0,
-};
-
-/**
- * FSignature
- */
-USTRUCT(BlueprintType)
-struct FSignatureByteArray
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite)
-	TArray<uint8> Data;
-	
-	FSignatureByteArray() {}
-	FSignatureByteArray(const TArray<uint8>& InData) : Data(InData) {}
 };
 
 /**
@@ -41,7 +29,7 @@ struct FSigningResponse
 	GENERATED_BODY()
 	
 	UPROPERTY(BlueprintReadWrite)
-	TArray<FSignatureByteArray> Signatures;
+	TArray<FByteArray> Signatures;
 	UPROPERTY(BlueprintReadWrite)
 	TArray<FString> ResolvedDerivationPaths;
 };

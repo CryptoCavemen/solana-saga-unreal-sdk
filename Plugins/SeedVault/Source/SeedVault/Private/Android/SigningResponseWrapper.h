@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
+#include "Android/ArrayList.h"
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace SeedVault
-{
-class FArrayList;
-	
 /**
  * Wrapper for com/solanamobile/seedvault/SigningResponse.java. 
  */
@@ -27,7 +24,5 @@ protected:
 	FJavaClassMethod GetSignaturesMethod;
 	FJavaClassMethod GetResolvedDerivationPathsMethod;
 };
-	
-}
 
 #endif

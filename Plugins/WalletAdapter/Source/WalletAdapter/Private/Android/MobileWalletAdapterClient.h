@@ -5,14 +5,11 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-#include "Future.h"
-
-namespace WalletAdapter
-{
+#include "Android/Future.h"
 	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient
@@ -113,7 +110,6 @@ public:
 protected:
 	FJavaClassField MessagesField;
 };
-	
-}
+
 
 #endif

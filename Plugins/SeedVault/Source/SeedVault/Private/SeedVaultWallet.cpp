@@ -5,20 +5,16 @@
 
 #include "SeedVaultWallet.h"
 #include "SeedVault.h"
-#include "Android/Defines.h"
-#include "Android/GameActivity.h"
-#include "Android/Wallet.h"
-#include "Android/Throwable.h"
+
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJava.h"
 #include "Android/AndroidJNI.h"
-#endif
-
-#if PLATFORM_ANDROID
-using namespace SeedVault;
+#include "Android/GameActivity.h"
+#include "Android/Wallet.h"
+#include "Android/Throwable.h"
 #endif
 
 

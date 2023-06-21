@@ -5,12 +5,9 @@
 
 #include "Android/JavaClassObjectWrapper.h"
 
-#include "JavaUtils.h"
-#include "Android/AndroidJavaEnv.h"
-
 #if PLATFORM_ANDROID
-
-using namespace WalletAdapter;
+#include "Android/JavaUtils.h"
+#include "Android/AndroidJavaEnv.h"
 
 jclass FJavaClassObjectWrapper::StaticClass = nullptr;
 

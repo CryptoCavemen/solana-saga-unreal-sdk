@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY(LogWalletAdapter);
 void FWalletAdapterModule::StartupModule()
 {
 #if PLATFORM_ANDROID	
-	WalletAdapter::FLocalAssociationIntentCreator::StaticConstruct();
+	FLocalAssociationIntentCreator::StaticConstruct();
 #endif
 }
 

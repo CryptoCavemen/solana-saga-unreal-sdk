@@ -11,9 +11,6 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Throwable.h"
 
-namespace WalletAdapter
-{
-	
 /**
  * Wrapper for com.epicgames.ue4.GameActivity 
  */
@@ -33,7 +30,5 @@ protected:
 	FJavaClassMethod StartActivityMethod;
 	FJavaClassMethod StartActivityForResultMethod;
 };
-	
-}
 
 #endif
