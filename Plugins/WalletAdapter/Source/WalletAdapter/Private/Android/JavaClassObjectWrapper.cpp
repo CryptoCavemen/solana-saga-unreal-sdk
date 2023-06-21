@@ -181,15 +181,39 @@ bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...)
 }
 
 template<>
-int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...)
+int16 FJavaClassObjectWrapper::CallMethod<int16>(FJavaClassMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	int RetVal = Env->CallIntMethodV(Object, Method.Method, Params);
+	int16 RetVal = Env->CallShortMethodV(Object, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
+}
+
+template<>
+int32 FJavaClassObjectWrapper::CallMethod<int32>(FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	int32 RetVal = Env->CallIntMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+TArray<uint8> FJavaClassObjectWrapper::CallMethod<TArray<uint8>>(FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jbyteArray val = (jbyteArray)Env->CallObjectMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return FJavaUtils::JByteArrayToTArray(val);
 }
 
 template<>

@@ -173,7 +173,13 @@ template<>
 bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...);
 
 template<>
-int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...);
+int16 FJavaClassObjectWrapper::CallMethod<int16>(FJavaClassMethod Method, ...);
+	
+template<>
+int32 FJavaClassObjectWrapper::CallMethod<int32>(FJavaClassMethod Method, ...);
+
+template<>
+TArray<uint8> FJavaClassObjectWrapper::CallMethod<TArray<uint8>>(FJavaClassMethod Method, ...);
 
 template<>
 jobject FJavaClassObjectWrapper::CallMethod<jobject>(FJavaClassMethod Method, ...);
