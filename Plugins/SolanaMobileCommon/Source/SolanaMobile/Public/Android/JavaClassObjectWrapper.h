@@ -130,8 +130,10 @@ public:
 	static ReturnType CallThrowableStaticMethod(jthrowable& Exception, FJavaClassMethod Method, ...);	
 
 	jobject GetObjectField(FJavaClassField Field) const;
+	bool GetBooleanField(FJavaClassField Field) const;
 	FString GetStringField(FJavaClassField Field) const;
 	uint8 GetByteField(FJavaClassField Field) const;
+	uint32 GetIntField(FJavaClassField Field) const;
 	TArray<jobject> GetObjectArrayField(FJavaClassField Field) const;
 	TArray<uint8> GetByteArrayField(FJavaClassField Field) const;
 	TArray<TArray<uint8>> GetArrayOfByteArrayField(FJavaClassField Field) const;

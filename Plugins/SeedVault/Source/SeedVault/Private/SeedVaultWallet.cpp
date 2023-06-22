@@ -7,14 +7,12 @@
 #include "SeedVault.h"
 
 #if PLATFORM_ANDROID
-#include "Android/AndroidApplication.h"
-#include "Android/AndroidPlatform.h"
-#include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJava.h"
-#include "Android/AndroidJNI.h"
 #include "Android/GameActivity.h"
 #include "Android/Wallet.h"
 #include "Android/Throwable.h"
+#include "Android/AndroidApplication.h"
+#include "Android/AndroidPlatform.h"
+#include "Android/AndroidJavaEnv.h"
 #endif
 
 

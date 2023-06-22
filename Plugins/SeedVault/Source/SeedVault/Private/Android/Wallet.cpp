@@ -13,7 +13,6 @@
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
 
 FJavaClassMethod FWallet::AuthorizeSeedMethod;
 FJavaClassMethod FWallet::CreateSeedMethod;

@@ -6,10 +6,7 @@
 #include "Android/Cursor.h"
 
 #if PLATFORM_ANDROID
-#include "Android/AndroidApplication.h"
-#include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FCursor, FJavaClassObjectWrapper, "java/lang/Cursor", "()V")
 	GetCountMethod = GetClassMethod("getCount", "()I");

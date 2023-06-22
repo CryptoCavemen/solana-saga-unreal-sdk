@@ -500,6 +500,14 @@ jobject FJavaClassObjectWrapper::GetObjectField(FJavaClassField Field) const
 	return RetVal;		
 }
 
+bool FJavaClassObjectWrapper::GetBooleanField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jboolean RetVal = Env->GetBooleanField(Object, Field.Field);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
 FString FJavaClassObjectWrapper::GetStringField(FJavaClassField Field) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -513,6 +521,14 @@ uint8 FJavaClassObjectWrapper::GetByteField(FJavaClassField Field) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	jbyte RetVal = Env->GetByteField(Object, Field.Field);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+uint32 FJavaClassObjectWrapper::GetIntField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jint RetVal = Env->GetIntField(Object, Field.Field);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
 }

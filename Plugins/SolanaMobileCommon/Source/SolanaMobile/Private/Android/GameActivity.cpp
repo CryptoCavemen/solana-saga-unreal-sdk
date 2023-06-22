@@ -7,10 +7,6 @@
 
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-#include "Android/AndroidApplication.h"
-#include "Android/AndroidPlatform.h"
-#include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/epicgames/unreal/GameActivity", "()V")
 	GetApplicationContextMethod = GetClassMethod("getApplicationContext", "()Landroid/content/Context;");

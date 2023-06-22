@@ -4,8 +4,12 @@
 //
 
 #include "SeedVault.h"
-#include "Android/Wallet.h"
 #include "SeedVaultWallet.h"
+
+#if PLATFORM_ANDROID
+#include "Android/Wallet.h"
+#include "Android/Bip44DerivationPath.h"
+#endif
 
 DEFINE_LOG_CATEGORY(LogSeedVault);
 
@@ -13,6 +17,7 @@ void FSeedVaultModule::StartupModule()
 {
 #if PLATFORM_ANDROID
 	FWallet::StaticConstruct();
+	FBip44DerivationPath::StaticConstruct();
 #endif
 }
 

@@ -12,13 +12,13 @@
 #include "Android/JavaClassObjectWrapper.h"
 
 /**
- * Wrapper for java.util.ArrayList 
+ * Wrapper for java.util.List 
  */
-class FArrayList : public FJavaClassObjectWrapper
+class FList : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FArrayList);
+	DECLARE_JAVA_CLASS_OBJECT(FList);
 public:
-	bool Add(jobject Element);
+	void Add(jobject Element);
 	FScopedJavaObject<jobject> Get(int32 Index);
 	int32 Size();
 protected:
