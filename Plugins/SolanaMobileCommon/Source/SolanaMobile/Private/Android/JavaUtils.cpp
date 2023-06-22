@@ -14,6 +14,20 @@ FScopedJavaObject<jstring> FJavaUtils::GetJString(const FString& String)
 	return FJavaHelper::ToJavaString(Env, String);
 }
 
+FScopedJavaObject<jobjectArray> FJavaUtils::GetJStringArray(const TArray<FString>& Strings)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	jclass ArrayClass = Env->FindClass("[Ljava/lang/String;");
+	jobjectArray JStringsArray = Env->NewObjectArray(Strings.Num(), ArrayClass, Env->NewByteArray(1));
+	Env->DeleteLocalRef(ArrayClass);
+
+	for (int32 Index = 0; Index < Strings.Num(); Index++)  
+		Env->SetObjectArrayElement(JStringsArray, Index, *FJavaHelper::ToJavaString(Env, Strings[Index]));
+
+	return NewScopedJavaObject(Env, JStringsArray);
+}
+
 FScopedJavaObject<jobject> FJavaUtils::GetJUri(const FString& Uri)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -50,9 +64,9 @@ FScopedJavaObject<jobjectArray> FJavaUtils::GetArrayOfByteArray(const TArray<TAr
 	if (!ByteArray.Num())
 		return FScopedJavaObject<jobjectArray>(Env, nullptr);
 		
-	jclass ArrayElemClass = Env->FindClass("[B");
-	jobjectArray JByteArray = Env->NewObjectArray(ByteArray.Num(), ArrayElemClass, Env->NewByteArray(1));
-	Env->DeleteLocalRef(ArrayElemClass);
+	jclass ArrayClass = Env->FindClass("[B");
+	jobjectArray JByteArray = Env->NewObjectArray(ByteArray.Num(), ArrayClass, Env->NewByteArray(1));
+	Env->DeleteLocalRef(ArrayClass);
 
 	for (int32 Index = 0; Index < ByteArray.Num(); Index++)
 	{   

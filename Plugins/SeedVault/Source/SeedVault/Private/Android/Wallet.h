@@ -12,6 +12,8 @@
 #include "Android/Throwable.h"
 #include "Android/JavaClassObjectWrapper.h"
 
+class FCursor;
+
 
 /**
  * Wrapper for com/solanamobile/seedvault/Wallet.java. 
@@ -110,6 +112,61 @@ public:
 	static FJavaClassObjectWrapperPtr RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, TSharedPtr<FThrowable>* OutException = nullptr);
 
 	/**
+	 * Request a {@link Cursor} containing account metadata for known accounts for the specified
+	 * auth token. The projection should be a subset of the columns in
+	 * {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param AuthToken the auth token for which to retrieve account metadata
+	 * @param Projection the set of columns to be present in the returned {@link Cursor}
+	 * @return a Cursor
+	 * @throws IllegalArgumentException if auth token is not valid for this app
+	 */	
+	static TSharedPtr<FCursor> GetAccounts(FJavaClassObjectWrapperRef Context, int64 AuthToken, const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException = nullptr);
+	
+	/**
+	 * Request a Cursor containing account metadata for known accounts for the specified
+	 * auth token which match the provided query. The projection should be a subset of the columns
+	 * in {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param AuthToken the auth token for which to retrieve account metadata
+	 * @param projection the set of columns to be present in the returned {@link Cursor}
+	 * @param FilterOnColumn the column from {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS} on which
+	 *      to filter
+	 * @param Value the value of filterOnColumn which all returned rows must match
+	 * @return a Cursor
+	 * @throws IllegalArgumentException if auth token is not valid for this app, if filterOnColumn
+	 *      is not a column in {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}, or if value cannot be
+	 *      interpreted as an appropriate type to match against filterOnColumn values.
+	 */	
+	static TSharedPtr<FCursor> GetAccounts(FJavaClassObjectWrapperRef Context, int64 AuthToken,
+		const TArray<FString>& Projection, const FString& FilterOnColumn, const FString& Value, TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
+	 * Request a {@link Cursor} containing account metadata for the specified known account for the
+	 * given auth token. The projection should be a subset of the columns in
+	 * {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
+	 * @param context the {@link Context} in which to perform this request
+	 * @param authToken the auth token for which to retrieve account metadata
+	 * @param id the account ID for which to retrieve account metadata
+	 * @param projection the set of columns to be present in the returned {@link Cursor}
+	 * @return a {@link Cursor}
+	 * @throws IllegalArgumentException if auth token is not valid for this app
+	 */
+	static TSharedPtr<FCursor> GetAccount(FJavaClassObjectWrapperRef Context, int64 AuthToken, int64 Id, const TArray<FString>& Projection,
+		TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
+	 * Update the account name for the specified known account for the given auth token
+	 * @param Context the Context in which to perform this request
+	 * @param AuthToken the auth token for which to update account metadata
+	 * @param Id the account ID to update
+	 * @param Name the new name for the account. If null or blank, the account name will be cleared.
+	 * @throws IllegalArgumentException if auth token is not valid for this app
+	 * @throws NotModifiedException if ID does not represent a known account
+	 */
+	static void UpdateAccountName(FJavaClassObjectWrapperRef Context, int64 AuthToken, int64 Id, const FString& Name, TSharedPtr<FThrowable>* OutException = nullptr);
+	
+	/**
 	 * Deauthorize the specified seed for the current app
 	 * @param Context the Context in which to perform this request
 	 * @param AuthToken the auth token of the seed to deauthorize
@@ -134,6 +191,9 @@ protected:
 	static FJavaClassMethod SignTransactionMethod;
 	static FJavaClassMethod SignMessageMethod;
 	static FJavaClassMethod RequestPublicKeysMethod;
+	static FJavaClassMethod GetAccountsMethod;
+	static FJavaClassMethod GetAccountMethod;
+	static FJavaClassMethod UpdateAccountNameMethod;
 	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
 };

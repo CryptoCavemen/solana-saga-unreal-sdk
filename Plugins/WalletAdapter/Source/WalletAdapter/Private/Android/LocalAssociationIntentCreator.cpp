@@ -44,7 +44,7 @@ FJavaClassObjectWrapperPtr FLocalAssociationIntentCreator::CreateAssociationInte
 		
 		if (JThrowable)
 		{
-			*OutException = MakeShareable(FThrowable::Construct(JThrowable));
+			*OutException = FThrowable::CreateFromExisting(JThrowable);
 		}
 		else
 		{

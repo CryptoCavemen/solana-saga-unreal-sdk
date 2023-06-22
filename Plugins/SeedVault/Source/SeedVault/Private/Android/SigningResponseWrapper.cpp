@@ -19,14 +19,14 @@ END_IMPLEMENT_JAVA_CLASS_OBJECT
 TSharedRef<FArrayList> FSigningResponseWrapper::GetSignatures()
 {
 	jobject JSignatures = CallMethod<jobject>(GetSignaturesMethod);
-	auto Signatures = FArrayList::MakeFromExistingObject(JSignatures);	
+	auto Signatures = FArrayList::CreateFromExisting(JSignatures);	
 	return Signatures;
 }
 
 TSharedRef<FArrayList> FSigningResponseWrapper::GetResolvedDerivationPaths()
 {
 	jobject JResolvedDerivationPaths = CallMethod<jobject>(GetResolvedDerivationPathsMethod);
-	auto ResolvedDerivationPaths = FArrayList::MakeFromExistingObject(JResolvedDerivationPaths);	
+	auto ResolvedDerivationPaths = FArrayList::CreateFromExisting(JResolvedDerivationPaths);	
 	return ResolvedDerivationPaths;
 }
 

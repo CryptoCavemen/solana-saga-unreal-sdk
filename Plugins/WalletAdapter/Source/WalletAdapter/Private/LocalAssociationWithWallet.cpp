@@ -46,7 +46,7 @@ void ULocalAssociationWithWallet::Start(const FStartSuccessDelegate& Success, co
 			return;
 		}
 
-		auto NativeClient = FMobileWalletAdapterClient::MakeFromExistingObject(JClient->GetJObject());
+		auto NativeClient = FMobileWalletAdapterClient::CreateFromExisting(JClient->GetJObject());
 		Client = NewObject<UWalletAdapterClient>();
 		Client->SetClientImpl(NativeClient);
 
@@ -97,9 +97,9 @@ bool ULocalAssociationWithWallet::OpenWallet(const FString& UriPrefix)
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	
-	LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
+	LocalAssociation = FLocalAssociationScenario::CreateInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
 	if (!AssociationIntent.IsValid())
 	{

@@ -25,11 +25,11 @@ public:\
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args) override;\
 public:\
 	template<typename... Args>\
-	static TSharedRef<ImplClass> MakeInstance(Args... args)\
+	static TSharedRef<ImplClass> CreateInstance(Args... args)\
 	{\
 		return MakeShareable(Construct(nullptr, args...));\
 	}\
-	static TSharedRef<ImplClass> MakeFromExistingObject(jobject JObject)\
+	static TSharedRef<ImplClass> CreateFromExisting(jobject JObject)\
 	{\
 		return MakeShareable(Construct(JObject));\
 	}

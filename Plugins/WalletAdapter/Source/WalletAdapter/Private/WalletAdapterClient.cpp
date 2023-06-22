@@ -58,7 +58,7 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::CreateFromExisting(JAuthResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully: AuthToken = %s"), *AuthToken);
@@ -101,7 +101,7 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::CreateFromExisting(JAuthResult->GetJObject());
 	
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorized successfully"));
@@ -185,7 +185,7 @@ void UWalletAdapterClient::SignTransactions(const TArray<FByteArray>& Transactio
 		}
 
 		check(JSignResult.IsValid());
-		auto SignResult = FSignPayloadsResultWrapper::MakeFromExistingObject(JSignResult->GetJObject());
+		auto SignResult = FSignPayloadsResultWrapper::CreateFromExisting(JSignResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d transaction(s)"), Transactions.Num());
@@ -232,7 +232,7 @@ void UWalletAdapterClient::SignAndSendTransactions(const TArray<FByteArray>& Tra
 		}
 
 		check(JSignAndSendResult.IsValid());
-		auto SignAndSendResult = FSignAndSendTransactionsResultWrapper::MakeFromExistingObject(JSignAndSendResult->GetJObject());
+		auto SignAndSendResult = FSignAndSendTransactionsResultWrapper::CreateFromExisting(JSignAndSendResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed and sent %d transaction(s)"), Transactions.Num());
@@ -295,7 +295,7 @@ void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messag
 		}
 
 		check(JSignMessagesResult.IsValid());
-		auto SignMessagesResult = FSignMessagesResultWrapper::MakeFromExistingObject(JSignMessagesResult->GetJObject());
+		auto SignMessagesResult = FSignMessagesResultWrapper::CreateFromExisting(JSignMessagesResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d message(s)"), Messages.Num());

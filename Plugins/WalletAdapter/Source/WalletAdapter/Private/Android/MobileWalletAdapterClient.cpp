@@ -45,7 +45,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Authorize(const FString& Identit
 		!Cluster.IsEmpty() ? *FJavaUtils::GetJString(Cluster) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 			
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();
 }
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::Reauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken, TSharedPtr<FThrowable>& OutException)
@@ -61,7 +61,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Reauthorize(const FString& Ident
 		!AuthToken.IsEmpty() ? *FJavaUtils::GetJString(AuthToken) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;		
 	
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();
 }
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>& OutException)
@@ -72,7 +72,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthT
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, DeauthorizeMethod, !AuthToken.IsEmpty() ? *FJavaUtils::GetJString(AuthToken) : nullptr);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();
 }
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException)
@@ -83,7 +83,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TA
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignTransactionsMethod, *FJavaUtils::GetArrayOfByteArray(Transactions));
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();	
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();	
 }
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::SignAndSendTransactions(const TArray<TArray<uint8>>& Transactions, const int32* MinContextSlot, TSharedPtr<FThrowable>& OutException)
@@ -104,7 +104,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignAndSendTransactions(const TA
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignAndSendTransactionsMethod, *FJavaUtils::GetArrayOfByteArray(Transactions), JMinContextSlot);
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();		
 }
 
 TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessagesDetached(const TArray<TArray<uint8>>& Messages, const TArray<TArray<uint8>>& Addresses, TSharedPtr<FThrowable>& OutException)
@@ -115,7 +115,7 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessagesDetached(const TArra
 	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, SignMessagesDetachedMethod, *FJavaUtils::GetArrayOfByteArray(Messages), *FJavaUtils::GetArrayOfByteArray(Addresses));
 	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	
-	return RetVal ? FFuture::MakeFromExistingObject(RetVal) : TSharedPtr<FFuture>();		
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();		
 }
 
 
@@ -212,7 +212,7 @@ TArray<TSharedRef<FSignedMessageWrapper>> FSignMessagesResultWrapper::GetMessage
 	
 	TArray<jobject> JObjectArray = GetObjectArrayField(MessagesField);
 	for (jobject JObject : JObjectArray)
-		 Messages.Add(FSignedMessageWrapper::MakeFromExistingObject(JObject));
+		 Messages.Add(FSignedMessageWrapper::CreateFromExisting(JObject));
 	
 	return Messages;
 }

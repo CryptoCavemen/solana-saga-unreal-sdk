@@ -14,6 +14,7 @@ class FJavaUtils
 {
 public:
 	static FScopedJavaObject<jstring> GetJString(const FString& String);
+	static FScopedJavaObject<jobjectArray> GetJStringArray(const TArray<FString>& Strings);
 	static FScopedJavaObject<jobject> GetJUri(const FString& Uri);
 	static FScopedJavaObject<jbyteArray> GetByteArray(const TArray<uint8>& Bytes);
 	static FScopedJavaObject<jobjectArray> GetArrayOfByteArray(const TArray<TArray<uint8>>& ByteArray);

@@ -90,12 +90,12 @@ extern "C"
 	{
 		TArray<FSigningResponse> FSigningResponses;
 		
-		auto SigningResponses = FArrayList::MakeFromExistingObject(JSigningResponses);
+		auto SigningResponses = FArrayList::CreateFromExisting(JSigningResponses);
 
 		int32 NumSigningResponses = SigningResponses->Size();
 		for (int32 ResponseIndex = 0; ResponseIndex < NumSigningResponses; ResponseIndex++)
 		{
-			auto SigningResponse = FSigningResponseWrapper::MakeFromExistingObject(**SigningResponses->Get(ResponseIndex));
+			auto SigningResponse = FSigningResponseWrapper::CreateFromExisting(**SigningResponses->Get(ResponseIndex));
 			FSigningResponse FSigningResponse;
 
 			auto Signatures = SigningResponse->GetSignatures();
@@ -178,12 +178,12 @@ extern "C"
 
 		TArray<FPublicKeyResponse> FPublicKeyResponses;
 		
-		auto PublicKeyResponses = FArrayList::MakeFromExistingObject(publicKeyResponses);
+		auto PublicKeyResponses = FArrayList::CreateFromExisting(publicKeyResponses);
 
 		int32 NumPublicKeyResponses = PublicKeyResponses->Size();
 		for (int32 ResponseIndex = 0; ResponseIndex < NumPublicKeyResponses; ResponseIndex++)
 		{
-			auto PublicKeyResponse = FPublicKeyResponseWrapper::MakeFromExistingObject(**PublicKeyResponses->Get(ResponseIndex));
+			auto PublicKeyResponse = FPublicKeyResponseWrapper::CreateFromExisting(**PublicKeyResponses->Get(ResponseIndex));
 
 			FPublicKeyResponse FPublicKeyResponse;
 			FPublicKeyResponse.PublicKey = PublicKeyResponse->GetPublicKey();

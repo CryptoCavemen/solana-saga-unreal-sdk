@@ -67,7 +67,7 @@ void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWi
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_AUTHORIZE_SEED_ACCESS, &Exception);
 	if (Exception)
 	{
@@ -101,7 +101,7 @@ void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithT
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_CREATE_NEW_SEED, &Exception);
 	if (Exception)
 	{
@@ -135,7 +135,7 @@ void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithT
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_IMPORT_EXISTING_SEED, &Exception);
 	if (Exception)
 	{
@@ -170,7 +170,7 @@ void USeedVaultWallet::SignTransaction(int64 AuthToken, const FString& Derivatio
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_SIGN_TRANSACTIONS, &Exception);
 	if (Exception)
 	{
@@ -205,7 +205,7 @@ void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPat
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_SIGN_MESSAGES, &Exception);
 	if (Exception)
 	{
@@ -239,7 +239,7 @@ void USeedVaultWallet::RequestPublicKey(int64 AuthToken, const FString& Derivati
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_GET_PUBLIC_KEYS, &Exception);
 	if (Exception)
 	{
@@ -274,7 +274,7 @@ void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>&
 
 	check(Intent.IsValid());
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	Activity->StartActivityForResult(Intent.ToSharedRef(), (int32)EActivityRequestCode::REQUEST_GET_PUBLIC_KEYS, &Exception);
 	if (Exception)
 	{
@@ -289,7 +289,7 @@ bool USeedVaultWallet::DeauthorizeSeed(int64 AuthToken)
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	auto AppContext = Activity->GetApplication();
 	return FWallet::DeauthorizeSeed(AppContext, AuthToken, &Exception);
 #endif
@@ -301,7 +301,7 @@ bool USeedVaultWallet::HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose)
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	auto AppContext = Activity->GetApplication();
 	bool Result = FWallet::HasUnauthorizedSeedsForPurpose(AppContext, (int32)Purpose, &Exception);
 	if (Exception)

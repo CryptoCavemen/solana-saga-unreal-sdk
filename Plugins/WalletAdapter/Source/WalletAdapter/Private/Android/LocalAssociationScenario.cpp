@@ -26,19 +26,19 @@ int32 FLocalAssociationScenario::GetPort()
 TSharedRef<FMobileWalletAdapterSession> FLocalAssociationScenario::GetSession()
 {
 	jobject JObject = CallMethod<jobject>(GetSessionMethod);
-	return FMobileWalletAdapterSession::MakeFromExistingObject(JObject);
+	return FMobileWalletAdapterSession::CreateFromExisting(JObject);
 }
 
 TSharedRef<FFuture> FLocalAssociationScenario::Start()
 {	
 	jobject RetVal = CallMethod<jobject>(StartMethod);
-	return FFuture::MakeFromExistingObject(RetVal);
+	return FFuture::CreateFromExisting(RetVal);
 }
 
 TSharedRef<FFuture> FLocalAssociationScenario::Close()
 {	
 	jobject RetVal = CallMethod<jobject>(CloseMethod);
-	return FFuture::MakeFromExistingObject(RetVal);
+	return FFuture::CreateFromExisting(RetVal);
 }
 
 #endif
