@@ -25,6 +25,7 @@ FJavaClassMethod FWallet::GetAccountMethod;
 FJavaClassMethod FWallet::UpdateAccountNameMethod;
 FJavaClassMethod FWallet::DeauthorizeSeedMethod;
 FJavaClassMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
+FJavaClassMethod FWallet::ResolveDerivationPathMethod;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wallet")
 	AuthorizeSeedMethod = GetClassStaticMethod("authorizeSeed", "(I)Landroid/content/Intent;");
@@ -38,6 +39,7 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wa
 	UpdateAccountNameMethod = GetClassStaticMethod("updateAccountName", "(Landroid/content/Context;JJLjava/lang/String;)V");	
 	DeauthorizeSeedMethod = GetClassStaticMethod("deauthorizeSeed", "(Landroid/content/Context;J)V");
 	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod("hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
+	ResolveDerivationPathMethod = GetClassStaticMethod("resolveDerivationPath", "(Landroid/content/Context;Landroid/net/Uri;I)Landroid/net/Uri;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
 
 FJavaClassObjectWrapperPtr FWallet::AuthorizeSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException)
@@ -301,6 +303,23 @@ bool FWallet::HasUnauthorizedSeedsForPurpose(FJavaClassObjectWrapperRef Context,
 	}
 	
 	return Result;
+}
+
+FString FWallet::ResolveDerivationPath(FJavaClassObjectWrapperRef Context, FString DerivationPath, int32 Purpose, TSharedPtr<FThrowable>* OutException)
+{
+	jobject JRetVal;
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		JRetVal = CallThrowableStaticMethod<jobject>(JThrowable, ResolveDerivationPathMethod, **Context, *FJavaUtils::GetJUri(DerivationPath), Purpose);
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	}
+	else
+	{
+		JRetVal = CallStaticMethod<jobject>(ResolveDerivationPathMethod, **Context, *FJavaUtils::GetJUri(DerivationPath), Purpose);
+	}
+
+	return *OutException ? "" : FJavaUtils::JUriToString(JRetVal);	
 }
 
 #endif

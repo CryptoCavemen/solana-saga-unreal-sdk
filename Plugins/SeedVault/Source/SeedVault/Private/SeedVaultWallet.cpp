@@ -312,3 +312,22 @@ bool USeedVaultWallet::HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose)
 
 	return false;
 }
+
+FString USeedVaultWallet::ResolveDerivationPath(const FString& DerivationPath, EWalletContractV1 Purpose)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	FString Uri = FWallet::ResolveDerivationPath(AppContext, DerivationPath, (int32)Purpose, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during ResolveDerivationPath call: %s"), *Exception->GetMessage());
+		return "";
+	}
+	return Uri;
+#endif
+
+	return "";
+}

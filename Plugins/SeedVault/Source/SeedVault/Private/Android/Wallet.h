@@ -183,6 +183,23 @@ public:
 	 * @return true if there are unauthorized seeds for purpose, else false
 	 */	
 	static bool HasUnauthorizedSeedsForPurpose(FJavaClassObjectWrapperRef Context, int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
+	 * Resolve the provided BIP derivation path Uri with scheme
+	 * WalletContractV1#BIP32_URI_SCHEME or WalletContractV1#BIP44_URI_SCHEME and
+	 * the provided @code WalletContractV1.PURPOSE_* purpose to a BIP32 derivation path.
+	 * This is used to apply purpose-specific properties (such as mandatory hardening) and to
+	 * translate from BIP44 to BIP32 derivation paths. Entries in the
+	 * {@link WalletContractV1#ACCOUNTS_TABLE} table will always be resolved BIP32 derivation paths.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param DerivationPath a BIP32 or BIP44 {@link Uri} to resolve to a BIP32 derivation path for
+	 *      the specified purpose
+	 * @param Purpose the {@code WalletContractV1.PURPOSE_*} purpose for which to resolve
+	 *      derivationPath
+	 * @return a BIP32 derivation path {@link Uri}
+	 * @throws UnsupportedOperationException on failure to resolve the provided derivationPath
+	 */
+	static FString ResolveDerivationPath(FJavaClassObjectWrapperRef Context, FString DerivationPath, int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);	
 	
 protected:
 	static FJavaClassMethod AuthorizeSeedMethod;
@@ -196,6 +213,7 @@ protected:
 	static FJavaClassMethod UpdateAccountNameMethod;
 	static FJavaClassMethod DeauthorizeSeedMethod;
 	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
+	static FJavaClassMethod ResolveDerivationPathMethod;
 };
 
 #endif

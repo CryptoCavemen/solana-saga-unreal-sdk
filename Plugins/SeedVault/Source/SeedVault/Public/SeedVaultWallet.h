@@ -103,7 +103,13 @@ public:
 
 	/** Test whether there are any unauthorized seeds with the specified purpose available for the current app */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static bool HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose);	
+	static bool HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose);
+	
+	/** Resolve the provided BIP derivation path Uri with scheme
+	  * WalletContractV1#BIP32_URI_SCHEME or WalletContractV1#BIP44_URI_SCHEME and
+	  * the provided @code WalletContractV1.PURPOSE_* purpose to a BIP32 derivation path.*/
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static FString ResolveDerivationPath(const FString& DerivationPath, EWalletContractV1 Purpose);
 
 public:
 	static FSuccessWithTokenDynDelegate AuthorizeSeedSuccess;
