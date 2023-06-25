@@ -23,6 +23,8 @@ FJavaClassStaticMethod FWallet::RequestPublicKeysMethod;
 FJavaClassStaticMethod FWallet::GetAccountsMethod;
 FJavaClassStaticMethod FWallet::GetAccountMethod;
 FJavaClassStaticMethod FWallet::UpdateAccountNameMethod;
+FJavaClassStaticMethod FWallet::GetAuthorizedSeedsMethod;
+FJavaClassStaticMethod FWallet::GetAuthorizedSeedMethod;
 FJavaClassStaticMethod FWallet::DeauthorizeSeedMethod;
 FJavaClassStaticMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
 FJavaClassStaticMethod FWallet::ResolveDerivationPathMethod;
@@ -36,7 +38,9 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wa
 	RequestPublicKeysMethod = GetClassStaticMethod(StaticClass, "requestPublicKeys", "(JLjava/util/ArrayList;)Landroid/content/Intent;");
 	GetAccountsMethod = GetClassStaticMethod(StaticClass, "getAccounts", "(Landroid/content/Context;J[Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Landroid/database/Cursor;");
 	GetAccountMethod = GetClassStaticMethod(StaticClass, "getAccount", "(Landroid/content/Context;JJ[Ljava/lang/String;)Landroid/database/Cursor;");
-	UpdateAccountNameMethod = GetClassStaticMethod(StaticClass, "updateAccountName", "(Landroid/content/Context;JJLjava/lang/String;)V");	
+	UpdateAccountNameMethod = GetClassStaticMethod(StaticClass, "updateAccountName", "(Landroid/content/Context;JJLjava/lang/String;)V");
+	GetAuthorizedSeedsMethod = GetClassStaticMethod(StaticClass, "getAuthorizedSeeds", "(Landroid/content/Context;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Landroid/database/Cursor;");
+	GetAuthorizedSeedMethod = GetClassStaticMethod(StaticClass, "getAuthorizedSeed", "(Landroid/content/Context;J[Ljava/lang/String;)Landroid/database/Cursor;");
 	DeauthorizeSeedMethod = GetClassStaticMethod(StaticClass, "deauthorizeSeed", "(Landroid/content/Context;J)V");
 	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod(StaticClass, "hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
 	ResolveDerivationPathMethod = GetClassStaticMethod(StaticClass, "resolveDerivationPath", "(Landroid/content/Context;Landroid/net/Uri;I)Landroid/net/Uri;");
@@ -221,7 +225,9 @@ TSharedPtr<FCursor> FWallet::GetAccounts(FJavaClassObjectWrapperRef Context, int
 	{
 		jthrowable JThrowable;
 		jobject JCursor = CallThrowableStaticMethod<jobject>(JThrowable, GetAccountsMethod, **Context, AuthToken,
-			*FJavaUtils::GetJStringArray(Projection), *FJavaUtils::GetJString(FilterOnColumn), *FJavaUtils::GetJString(Value));
+			*FJavaUtils::GetJStringArray(Projection),
+			*FJavaUtils::GetJString(FilterOnColumn),
+			*FJavaUtils::GetJString(Value));
 		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 		if (!JThrowable)
 			Cursor = FCursor::CreateFromExisting(JCursor);
@@ -269,6 +275,75 @@ void FWallet::UpdateAccountName(FJavaClassObjectWrapperRef Context, int64 AuthTo
 	{	
 		CallStaticMethod<jobject>(UpdateAccountNameMethod, **Context, AuthToken, Id, *FJavaUtils::GetJString(Name));
 	}
+}
+
+TSharedPtr<FCursor> FWallet::GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection)
+{
+	jobject JCursor = CallStaticMethod<jobject>(
+		GetAuthorizedSeedsMethod,
+		**Context,
+		*FJavaUtils::GetJStringArray(Projection),
+		nullptr,
+		nullptr);
+		
+	return FCursor::CreateFromExisting(JCursor);	
+}
+
+TSharedPtr<FCursor> FWallet::GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection, const FString& FilterOnColumn, const FString& Value,
+                                                TSharedPtr<FThrowable>* OutException)
+{
+	TSharedPtr<FCursor> Cursor;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		
+		jobject JCursor = CallThrowableStaticMethod<jobject>(
+			JThrowable,
+			GetAuthorizedSeedsMethod,
+			**Context,
+			*FJavaUtils::GetJStringArray(Projection),
+			*FJavaUtils::GetJString(FilterOnColumn),
+			*FJavaUtils::GetJString(Value));
+		
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+		if (!JThrowable)
+			Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+	else
+	{	
+		jobject JCursor = CallStaticMethod<jobject>(
+			GetAuthorizedSeedsMethod,
+			**Context,
+			*FJavaUtils::GetJStringArray(Projection),
+			*FJavaUtils::GetJString(FilterOnColumn),
+			*FJavaUtils::GetJString(Value));
+		
+		Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+
+	return Cursor;		
+}
+
+TSharedPtr<FCursor> FWallet::GetAuthorizedSeed(FJavaClassObjectWrapperRef Context, int64 AuthToken, const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException)
+{
+	TSharedPtr<FCursor> Cursor;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		jobject JCursor = CallThrowableStaticMethod<jobject>(JThrowable, GetAuthorizedSeedMethod, **Context, AuthToken, *FJavaUtils::GetJStringArray(Projection));
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+		if (!JThrowable)
+			Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+	else
+	{	
+		jobject JCursor = CallStaticMethod<jobject>(GetAuthorizedSeedMethod, **Context, AuthToken, *FJavaUtils::GetJStringArray(Projection));
+		Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+
+	return Cursor;		
 }
 
 bool FWallet::DeauthorizeSeed(FJavaClassObjectWrapperRef Context, int64 AuthToken, TSharedPtr<FThrowable>* OutException)

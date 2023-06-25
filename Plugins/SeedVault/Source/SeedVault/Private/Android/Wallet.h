@@ -76,7 +76,7 @@ public:
 	 * {@link Activity#onActivityResult(int, int, Intent)}) should be used as parameters to
 	 * {@link #onSignMessagesResult(int, Intent)}.
 	 * @param AuthToken the auth token for the seed with which to perform message signing
-	 * @param DerivationPath a BipDerivationPath representing the account with which to
+	 * @param DerivationPath a {@link FBip44DerivationPath} representing the account with which to
 	 *      sign this message
 	 * @param Message a byte[] containing the message to be signed
 	 * @return an Intent suitable for usage with Activity#startActivityForResult(Intent, int)
@@ -84,56 +84,56 @@ public:
 	static FJavaClassObjectWrapperPtr SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, TSharedPtr<FThrowable>* OutException = nullptr);	
 
 	/**
-	 * Request the public key for a given {@link BipDerivationPath} of a seed. The returned
+	 * Request the public key for a given {@link FBip44DerivationPath} of a seed. The returned
 	 * {@link Intent} should be used with {@link Activity#startActivityForResult(Intent, int)}, and
 	 * the result (as returned to {@link Activity#onActivityResult(int, int, Intent)}) should be
 	 * used as parameters to {@link #onRequestPublicKeysResult(int, Intent)}. If the public key is
 	 * not present in the results of {@link #getAccounts(Context, long, String[])}, the user will be
 	 * asked to authorize access to this public key.
 	 * @param AuthToken the auth token for the seed with which to request a public key
-	 * @param DerivationPath a {@link BipDerivationPath} representing the account from which to
+	 * @param DerivationPath a {@link FBip44DerivationPath} representing the account from which to
 	 *      request the public key
 	 * @return an Intent suitable for usage with Activity#startActivityForResult
 	 */
 	static FJavaClassObjectWrapperPtr RequestPublicKey(int64 AuthToken, const FString& DerivationPath, TSharedPtr<FThrowable>* OutException = nullptr);
 	
 	/**
-	 * Request the public keys for a set of {@link BipDerivationPath}s of a seed. The returned
+	 * Request the public keys for a set of {@link FBip44DerivationPath}s of a seed. The returned
 	 * {@link Intent} should be used with {@link Activity#startActivityForResult(Intent, int)}, and
 	 * the result (as returned to {@link Activity#onActivityResult(int, int, Intent)}) should be
 	 * used as parameters to {@link #onRequestPublicKeysResult(int, Intent)}. If the public keys are
 	 * not present in the results of {@link #getAccounts(Context, long, String[])}, the user will be
 	 * asked to authorize access to these public keys.
 	 * @param AuthToken the auth token for the seed with which to request a public key
-	 * @param DerivationPaths an {@link ArrayList} of {@link BipDerivationPath}s representing the
+	 * @param DerivationPaths an {@link FArrayList} of {@link FBip44DerivationPath}s representing the
 	 *      accounts from which to request the public keys
 	 * @return an Intent suitable for usage with Activity#startActivityForResult
 	 */	
 	static FJavaClassObjectWrapperPtr RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, TSharedPtr<FThrowable>* OutException = nullptr);
 
 	/**
-	 * Request a {@link Cursor} containing account metadata for known accounts for the specified
+	 * Request a {@link FCursor} containing account metadata for known accounts for the specified
 	 * auth token. The projection should be a subset of the columns in
 	 * {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
 	 * @param Context the {@link Context} in which to perform this request
 	 * @param AuthToken the auth token for which to retrieve account metadata
-	 * @param Projection the set of columns to be present in the returned {@link Cursor}
-	 * @return a Cursor
+	 * @param Projection the set of columns to be present in the returned {@link FCursor}
+	 * @return a {@link FCursor}
 	 * @throws IllegalArgumentException if auth token is not valid for this app
 	 */	
 	static TSharedPtr<FCursor> GetAccounts(FJavaClassObjectWrapperRef Context, int64 AuthToken, const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException = nullptr);
 	
 	/**
-	 * Request a Cursor containing account metadata for known accounts for the specified
+	 * Request a {@link FCursor} containing account metadata for known accounts for the specified
 	 * auth token which match the provided query. The projection should be a subset of the columns
 	 * in {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
 	 * @param Context the {@link Context} in which to perform this request
 	 * @param AuthToken the auth token for which to retrieve account metadata
-	 * @param projection the set of columns to be present in the returned {@link Cursor}
+	 * @param projection the set of columns to be present in the returned {@link FCursor}
 	 * @param FilterOnColumn the column from {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS} on which
 	 *      to filter
 	 * @param Value the value of filterOnColumn which all returned rows must match
-	 * @return a Cursor
+	 * @return a {@link FCursor}
 	 * @throws IllegalArgumentException if auth token is not valid for this app, if filterOnColumn
 	 *      is not a column in {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}, or if value cannot be
 	 *      interpreted as an appropriate type to match against filterOnColumn values.
@@ -142,14 +142,14 @@ public:
 		const TArray<FString>& Projection, const FString& FilterOnColumn, const FString& Value, TSharedPtr<FThrowable>* OutException = nullptr);
 
 	/**
-	 * Request a {@link Cursor} containing account metadata for the specified known account for the
+	 * Request a {@link FCursor} containing account metadata for the specified known account for the
 	 * given auth token. The projection should be a subset of the columns in
 	 * {@link WalletContractV1#ACCOUNTS_ALL_COLUMNS}.
-	 * @param context the {@link Context} in which to perform this request
-	 * @param authToken the auth token for which to retrieve account metadata
-	 * @param id the account ID for which to retrieve account metadata
-	 * @param projection the set of columns to be present in the returned {@link Cursor}
-	 * @return a {@link Cursor}
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param AuthToken the auth token for which to retrieve account metadata
+	 * @param Id the account ID for which to retrieve account metadata
+	 * @param Projection the set of columns to be present in the returned {@link FCursor}
+	 * @return a {@link FCursor}
 	 * @throws IllegalArgumentException if auth token is not valid for this app
 	 */
 	static TSharedPtr<FCursor> GetAccount(FJavaClassObjectWrapperRef Context, int64 AuthToken, int64 Id, const TArray<FString>& Projection,
@@ -165,6 +165,45 @@ public:
 	 * @throws NotModifiedException if ID does not represent a known account
 	 */
 	static void UpdateAccountName(FJavaClassObjectWrapperRef Context, int64 AuthToken, int64 Id, const FString& Name, TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
+	 * Request a {@link FCursor} containing the authorized seeds for the current app. The projection
+	 * should be a subset of the columns in {@link WalletContractV1#AUTHORIZED_SEEDS_ALL_COLUMNS}.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param Projection the set of columns to be present in the returned {@link Cursor}
+	 * @return a {@link FCursor}
+	 */
+	static TSharedPtr<FCursor> GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection);
+	
+	/**
+	 * Request a {@link FCursor} containing the authorized seeds for the current app which match the
+	 * provided query. The projection should be a subset of the columns in
+	 * {@link WalletContractV1#AUTHORIZED_SEEDS_ALL_COLUMNS}.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param Projection the set of columns to be present in the returned {@link FCursor}
+	 * @param FilterOnColumn the column from {@link WalletContractV1#AUTHORIZED_SEEDS_ALL_COLUMNS}
+	 *      on which to filter
+	 * @param Value the value of filterOnColumn which all returned rows must match
+	 * @return a {@link FCursor}
+	 * @throws IllegalArgumentException if filterOnColumn is not a column in
+	 *      {@link WalletContractV1#AUTHORIZED_SEEDS_ALL_COLUMNS}, or if value cannot be interpreted
+	 *      as an appropriate type to match against filterOnColumn values.
+	 */	
+	static TSharedPtr<FCursor> GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context,
+		const TArray<FString>& Projection, const FString& FilterOnColumn, const FString& Value, TSharedPtr<FThrowable>* OutException = nullptr);
+
+	/**
+	 * Request a {@link FCursor} containing the specified authorized seed for the current app. The
+	 * projection should be a subset of the columns in
+	 * {@link WalletContractV1#AUTHORIZED_SEEDS_ALL_COLUMNS}. If the specified auth token is not
+	 * found, the returned {@link FCursor} will be empty.
+	 * @param Context the {@link Context} in which to perform this request
+	 * @param AuthToken the auth token of the authorized seed to return in the {@link FCursor}
+	 * @param Projection the set of columns to be present in the returned {@link FCursor}
+	 * @return a {@link FCursor}
+	 */	
+	static TSharedPtr<FCursor> GetAuthorizedSeed(FJavaClassObjectWrapperRef Context, int64 AuthToken,
+		const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException = nullptr);
 	
 	/**
 	 * Deauthorize the specified seed for the current app
@@ -211,6 +250,8 @@ protected:
 	static FJavaClassStaticMethod GetAccountsMethod;
 	static FJavaClassStaticMethod GetAccountMethod;
 	static FJavaClassStaticMethod UpdateAccountNameMethod;
+	static FJavaClassStaticMethod GetAuthorizedSeedsMethod;
+	static FJavaClassStaticMethod GetAuthorizedSeedMethod;	
 	static FJavaClassStaticMethod DeauthorizeSeedMethod;
 	static FJavaClassStaticMethod HasUnauthorizedSeedsForPurposeMethod;
 	static FJavaClassStaticMethod ResolveDerivationPathMethod;

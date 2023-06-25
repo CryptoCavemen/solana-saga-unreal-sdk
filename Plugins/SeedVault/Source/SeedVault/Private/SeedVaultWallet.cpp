@@ -18,6 +18,18 @@
 #include "Android/AndroidJavaEnv.h"
 #endif
 
+#define ACCOUNTS_ACCOUNT_ID					TEXT("_id")
+#define ACCOUNTS_BIP32_DERIVATION_PATH		TEXT("Accounts_Bip32DerivationPath")
+#define ACCOUNTS_PUBLIC_KEY_RAW				TEXT("Accounts_PublicKeyRaw")
+#define ACCOUNTS_PUBLIC_KEY_ENCODED			TEXT("Accounts_PublicKeyEncoded")
+#define ACCOUNTS_ACCOUNT_NAME				TEXT("Accounts_AccountName")
+#define ACCOUNTS_ACCOUNT_IS_USER_WALLET		TEXT("Accounts_IsUserWallet")
+#define ACCOUNTS_ACCOUNT_IS_VALID			TEXT("Accounts_IsValid")
+
+#define AUTHORIZED_SEEDS_AUTH_TOKEN			TEXT("_id")
+#define AUTHORIZED_SEEDS_AUTH_PURPOSE		TEXT("AuthorizedSeeds_AuthPurpose")
+#define AUTHORIZED_SEEDS_SEED_NAME			TEXT("AuthorizedSeeds_SeedName")
+
 
 USeedVaultWallet::FSuccessWithTokenDynDelegate USeedVaultWallet::AuthorizeSeedSuccess;
 USeedVaultWallet::FFailureDynDelegate USeedVaultWallet::AuthorizeSeedFailure;
@@ -285,10 +297,57 @@ void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>&
 #endif
 }
 
-bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountIndex, FWalletAccount& OutAccount)
+TArray<FWalletAccount> USeedVaultWallet::GetAccounts(int64 AuthToken)
+{
+	TArray<FWalletAccount> Accounts;
+
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	
+	TArray<FString> Columns;
+	Columns.Add(ACCOUNTS_ACCOUNT_ID);
+	Columns.Add(ACCOUNTS_BIP32_DERIVATION_PATH);
+	Columns.Add(ACCOUNTS_PUBLIC_KEY_RAW);
+	Columns.Add(ACCOUNTS_PUBLIC_KEY_ENCODED);
+	Columns.Add(ACCOUNTS_ACCOUNT_NAME);
+	Columns.Add(ACCOUNTS_ACCOUNT_IS_USER_WALLET);
+	Columns.Add(ACCOUNTS_ACCOUNT_IS_VALID);
+	
+	auto AccountsCursor = FWallet::GetAccounts(AppContext, AuthToken, Columns, &Exception);
+
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to request the accounts list: %s"), *Exception->GetMessage());
+		return Accounts;
+	}
+
+	while (AccountsCursor->MoveToNext())
+	{
+		FWalletAccount Account;
+		Account.AccountId = AccountsCursor->GetLong(0);
+		Account.DerivationPath = AccountsCursor->GetString(1);
+		Account.PublicKeyRaw = AccountsCursor->GetBlob(2);
+		Account.PublicKeyEncoded = AccountsCursor->GetString(3);
+		Account.Name = AccountsCursor->GetString(4);
+		Account.bIsUserWallet = AccountsCursor->GetShort(5) == 1 ? true : false;
+		Account.bIsValid = AccountsCursor->GetShort(6) == 1 ? true : false;
+		Accounts.Add(Account);
+	}
+
+#else
+	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
+#endif
+
+	return Accounts;
+}
+
+bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountId, FWalletAccount& OutAccount)
 {
 #if PLATFORM_ANDROID
-	auto AccountBipLevel = FBipLevel::CreateInstance(AccountIndex, true);
+	auto AccountBipLevel = FBipLevel::CreateInstance(AccountId, true);
 	auto DerivationPath = FBip44DerivationPath::CreateInstance(**AccountBipLevel, nullptr, nullptr);
 
 	FString DerivationPathUri = DerivationPath->ToUri();
@@ -303,14 +362,18 @@ bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountIndex, FWalletAc
 	
 	TArray<FString> Columns;
 	Columns.Add(ACCOUNTS_ACCOUNT_ID);
+	Columns.Add(ACCOUNTS_BIP32_DERIVATION_PATH);
+	Columns.Add(ACCOUNTS_PUBLIC_KEY_RAW);
+	Columns.Add(ACCOUNTS_PUBLIC_KEY_ENCODED);
+	Columns.Add(ACCOUNTS_ACCOUNT_NAME);
 	Columns.Add(ACCOUNTS_ACCOUNT_IS_USER_WALLET);
 	Columns.Add(ACCOUNTS_ACCOUNT_IS_VALID);
-	Columns.Add(ACCOUNTS_ACCOUNT_NAME);	
+	
 	auto Cursor = FWallet::GetAccounts(AppContext, AuthToken, Columns, ACCOUNTS_BIP32_DERIVATION_PATH, ResolvedDerivationPath, &Exception);
 
 	if (Exception)
 	{
-		UE_LOG(LogSeedVault, Error, TEXT("Failed to find expected account '%s': "), *ResolvedDerivationPath, *Exception->GetMessage());
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to find expected account '%s': %s"), *ResolvedDerivationPath, *Exception->GetMessage());
 		return false;
 	}
 
@@ -321,15 +384,48 @@ bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountIndex, FWalletAc
 	}
 
 	OutAccount.AccountId = Cursor->GetLong(0);
-	OutAccount.bIsUserWallet = Cursor->GetShort(1) == 1 ? true : false;
-	OutAccount.bIsValid = Cursor->GetShort(2) == 1 ? true : false;
-	OutAccount.Name = Cursor->GetString(3);
+	OutAccount.DerivationPath = Cursor->GetString(1);
+	OutAccount.PublicKeyRaw = Cursor->GetBlob(2);
+	OutAccount.PublicKeyEncoded = Cursor->GetString(3);
+	OutAccount.Name = Cursor->GetString(4);
+	OutAccount.bIsUserWallet = Cursor->GetShort(5) == 1 ? true : false;
+	OutAccount.bIsValid = Cursor->GetShort(6) == 1 ? true : false;
 	
 	return true;
 #else
 	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
 	return false;
 #endif	
+}
+
+TArray<FWalletSeed> USeedVaultWallet::GetAuthorizedSeeds()
+{
+	TArray<FWalletSeed> AuthorizedSeeds;
+
+#if PLATFORM_ANDROID
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	
+	TArray<FString> Columns;
+	Columns.Add(AUTHORIZED_SEEDS_AUTH_TOKEN);
+	Columns.Add(AUTHORIZED_SEEDS_AUTH_PURPOSE);
+	Columns.Add(AUTHORIZED_SEEDS_SEED_NAME);
+
+	auto AuthorizedSeedsCursor = FWallet::GetAuthorizedSeeds(AppContext, Columns);
+
+	while (AuthorizedSeedsCursor->MoveToNext())
+	{
+		FWalletSeed Seed;
+		Seed.AuthToken = AuthorizedSeedsCursor->GetLong(0);
+		Seed.AuthPurpose = AuthorizedSeedsCursor->GetInt(1);
+		Seed.Name = AuthorizedSeedsCursor->GetString(2);
+		AuthorizedSeeds.Add(Seed);
+	}
+#else
+	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
+#endif
+
+	return AuthorizedSeeds;
 }
 
 bool USeedVaultWallet::DeauthorizeSeed(int64 AuthToken)
