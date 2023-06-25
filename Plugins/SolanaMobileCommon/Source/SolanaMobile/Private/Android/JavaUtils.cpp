@@ -19,7 +19,7 @@ FScopedJavaObject<jobjectArray> FJavaUtils::GetJStringArray(const TArray<FString
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 
 	jclass ArrayClass = Env->FindClass("[Ljava/lang/String;");
-	jobjectArray JStringsArray = Env->NewObjectArray(Strings.Num(), ArrayClass, Env->NewByteArray(1));
+	jobjectArray JStringsArray = Env->NewObjectArray(Strings.Num(), ArrayClass, nullptr);
 	Env->DeleteLocalRef(ArrayClass);
 
 	for (int32 Index = 0; Index < Strings.Num(); Index++)  
