@@ -9,7 +9,6 @@
 #include "Defines.h"
 
 #if PLATFORM_ANDROID
-#include "Android/AndroidJava.h"
 #include "Android/AndroidJavaEnv.h"
 #include <jni.h>
 
@@ -82,7 +81,7 @@ public:\
 #define BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(ImplClass, JavaClassName)\
 void ImplClass::StaticConstruct()\
 {\
-	StaticClass = FAndroidApplication::FindJavaClassGlobalRef(JavaClassName);\
+	jclass StaticClass = FAndroidApplication::FindJavaClassGlobalRef(JavaClassName);\
 	check(StaticClass);
 
 /**
@@ -95,6 +94,29 @@ struct FJavaClassField
 	FName		Name;
 	FName		Signature;
 	jfieldID	Field;
+};
+
+struct FJavaClassStaticField
+{
+	jclass		Class;
+	FName		Name;
+	FName		Signature;
+	jfieldID	Field;
+};
+
+struct FJavaClassMethod
+{
+	FName		Name;
+	FName		Signature;
+	jmethodID	Method;
+};
+
+struct FJavaClassStaticMethod
+{
+	jclass		Class;
+	FName		Name;
+	FName		Signature;
+	jmethodID	Method;
 };
 
 /**
@@ -114,20 +136,20 @@ public:
 
 	FJavaClassMethod GetClassMethod(const char* MethodName, const char* FuncSig) const;
 	FJavaClassField GetClassField(const char* FieldName, const char* FuncSig) const;
-	static FJavaClassMethod GetClassStaticMethod(const char* MethodName, const char* FuncSig);
-	static FJavaClassField GetClassStaticField(const char* FieldName, const char* FuncSig);
+	static FJavaClassStaticMethod GetClassStaticMethod(jclass StaticClass, const char* MethodName, const char* FuncSig);
+	static FJavaClassStaticField GetClassStaticField(jclass StaticClass, const char* FieldName, const char* FuncSig);
 
 	template<typename ReturnType>
 	ReturnType CallMethod(FJavaClassMethod Method, ...);
 	template<typename ReturnType>
-	static ReturnType CallStaticMethod(FJavaClassMethod Method, ...);	
+	static ReturnType CallStaticMethod(FJavaClassStaticMethod Method, ...);	
 
 	/** Calls the method and stores a local reference to an exception if any occured. */
 	template<typename ReturnType>
 	ReturnType CallThrowableMethod(jthrowable& Exception, FJavaClassMethod Method, ...);
 	/** Calls the static method and stores a local reference to an exception if any occured. */
 	template<typename ReturnType>
-	static ReturnType CallThrowableStaticMethod(jthrowable& Exception, FJavaClassMethod Method, ...);	
+	static ReturnType CallThrowableStaticMethod(jthrowable& Exception, FJavaClassStaticMethod Method, ...);	
 
 	jobject GetObjectField(FJavaClassField Field) const;
 	bool GetBooleanField(FJavaClassField Field) const;
@@ -149,8 +171,6 @@ protected:
 	jobject Object;
 	/** The java class of a stored object */
 	jclass Class;
-	/** Initialized if only has static methods */
-	static jclass StaticClass;
 
 private:
 	FJavaClassObjectWrapper(const FJavaClassObjectWrapper& rhs);
@@ -198,25 +218,25 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 //
 	
 template<>
-void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassMethod Method, ...);
+void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassStaticMethod Method, ...);
 
 template<>
-bool FJavaClassObjectWrapper::CallStaticMethod<bool>(FJavaClassMethod Method, ...);
+bool FJavaClassObjectWrapper::CallStaticMethod<bool>(FJavaClassStaticMethod Method, ...);
 
 template<>
-int FJavaClassObjectWrapper::CallStaticMethod<int>(FJavaClassMethod Method, ...);
+int FJavaClassObjectWrapper::CallStaticMethod<int>(FJavaClassStaticMethod Method, ...);
 
 template<>
-jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassMethod Method, ...);
+jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassStaticMethod Method, ...);
 
 template<>
-jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassMethod Method, ...);
+jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassStaticMethod Method, ...);
 
 template<>
-int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassMethod Method, ...);
+int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassStaticMethod Method, ...);
 
 template<>
-FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassMethod Method, ...);	
+FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassStaticMethod Method, ...);	
 
 //
 // THROWABLE METHODS
@@ -236,13 +256,13 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 //
 	
 template<>
-void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...);
+void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassStaticMethod Method, ...);
 
 template<>
-bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...);
+bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassStaticMethod Method, ...);
 
 template<>
-jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...);
+jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassStaticMethod Method, ...);
 
 
 // Helper types

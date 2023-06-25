@@ -5,11 +5,14 @@
 
 #include "SeedVaultWallet.h"
 #include "SeedVault.h"
+#include "Android/Cursor.h"
 
 #if PLATFORM_ANDROID
 #include "Android/GameActivity.h"
 #include "Android/Wallet.h"
 #include "Android/Throwable.h"
+#include "Android/Bip44DerivationPath.h"
+#include "Android/BipLevel.h"
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
@@ -280,6 +283,53 @@ void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>&
 		Failure.ExecuteIfBound(Exception->GetMessage());
 	}
 #endif
+}
+
+bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountIndex, FWalletAccount& OutAccount)
+{
+#if PLATFORM_ANDROID
+	auto AccountBipLevel = FBipLevel::CreateInstance(AccountIndex, true);
+	auto DerivationPath = FBip44DerivationPath::CreateInstance(**AccountBipLevel, nullptr, nullptr);
+
+	FString DerivationPathUri = DerivationPath->ToUri();
+	FString ResolvedDerivationPath = ResolveDerivationPath(DerivationPathUri, EWalletContractV1::PURPOSE_SIGN_SOLANA_TRANSACTION);
+	UE_LOG(LogSeedVault, Log, TEXT("Resolved BIP derivation path '%s' to BIP32 derivation path '%s' for purpose PURPOSE_SIGN_SOLANA_TRANSACTION"),
+		*DerivationPathUri, *ResolvedDerivationPath);
+
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	
+	TArray<FString> Columns;
+	Columns.Add(ACCOUNTS_ACCOUNT_ID);
+	Columns.Add(ACCOUNTS_ACCOUNT_IS_USER_WALLET);
+	Columns.Add(ACCOUNTS_ACCOUNT_IS_VALID);
+	Columns.Add(ACCOUNTS_ACCOUNT_NAME);	
+	auto Cursor = FWallet::GetAccounts(AppContext, AuthToken, Columns, ACCOUNTS_BIP32_DERIVATION_PATH, ResolvedDerivationPath, &Exception);
+
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to find expected account '%s': "), *ResolvedDerivationPath, *Exception->GetMessage());
+		return false;
+	}
+
+	if (!Cursor->MoveToNext())
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to find expected account '%s'"), *ResolvedDerivationPath);
+		return false;
+	}
+
+	OutAccount.AccountId = Cursor->GetLong(0);
+	OutAccount.bIsUserWallet = Cursor->GetShort(1) == 1 ? true : false;
+	OutAccount.bIsValid = Cursor->GetShort(2) == 1 ? true : false;
+	OutAccount.Name = Cursor->GetString(3);
+	
+	return true;
+#else
+	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
+	return false;
+#endif	
 }
 
 bool USeedVaultWallet::DeauthorizeSeed(int64 AuthToken)

@@ -26,7 +26,7 @@ public:
 	static FJavaClassObjectWrapperPtr CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session, TSharedPtr<FThrowable>* OutException = nullptr);
 
 protected:
-	static FJavaClassMethod CreateAssociationIntentMethod;
+	static FJavaClassStaticMethod CreateAssociationIntentMethod;
 };
 
 #endif

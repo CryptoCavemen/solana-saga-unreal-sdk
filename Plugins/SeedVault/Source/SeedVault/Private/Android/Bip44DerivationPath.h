@@ -19,7 +19,7 @@ class FThrowable;
  */
 class FBip44DerivationPath : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FBip44DerivationPath);
+	DECLARE_JAVA_CLASS_OBJECT(FBip44DerivationPath)
 	DECLARE_JAVA_CLASS_OBJECT_STATIC()
 public:
 	TSharedRef<FBipLevel> GetAccount();	
@@ -39,7 +39,7 @@ protected:
 	FJavaClassMethod GetAddressIndexMethod;
 	FJavaClassMethod GetLevelsMethod;
 	FJavaClassMethod ToUriMethod;
-	static FJavaClassMethod FromUriMethod;
+	static FJavaClassStaticMethod FromUriMethod;
 	FJavaClassMethod ToStringMethod;
 };
 

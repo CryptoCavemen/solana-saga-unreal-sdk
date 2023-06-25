@@ -16,7 +16,7 @@
  */
 class FSigningResponseWrapper : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FSigningResponseWrapper);
+	DECLARE_JAVA_CLASS_OBJECT(FSigningResponseWrapper)
 public:
 	TSharedRef<FArrayList> GetSignatures();
 	TSharedRef<FArrayList> GetResolvedDerivationPaths();

@@ -14,32 +14,32 @@
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 
-FJavaClassMethod FWallet::AuthorizeSeedMethod;
-FJavaClassMethod FWallet::CreateSeedMethod;
-FJavaClassMethod FWallet::ImportSeedMethod;
-FJavaClassMethod FWallet::SignTransactionMethod;
-FJavaClassMethod FWallet::SignMessageMethod;
-FJavaClassMethod FWallet::RequestPublicKeysMethod;
-FJavaClassMethod FWallet::GetAccountsMethod;
-FJavaClassMethod FWallet::GetAccountMethod;
-FJavaClassMethod FWallet::UpdateAccountNameMethod;
-FJavaClassMethod FWallet::DeauthorizeSeedMethod;
-FJavaClassMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
-FJavaClassMethod FWallet::ResolveDerivationPathMethod;
+FJavaClassStaticMethod FWallet::AuthorizeSeedMethod;
+FJavaClassStaticMethod FWallet::CreateSeedMethod;
+FJavaClassStaticMethod FWallet::ImportSeedMethod;
+FJavaClassStaticMethod FWallet::SignTransactionMethod;
+FJavaClassStaticMethod FWallet::SignMessageMethod;
+FJavaClassStaticMethod FWallet::RequestPublicKeysMethod;
+FJavaClassStaticMethod FWallet::GetAccountsMethod;
+FJavaClassStaticMethod FWallet::GetAccountMethod;
+FJavaClassStaticMethod FWallet::UpdateAccountNameMethod;
+FJavaClassStaticMethod FWallet::DeauthorizeSeedMethod;
+FJavaClassStaticMethod FWallet::HasUnauthorizedSeedsForPurposeMethod;
+FJavaClassStaticMethod FWallet::ResolveDerivationPathMethod;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FWallet, "com/solanamobile/seedvault/Wallet")
-	AuthorizeSeedMethod = GetClassStaticMethod("authorizeSeed", "(I)Landroid/content/Intent;");
-	CreateSeedMethod = GetClassStaticMethod("createSeed", "(I)Landroid/content/Intent;");
-	ImportSeedMethod = GetClassStaticMethod("importSeed", "(I)Landroid/content/Intent;");
-	SignTransactionMethod = GetClassStaticMethod("signTransaction", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
-	SignMessageMethod = GetClassStaticMethod("signMessage", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
-	RequestPublicKeysMethod = GetClassStaticMethod("requestPublicKeys", "(JLjava/util/ArrayList;)Landroid/content/Intent;");
-	GetAccountsMethod = GetClassStaticMethod("getAccounts", "(Landroid/content/Context;J[Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Landroid/database/Cursor;");
-	GetAccountMethod = GetClassStaticMethod("getAccount", "(Landroid/content/Context;JJ[Ljava/lang/String;)Landroid/database/Cursor;");
-	UpdateAccountNameMethod = GetClassStaticMethod("updateAccountName", "(Landroid/content/Context;JJLjava/lang/String;)V");	
-	DeauthorizeSeedMethod = GetClassStaticMethod("deauthorizeSeed", "(Landroid/content/Context;J)V");
-	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod("hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
-	ResolveDerivationPathMethod = GetClassStaticMethod("resolveDerivationPath", "(Landroid/content/Context;Landroid/net/Uri;I)Landroid/net/Uri;");
+	AuthorizeSeedMethod = GetClassStaticMethod(StaticClass, "authorizeSeed", "(I)Landroid/content/Intent;");
+	CreateSeedMethod = GetClassStaticMethod(StaticClass, "createSeed", "(I)Landroid/content/Intent;");
+	ImportSeedMethod = GetClassStaticMethod(StaticClass, "importSeed", "(I)Landroid/content/Intent;");
+	SignTransactionMethod = GetClassStaticMethod(StaticClass, "signTransaction", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
+	SignMessageMethod = GetClassStaticMethod(StaticClass, "signMessage", "(JLandroid/net/Uri;[B)Landroid/content/Intent;");
+	RequestPublicKeysMethod = GetClassStaticMethod(StaticClass, "requestPublicKeys", "(JLjava/util/ArrayList;)Landroid/content/Intent;");
+	GetAccountsMethod = GetClassStaticMethod(StaticClass, "getAccounts", "(Landroid/content/Context;J[Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Landroid/database/Cursor;");
+	GetAccountMethod = GetClassStaticMethod(StaticClass, "getAccount", "(Landroid/content/Context;JJ[Ljava/lang/String;)Landroid/database/Cursor;");
+	UpdateAccountNameMethod = GetClassStaticMethod(StaticClass, "updateAccountName", "(Landroid/content/Context;JJLjava/lang/String;)V");	
+	DeauthorizeSeedMethod = GetClassStaticMethod(StaticClass, "deauthorizeSeed", "(Landroid/content/Context;J)V");
+	HasUnauthorizedSeedsForPurposeMethod = GetClassStaticMethod(StaticClass, "hasUnauthorizedSeedsForPurpose", "(Landroid/content/Context;I)Z");
+	ResolveDerivationPathMethod = GetClassStaticMethod(StaticClass, "resolveDerivationPath", "(Landroid/content/Context;Landroid/net/Uri;I)Landroid/net/Uri;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
 
 FJavaClassObjectWrapperPtr FWallet::AuthorizeSeed(int32 Purpose, TSharedPtr<FThrowable>* OutException)

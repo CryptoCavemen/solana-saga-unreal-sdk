@@ -9,8 +9,6 @@
 #include "Android/JavaUtils.h"
 #include "Android/AndroidJavaEnv.h"
 
-jclass FJavaClassObjectWrapper::StaticClass = nullptr;
-
 FJavaClassObjectWrapper::FJavaClassObjectWrapper()
 	: Object(nullptr)
 	, Class(nullptr)
@@ -92,12 +90,13 @@ FJavaClassField FJavaClassObjectWrapper::GetClassField(const char* FieldName, co
 	return Field;
 }
 
-FJavaClassMethod FJavaClassObjectWrapper::GetClassStaticMethod(const char* MethodName, const char* FuncSig)
-{	
-	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+FJavaClassStaticMethod FJavaClassObjectWrapper::GetClassStaticMethod(jclass StaticClass, const char* MethodName, const char* FuncSig)
+{
 	check(StaticClass);
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	
-	FJavaClassMethod Method;
+	FJavaClassStaticMethod Method;
+	Method.Class = StaticClass;
 	Method.Method = Env->GetStaticMethodID(StaticClass, MethodName, FuncSig);
 	Method.Name = MethodName;
 	Method.Signature = FuncSig;
@@ -106,12 +105,13 @@ FJavaClassMethod FJavaClassObjectWrapper::GetClassStaticMethod(const char* Metho
 	return Method;
 }
 
-FJavaClassField FJavaClassObjectWrapper::GetClassStaticField(const char* FieldName, const char* FuncSig)
+FJavaClassStaticField FJavaClassObjectWrapper::GetClassStaticField(jclass StaticClass, const char* FieldName, const char* FuncSig)
 {
-	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	check(StaticClass);
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	
-	FJavaClassField Field;
+	FJavaClassStaticField Field;
+	Field.Class = StaticClass;
 	Field.Field = Env->GetStaticFieldID(StaticClass, FieldName, FuncSig);
 	Field.Name = FieldName;
 	Field.Signature = FuncSig;
@@ -267,47 +267,47 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 }
 
 template<>
-void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassMethod Method, ...)
+void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	Env->CallStaticObjectMethodV(StaticClass, Method.Method, Params);
+	Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 }
 
 template<>
-bool FJavaClassObjectWrapper::CallStaticMethod<bool>(FJavaClassMethod Method, ...)
+bool FJavaClassObjectWrapper::CallStaticMethod<bool>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	bool RetVal = Env->CallStaticBooleanMethodV(StaticClass, Method.Method, Params);
-	va_end(Params);
-	FJavaUtils::VerifyException(Env);
-	return RetVal;
-}
-
-template<>
-int FJavaClassObjectWrapper::CallStaticMethod<int>(FJavaClassMethod Method, ...)
-{
-	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
-	va_list Params;
-	va_start(Params, Method);
-	int RetVal = Env->CallStaticIntMethodV(StaticClass, Method.Method, Params);
+	bool RetVal = Env->CallStaticBooleanMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
 }
 
 template<>
-jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassMethod Method, ...)
+int FJavaClassObjectWrapper::CallStaticMethod<int>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	jobject val = Env->CallStaticObjectMethodV(StaticClass, Method.Method, Params);
+	int RetVal = Env->CallStaticIntMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	jobject RetVal = Env->NewGlobalRef(val);
@@ -316,12 +316,12 @@ jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassMethod Meth
 }
 
 template<>
-jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassMethod Method, ...)
+jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	jobject val = Env->CallStaticObjectMethodV(StaticClass, Method.Method, Params);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	jobjectArray RetVal = (jobjectArray)Env->NewGlobalRef(val);
@@ -330,24 +330,24 @@ jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassM
 }
 
 template<>
-int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassMethod Method, ...)
+int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	int64 RetVal = Env->CallStaticLongMethodV(StaticClass, Method.Method, Params);
+	int64 RetVal = Env->CallStaticLongMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
 }
 
 template<>
-FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassMethod Method, ...)
+FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	jstring RetVal = static_cast<jstring>(Env->CallStaticObjectMethodV(StaticClass, Method.Method, Params));
+	jstring RetVal = static_cast<jstring>(Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params));
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	auto Result = FJavaHelper::FStringFromLocalRef(Env, RetVal);
@@ -424,12 +424,12 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 }
 
 template<>
-void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...)
+void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	Env->CallStaticVoidMethodV(StaticClass, Method.Method, Params);
+	Env->CallStaticVoidMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	
 	if (Env->ExceptionCheck())
@@ -445,12 +445,12 @@ void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Except
 }
 
 template<>
-bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...)
+bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	bool RetVal = Env->CallStaticBooleanMethodV(StaticClass, Method.Method, Params);
+	bool RetVal = Env->CallStaticBooleanMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 	
 	if (Env->ExceptionCheck())
@@ -468,12 +468,12 @@ bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Except
 }
 
 template<>
-jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassMethod Method, ...)
+jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	jobject val = Env->CallStaticObjectMethodV(StaticClass, Method.Method, Params);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
 	va_end(Params);
 
 	if (Env->ExceptionCheck())

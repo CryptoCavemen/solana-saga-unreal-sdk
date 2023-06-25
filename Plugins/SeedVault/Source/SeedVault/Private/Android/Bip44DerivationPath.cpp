@@ -26,10 +26,10 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FBip44DerivationPath, FJavaClassObjectWrapper,
 	ToStringMethod = GetClassMethod("toString", "()Ljava/lang/String;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
-FJavaClassMethod FBip44DerivationPath::FromUriMethod;
+FJavaClassStaticMethod FBip44DerivationPath::FromUriMethod;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FBip44DerivationPath, "com/solanamobile/seedvault/Bip44DerivationPath")
-	FromUriMethod = GetClassStaticMethod("fromUri", "(Landroid/net/Uri;)Lcom/solanamobile/seedvault/Bip44DerivationPath;");
+	FromUriMethod = GetClassStaticMethod(StaticClass, "fromUri", "(Landroid/net/Uri;)Lcom/solanamobile/seedvault/Bip44DerivationPath;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
 
 TSharedRef<FBipLevel> FBip44DerivationPath::GetAccount()

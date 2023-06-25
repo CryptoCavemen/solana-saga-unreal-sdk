@@ -18,10 +18,10 @@
 #include "WalletAdapter.h"
 
 
-FJavaClassMethod FLocalAssociationIntentCreator::CreateAssociationIntentMethod;
+FJavaClassStaticMethod FLocalAssociationIntentCreator::CreateAssociationIntentMethod;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FLocalAssociationIntentCreator, "com/solana/mobilewalletadapter/clientlib/scenario/LocalAssociationIntentCreator")
-	CreateAssociationIntentMethod = GetClassStaticMethod("createAssociationIntent", "(Landroid/net/Uri;ILcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;)Landroid/content/Intent;");
+	CreateAssociationIntentMethod = GetClassStaticMethod(StaticClass, "createAssociationIntent", "(Landroid/net/Uri;ILcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;)Landroid/content/Intent;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
 
 FJavaClassObjectWrapperPtr FLocalAssociationIntentCreator::CreateAssociationIntent(

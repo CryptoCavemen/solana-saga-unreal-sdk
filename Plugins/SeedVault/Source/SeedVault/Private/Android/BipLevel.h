@@ -15,7 +15,7 @@
  */
 class FBipLevel : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FBipLevel);
+	DECLARE_JAVA_CLASS_OBJECT(FBipLevel)
 public:
 	int32 GetIndex() const;
 	bool GetHardened() const;

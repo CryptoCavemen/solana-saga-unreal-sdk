@@ -15,7 +15,7 @@
  */
 class FPublicKeyResponseWrapper : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FPublicKeyResponseWrapper);
+	DECLARE_JAVA_CLASS_OBJECT(FPublicKeyResponseWrapper)
 public:
 	FString GetResolvedDerivationPath();
 	TArray<uint8> GetPublicKey();

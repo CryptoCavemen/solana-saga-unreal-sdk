@@ -8,9 +8,12 @@
 #if PLATFORM_ANDROID
 #include "Android/AndroidJavaEnv.h"
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FCursor, FJavaClassObjectWrapper, "java/lang/Cursor", "()V")
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FCursor, FJavaClassObjectWrapper, "android/database/Cursor", "()V")
 	GetCountMethod = GetClassMethod("getCount", "()I");
 	GetPositionMethod = GetClassMethod("getPosition", "()I");
+	MoveToFirstMethod = GetClassMethod("moveToFirst", "()Z");
+	MoveToLastMethod = GetClassMethod("moveToLast", "()Z");
+	MoveToNextMethod = GetClassMethod("moveToNext", "()Z");
 	GetBlobMethod = GetClassMethod("getBlob", "(I)[B");
 	GetStringMethod = GetClassMethod("getString", "(I)Ljava/lang/String");
 	GetShortMethod = GetClassMethod("getShort", "(I)S");
@@ -27,6 +30,21 @@ int32 FCursor::GetCount()
 int32 FCursor::GetPosition()
 {
 	return CallMethod<int32>(GetPositionMethod);
+}
+
+bool FCursor::MoveToFirst()
+{
+	return CallMethod<bool>(MoveToFirstMethod);
+}
+
+bool FCursor::MoveToLast()
+{
+	return CallMethod<bool>(MoveToLastMethod);
+}
+
+bool FCursor::MoveToNext()
+{
+	return CallMethod<bool>(MoveToNextMethod);
 }
 
 TArray<uint8> FCursor::GetBlob(int32 var1)

@@ -20,6 +20,15 @@ enum class EWalletContractV1 : uint8
 	PURPOSE_SIGN_SOLANA_TRANSACTION = 0,
 };
 
+#define ACCOUNTS_ACCOUNT_ID					TEXT("_id")
+#define ACCOUNTS_BIP32_DERIVATION_PATH		TEXT("Accounts_Bip32DerivationPath")
+#define ACCOUNTS_PUBLIC_KEY_RAW				TEXT("Accounts_PublicKeyRaw")
+#define ACCOUNTS_PUBLIC_KEY_ENCODED			TEXT("Accounts_PublicKeyEncoded")
+#define ACCOUNTS_ACCOUNT_NAME				TEXT("Accounts_AccountName")
+#define ACCOUNTS_ACCOUNT_IS_USER_WALLET		TEXT("Accounts_IsUserWallet")
+#define ACCOUNTS_ACCOUNT_IS_VALID			TEXT("Accounts_IsValid")
+
+
 /**
  * FSigningResponse
  */
@@ -48,6 +57,31 @@ struct FPublicKeyResponse
 	FString PublicKeyEncoded;
 	UPROPERTY(BlueprintReadWrite)
 	FString ResolvedDerivationPath;
+};
+
+/**
+ * FWalletAccount
+ */
+USTRUCT(BlueprintType)
+struct SEEDVAULT_API FWalletAccount
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	int64 AccountId;
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsUserWallet;
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsValid;
+	UPROPERTY(BlueprintReadOnly)
+	FString Name;	
+	
+	FWalletAccount()
+		: AccountId(0)
+		, bIsUserWallet(false)
+		, bIsValid(false)
+	{
+	}
 };
 
 /**
@@ -96,7 +130,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static void RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths,
 		const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
-		
+
+	UFUNCTION(BlueprintCallable)
+	static bool GetAccount(int64 AuthToken, int32 AccountIndex, FWalletAccount& OutAccount);	
+	
 	/** Deauthorize the specified seed for the current app. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
 	static bool DeauthorizeSeed(int64 AuthToken);

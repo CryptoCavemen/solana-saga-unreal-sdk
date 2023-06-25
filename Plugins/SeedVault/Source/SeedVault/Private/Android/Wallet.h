@@ -202,18 +202,18 @@ public:
 	static FString ResolveDerivationPath(FJavaClassObjectWrapperRef Context, FString DerivationPath, int32 Purpose, TSharedPtr<FThrowable>* OutException = nullptr);	
 	
 protected:
-	static FJavaClassMethod AuthorizeSeedMethod;
-	static FJavaClassMethod CreateSeedMethod;
-	static FJavaClassMethod ImportSeedMethod;
-	static FJavaClassMethod SignTransactionMethod;
-	static FJavaClassMethod SignMessageMethod;
-	static FJavaClassMethod RequestPublicKeysMethod;
-	static FJavaClassMethod GetAccountsMethod;
-	static FJavaClassMethod GetAccountMethod;
-	static FJavaClassMethod UpdateAccountNameMethod;
-	static FJavaClassMethod DeauthorizeSeedMethod;
-	static FJavaClassMethod HasUnauthorizedSeedsForPurposeMethod;
-	static FJavaClassMethod ResolveDerivationPathMethod;
+	static FJavaClassStaticMethod AuthorizeSeedMethod;
+	static FJavaClassStaticMethod CreateSeedMethod;
+	static FJavaClassStaticMethod ImportSeedMethod;
+	static FJavaClassStaticMethod SignTransactionMethod;
+	static FJavaClassStaticMethod SignMessageMethod;
+	static FJavaClassStaticMethod RequestPublicKeysMethod;
+	static FJavaClassStaticMethod GetAccountsMethod;
+	static FJavaClassStaticMethod GetAccountMethod;
+	static FJavaClassStaticMethod UpdateAccountNameMethod;
+	static FJavaClassStaticMethod DeauthorizeSeedMethod;
+	static FJavaClassStaticMethod HasUnauthorizedSeedsForPurposeMethod;
+	static FJavaClassStaticMethod ResolveDerivationPathMethod;
 };
 
 #endif

@@ -15,10 +15,13 @@
  */
 class FCursor : public FJavaClassObjectWrapper
 {
-	DECLARE_JAVA_CLASS_OBJECT(FCursor);
+	DECLARE_JAVA_CLASS_OBJECT(FCursor)
 public:
 	int32 GetCount();
 	int32 GetPosition();
+	bool MoveToFirst();
+	bool MoveToLast();
+	bool MoveToNext();
 	TArray<uint8> GetBlob(int32 var1);
 	FString GetString(int32 var1);
 	int16 GetShort(int32 var1);
@@ -28,6 +31,9 @@ public:
 protected:
 	FJavaClassMethod GetCountMethod;
 	FJavaClassMethod GetPositionMethod;
+	FJavaClassMethod MoveToFirstMethod;
+	FJavaClassMethod MoveToLastMethod;
+	FJavaClassMethod MoveToNextMethod;
 	FJavaClassMethod GetBlobMethod;
 	FJavaClassMethod GetStringMethod;
 	FJavaClassMethod GetShortMethod;
