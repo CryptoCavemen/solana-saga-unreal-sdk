@@ -18,12 +18,15 @@ FScopedJavaObject<jobjectArray> FJavaUtils::GetJStringArray(const TArray<FString
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 
-	jclass ArrayClass = Env->FindClass("[Ljava/lang/String;");
+	jclass ArrayClass = Env->FindClass("java/lang/String");
 	jobjectArray JStringsArray = Env->NewObjectArray(Strings.Num(), ArrayClass, nullptr);
 	Env->DeleteLocalRef(ArrayClass);
 
-	for (int32 Index = 0; Index < Strings.Num(); Index++)  
+	for (int32 Index = 0; Index < Strings.Num(); Index++)
+	{
 		Env->SetObjectArrayElement(JStringsArray, Index, *FJavaHelper::ToJavaString(Env, Strings[Index]));
+		VerifyException(Env);
+	}
 
 	return NewScopedJavaObject(Env, JStringsArray);
 }
@@ -38,7 +41,7 @@ FScopedJavaObject<jobject> FJavaUtils::GetJUri(const FString& Uri)
 	jclass UriClass = Env->FindClass("android/net/Uri");
 	jmethodID UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
 	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *FJavaHelper::ToJavaString(Env, Uri));
-	LogException(Env);
+	VerifyException(Env);
 	return NewScopedJavaObject(Env, JUri);
 }
 
@@ -72,6 +75,7 @@ FScopedJavaObject<jobjectArray> FJavaUtils::GetArrayOfByteArray(const TArray<TAr
 	{   
 		auto JBytes = GetByteArray(ByteArray[Index]);
 		Env->SetObjectArrayElement(JByteArray, Index, *JBytes);
+		VerifyException(Env);
 	}
 
 	return NewScopedJavaObject(Env, JByteArray);	

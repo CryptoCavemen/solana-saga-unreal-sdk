@@ -22,11 +22,11 @@ public:
 	bool MoveToFirst();
 	bool MoveToLast();
 	bool MoveToNext();
-	TArray<uint8> GetBlob(int32 var1);
-	FString GetString(int32 var1);
-	int16 GetShort(int32 var1);
-	int32 GetInt(int32 var1);
-	int64 GetLong(int32 var1);
+	TArray<uint8> GetBlob(int32 Var1);
+	FString GetString(int32 Var1);
+	int16 GetShort(int32 Var1);
+	int32 GetInt(int32 Var1);
+	int64 GetLong(int32 Var1);
 	void Close();
 protected:
 	FJavaClassMethod GetCountMethod;

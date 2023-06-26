@@ -15,7 +15,7 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FCursor, FJavaClassObjectWrapper, "android/dat
 	MoveToLastMethod = GetClassMethod("moveToLast", "()Z");
 	MoveToNextMethod = GetClassMethod("moveToNext", "()Z");
 	GetBlobMethod = GetClassMethod("getBlob", "(I)[B");
-	GetStringMethod = GetClassMethod("getString", "(I)Ljava/lang/String");
+	GetStringMethod = GetClassMethod("getString", "(I)Ljava/lang/String;");
 	GetShortMethod = GetClassMethod("getShort", "(I)S");
 	GetIntMethod = GetClassMethod("getInt", "(I)I");
 	GetLongMethod = GetClassMethod("getLong", "(I)J");
@@ -47,29 +47,29 @@ bool FCursor::MoveToNext()
 	return CallMethod<bool>(MoveToNextMethod);
 }
 
-TArray<uint8> FCursor::GetBlob(int32 var1)
+TArray<uint8> FCursor::GetBlob(int32 Var1)
 {
-	return CallMethod<TArray<uint8>>(GetBlobMethod);
+	return CallMethod<TArray<uint8>>(GetBlobMethod, Var1);
 }
 
-FString FCursor::GetString(int32 var1)
+FString FCursor::GetString(int32 Var1)
 {
-	return CallMethod<FString>(GetStringMethod);
+	return CallMethod<FString>(GetStringMethod, Var1);
 }
 
-int16 FCursor::GetShort(int32 var1)
+int16 FCursor::GetShort(int32 Var1)
 {
-	return CallMethod<int16>(GetShortMethod);
+	return CallMethod<int16>(GetShortMethod, Var1);
 }
 
-int32 FCursor::GetInt(int32 var1)
+int32 FCursor::GetInt(int32 Var1)
 {
-	return CallMethod<int32>(GetIntMethod);
+	return CallMethod<int32>(GetIntMethod, Var1);
 }
 
-int64 FCursor::GetLong(int32 var1)
+int64 FCursor::GetLong(int32 Var1)
 {
-	return CallMethod<int64>(GetLongMethod);
+	return CallMethod<int64>(GetLongMethod, Var1);
 }
 
 void FCursor::Close()
