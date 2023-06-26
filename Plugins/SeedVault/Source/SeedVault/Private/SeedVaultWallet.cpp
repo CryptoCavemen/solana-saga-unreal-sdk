@@ -338,6 +338,22 @@ TArray<FWalletAccount> USeedVaultWallet::GetAccounts(int64 AuthToken)
 	}
 
 #else
+	
+	/*
+	// FOR TEST PURPOSES
+	FWalletAccount Account;
+	Account.AccountId = 0;
+	Account.DerivationPath = "1000/000/0";
+	Account.PublicKeyEncoded = "fdfdfdfddf";
+	Account.Name = "AccountName 1";
+	Accounts.Add(Account);
+	Account.AccountId = 0;
+	Account.DerivationPath = "1000/000/1";
+	Account.PublicKeyEncoded = "fdfdfdfddf";
+	Account.Name = "AccountName 2";
+	Accounts.Add(Account);	
+	*/
+	
 	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
 #endif
 
@@ -422,6 +438,20 @@ TArray<FWalletSeed> USeedVaultWallet::GetAuthorizedSeeds()
 		AuthorizedSeeds.Add(Seed);
 	}
 #else
+
+	/*
+	// FOR TEST PURPOSES
+	FWalletSeed Seed;
+	Seed.AuthToken = 111;
+	Seed.AuthPurpose = 1;
+	Seed.Name = "Seed 1";
+	AuthorizedSeeds.Add(Seed);
+	Seed.AuthToken = 222;
+	Seed.AuthPurpose = 1;
+	Seed.Name = "Seed 2";
+	AuthorizedSeeds.Add(Seed);	
+	*/
+	
 	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
 #endif
 
