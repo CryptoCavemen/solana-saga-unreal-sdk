@@ -313,7 +313,7 @@ void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messag
 #endif
 }
 
-void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Authorize(IdentityUri, IconUri, IdentityName, Cluster,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
@@ -346,7 +346,7 @@ void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FS
 		}));
 }
 
-void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Reauthorize(IdentityUri, IconUri, IdentityName, AuthorizationToken,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
@@ -379,7 +379,7 @@ void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, 
 		}));	
 }
 
-void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, FSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Deauthorize(AuthorizationToken,
 		FSuccessDelegate::CreateLambda([Success]()
@@ -412,7 +412,7 @@ void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuc
 		}));	
 }
 
-void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transactions, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	SignTransactions(Transactions,
 		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
@@ -445,7 +445,7 @@ void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transac
 		}));
 }
 
-void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	SignAndSendTransactions(Transactions, MinContextSlot,
 		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
@@ -481,8 +481,8 @@ void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& 
 void UWalletAdapterClient::K2_SignMessagesDetached(
 	const TArray<FByteArray>& Messages,
 	const TArray<FByteArray>& Addresses,
-	const FSignMessagesSuccessDynDelegate& Success,
-	const FFailureDynDelegate& Failure)
+	FSignMessagesSuccessDynDelegate Success,
+	FFailureDynDelegate Failure)
 {
 	SignMessagesDetached(Messages, Addresses,
 		FSignMessagesSuccessDelegate::CreateLambda([Success](const TArray<FSignedMessage>& SignedMessages)

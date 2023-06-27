@@ -22,11 +22,10 @@ void FList::Add(jobject Element)
 	CallMethod<bool>(AddMethod, Element);
 }
 
-FScopedJavaObject<jobject> FList::Get(int32 Index)
+FJavaClassObjectWrapperRef FList::Get(int32 Index)
 {
-	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	jobject JRetVal = CallMethod<jobject>(GetMethod, Index);
-	return NewScopedJavaObject(Env, JRetVal);
+	return FJavaClassObjectWrapperRef(new FJavaClassObjectWrapper(JRetVal));
 }
 
 int32 FList::Size()

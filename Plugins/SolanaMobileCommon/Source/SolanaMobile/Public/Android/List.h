@@ -19,7 +19,7 @@ class FList : public FJavaClassObjectWrapper
 	DECLARE_JAVA_CLASS_OBJECT(FList);
 public:
 	void Add(jobject Element);
-	FScopedJavaObject<jobject> Get(int32 Index);
+	FJavaClassObjectWrapperRef Get(int32 Index);
 	int32 Size();
 protected:
 	FJavaClassMethod AddMethod;

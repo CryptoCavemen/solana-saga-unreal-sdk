@@ -95,7 +95,7 @@ extern "C"
 		int32 NumSigningResponses = SigningResponses->Size();
 		for (int32 ResponseIndex = 0; ResponseIndex < NumSigningResponses; ResponseIndex++)
 		{
-			auto SigningResponse = FSigningResponseWrapper::CreateFromExisting(*SigningResponses->Get(ResponseIndex));
+			auto SigningResponse = FSigningResponseWrapper::CreateFromExisting(**SigningResponses->Get(ResponseIndex));
 			FSigningResponse FSigningResponse;
 
 			auto Signatures = SigningResponse->GetSignatures();
@@ -103,7 +103,7 @@ extern "C"
 			for (int32 SignatureIndex = 0; SignatureIndex < NumSignatures; SignatureIndex++)
 			{
 				auto JSignature = Signatures->Get(SignatureIndex);
-				TArray<uint8> Signature = FJavaUtils::JByteArrayToTArray((jbyteArray)*JSignature);
+				TArray<uint8> Signature = FJavaUtils::JByteArrayToTArray((jbyteArray)**JSignature);
 				FSigningResponse.Signatures.Add(Signature);
 			}
 			
@@ -112,7 +112,7 @@ extern "C"
 			for (int32 PathIndex = 0; PathIndex < NumResolvedDerivationPaths; PathIndex++)
 			{
 				auto JPath = ResolvedDerivationPaths->Get(PathIndex);
-				FString Path = FJavaUtils::JUriToString(*JPath);
+				FString Path = FJavaUtils::JUriToString(**JPath);
 				FSigningResponse.ResolvedDerivationPaths.Add(Path);
 			}
 			
@@ -183,7 +183,7 @@ extern "C"
 		int32 NumPublicKeyResponses = PublicKeyResponses->Size();
 		for (int32 ResponseIndex = 0; ResponseIndex < NumPublicKeyResponses; ResponseIndex++)
 		{
-			auto PublicKeyResponse = FPublicKeyResponseWrapper::CreateFromExisting(*PublicKeyResponses->Get(ResponseIndex));
+			auto PublicKeyResponse = FPublicKeyResponseWrapper::CreateFromExisting(**PublicKeyResponses->Get(ResponseIndex));
 
 			FPublicKeyResponse FPublicKeyResponse;
 			FPublicKeyResponse.PublicKey = PublicKeyResponse->GetPublicKey();

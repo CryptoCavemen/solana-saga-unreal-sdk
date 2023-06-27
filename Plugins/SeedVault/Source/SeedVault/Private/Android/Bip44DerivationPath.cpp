@@ -68,7 +68,7 @@ TArray<TSharedRef<FBipLevel>> FBip44DerivationPath::GetLevels()
 	int32 NumLevels = JLevelsList->Size();
 	for (int32 LevelIndex = 0; LevelIndex < NumLevels; LevelIndex++)
 	{
-		auto Level = FBipLevel::CreateFromExisting(*JLevelsList->Get(LevelIndex));
+		auto Level = FBipLevel::CreateFromExisting(**JLevelsList->Get(LevelIndex));
 		Levels.Add(Level);
 	}
 	

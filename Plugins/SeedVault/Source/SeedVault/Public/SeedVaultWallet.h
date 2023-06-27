@@ -115,41 +115,37 @@ class SEEDVAULT_API USeedVaultWallet : public UBlueprintFunctionLibrary
 public:
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSuccessWithTokenDynDelegate, int64, AuthToken);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, TArray<FSigningResponse>, SigningResponses);
-	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetPublicKeysSuccessDynDelegate, TArray<FPublicKeyResponse>, PublicKeyResponses);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FSigningResponse>&, SigningResponses);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FGetPublicKeysSuccessDynDelegate, const TArray<FPublicKeyResponse>&, PublicKeyResponses);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 
 	/** Request authorization of a new seed for the specified purpose. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void AuthorizeSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure);
 
 	/** Request creation of a new seed for the specified purpose. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void CreateSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure);
 
 	/** Request import of an existing seed for the specified purpose. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void ImportSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure);
 
 	/** Request that the provided transaction be signed. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction,
-		const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	
 	/** Request that the provided transaction be signed. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message,
-		const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure);
 
 	/** Request the public key for a given BipDerivationPath of a seed. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void RequestPublicKey(int64 AuthToken, const FString& DerivationPaths,
-		const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	static void RequestPublicKey(int64 AuthToken, const FString& DerivationPaths, FGetPublicKeysSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	
 	/** Request the public keys for a set of BipDerivationPaths of a seed. */
 	UFUNCTION(BlueprintCallable, Category="Solana")
-	static void RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths,
-		const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+	static void RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, FGetPublicKeysSuccessDynDelegate Success, FFailureDynDelegate Failure);	
 
 	/** Request an account metadata for the specified known account for the given auth token. */
 	UFUNCTION(BlueprintCallable)

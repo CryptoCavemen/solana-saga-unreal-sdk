@@ -56,7 +56,7 @@ enum class EActivityRequestCode
 };
 
 
-void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (AuthorizeSeedSuccess.IsBound())
@@ -90,7 +90,7 @@ void USeedVaultWallet::AuthorizeSeed(EWalletContractV1 Purpose, const FSuccessWi
 #endif
 }
 
-void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (CreateSeedSuccess.IsBound())
@@ -124,7 +124,7 @@ void USeedVaultWallet::CreateSeed(EWalletContractV1 Purpose, const FSuccessWithT
 #endif
 }
 
-void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithTokenDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, FSuccessWithTokenDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (ImportSeedSuccess.IsBound())
@@ -158,8 +158,7 @@ void USeedVaultWallet::ImportSeed(EWalletContractV1 Purpose, const FSuccessWithT
 #endif
 }
 
-void USeedVaultWallet::SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction,
-	const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::SignTransaction(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Transaction, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (SignTransactionsSuccess.IsBound())
@@ -193,8 +192,7 @@ void USeedVaultWallet::SignTransaction(int64 AuthToken, const FString& Derivatio
 #endif
 }
 
-void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message,
-	const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPath, const TArray<uint8>& Message, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (SignMessagesSuccess.IsBound())
@@ -228,7 +226,7 @@ void USeedVaultWallet::SignMessage(int64 AuthToken, const FString& DerivationPat
 #endif
 }
 
-void USeedVaultWallet::RequestPublicKey(int64 AuthToken, const FString& DerivationPath, const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::RequestPublicKey(int64 AuthToken, const FString& DerivationPath, FGetPublicKeysSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (GetPublicKeysSuccess.IsBound())
@@ -262,8 +260,7 @@ void USeedVaultWallet::RequestPublicKey(int64 AuthToken, const FString& Derivati
 #endif
 }
 
-void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths,
-                                         const FGetPublicKeysSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void USeedVaultWallet::RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, FGetPublicKeysSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 #if PLATFORM_ANDROID
 	if (GetPublicKeysSuccess.IsBound())

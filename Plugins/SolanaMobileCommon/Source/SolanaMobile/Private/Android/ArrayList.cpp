@@ -22,11 +22,10 @@ bool FArrayList::Add(jobject Element)
 	return CallMethod<bool>(AddMethod, Element);
 }
 
-FScopedJavaObject<jobject> FArrayList::Get(int32 Index)
+FJavaClassObjectWrapperRef FArrayList::Get(int32 Index)
 {
-	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	jobject JRetVal = CallMethod<jobject>(GetMethod, Index);
-	return NewScopedJavaObject(Env, JRetVal);
+	return FJavaClassObjectWrapperRef(new FJavaClassObjectWrapper(JRetVal));
 }
 
 int32 FArrayList::Size()
