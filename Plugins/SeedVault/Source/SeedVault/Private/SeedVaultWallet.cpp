@@ -335,8 +335,8 @@ TArray<FWalletAccount> USeedVaultWallet::GetAccounts(int64 AuthToken)
 	}
 
 #else
-	
-	/*
+
+	/*	
 	// FOR TEST PURPOSES
 	FWalletAccount Account;
 	Account.AccountId = 0;
@@ -403,6 +403,29 @@ bool USeedVaultWallet::GetAccount(int64 AuthToken, int32 AccountId, FWalletAccou
 	OutAccount.Name = Cursor->GetString(4);
 	OutAccount.bIsUserWallet = Cursor->GetShort(5) == 1 ? true : false;
 	OutAccount.bIsValid = Cursor->GetShort(6) == 1 ? true : false;
+	
+	return true;
+#else
+	UE_LOG(LogSeedVault, Error, TEXT("SeedVault: platform is not supported"));
+	return false;
+#endif
+}
+
+bool USeedVaultWallet::UpdateAccountName(int64 AuthToken, int64 AccountId, const FString& Name)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
+	auto AppContext = Activity->GetApplication();
+	
+	FWallet::UpdateAccountName(AppContext, AuthToken, AccountId, Name, &Exception);
+
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Failed to update the name of account id '%d': %s"), AccountId, *Exception->GetMessage());
+		return false;
+	}
 	
 	return true;
 #else

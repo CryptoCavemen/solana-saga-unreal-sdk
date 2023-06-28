@@ -148,12 +148,16 @@ public:
 	static void RequestPublicKeys(int64 AuthToken, const TArray<FString>& DerivationPaths, FGetPublicKeysSuccessDynDelegate Success, FFailureDynDelegate Failure);	
 
 	/** Request an account metadata for the specified known account for the given auth token. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Solana")
 	static TArray<FWalletAccount> GetAccounts(int64 AuthToken);
 	
 	/** Request an account metadata for the specified known account for the given auth token. */
-	UFUNCTION(BlueprintCallable)
-	static bool GetAccount(int64 AuthToken, int32 AccountId, FWalletAccount& OutAccount);	
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static bool GetAccount(int64 AuthToken, int32 AccountId, FWalletAccount& OutAccount);
+
+	/** Update the account name for the specified known account for the given auth token. */
+	UFUNCTION(BlueprintCallable, Category="Solana")
+	static bool UpdateAccountName(int64 AuthToken, int64 AccountId, const FString& Name);
 
 	/** Returns the list of authorized seeds for the current app. */
 	UFUNCTION(BlueprintCallable, Category="Solana")

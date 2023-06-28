@@ -268,12 +268,12 @@ void FWallet::UpdateAccountName(FJavaClassObjectWrapperRef Context, int64 AuthTo
 	if (OutException)
 	{
 		jthrowable JThrowable;
-		CallThrowableStaticMethod<jobject>(JThrowable, UpdateAccountNameMethod, **Context, AuthToken, Id, *FJavaUtils::GetJString(Name));
+		CallThrowableStaticMethod<void>(JThrowable, UpdateAccountNameMethod, **Context, AuthToken, Id, *FJavaUtils::GetJString(Name));
 		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
 	}
 	else
 	{	
-		CallStaticMethod<jobject>(UpdateAccountNameMethod, **Context, AuthToken, Id, *FJavaUtils::GetJString(Name));
+		CallStaticMethod<void>(UpdateAccountNameMethod, **Context, AuthToken, Id, *FJavaUtils::GetJString(Name));
 	}
 }
 
