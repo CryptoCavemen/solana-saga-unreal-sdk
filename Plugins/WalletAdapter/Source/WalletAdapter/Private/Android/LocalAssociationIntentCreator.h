@@ -5,30 +5,28 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace WalletAdapter
-{
-	
+class FThrowable;
 class FMobileWalletAdapterSession;
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.FLocalAssociationIntentCreator 
  */
-class FLocalAssociationIntentCreator	
+class FLocalAssociationIntentCreator : FJavaClassObjectWrapper
 {
 private:
 	FLocalAssociationIntentCreator() {}
-public:
-	/** Initialize java objects and cache them for further usage. Called when the module is loaded. */
-	static void StaticConstruct();	
-
-	static FJavaClassObjectWrapperRef CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session);	
-};
 	
-}
+	DECLARE_JAVA_CLASS_OBJECT_STATIC()
+public:
+	static FJavaClassObjectWrapperPtr CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session, TSharedPtr<FThrowable>* OutException = nullptr);
+
+protected:
+	static FJavaClassStaticMethod CreateAssociationIntentMethod;
+};
 
 #endif

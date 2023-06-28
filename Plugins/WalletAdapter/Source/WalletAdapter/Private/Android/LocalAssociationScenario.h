@@ -5,17 +5,15 @@
 
 #pragma once
 
-#include "Defines.h"
 #include "CoreMinimal.h"
+#include "Android/Defines.h"
 #include "MobileWalletAdapterSession.h"
-#include "Future.h"
 #include "Scenario.h"
+
 #if PLATFORM_ANDROID
+#include "Android/Future.h"
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace WalletAdapter
-{
-	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.LocalAssociationScenario 
  */
@@ -34,7 +32,5 @@ protected:
 	FJavaClassMethod StartMethod;
 	FJavaClassMethod CloseMethod;
 };
-	
-}
 
 #endif

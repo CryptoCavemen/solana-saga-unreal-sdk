@@ -3,15 +3,11 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "Future.h"
+#include "Android/Future.h"
 
 #if PLATFORM_ANDROID
-#include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
-
-using namespace WalletAdapter;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FFuture, FJavaClassObjectWrapper, "jvav/util/concurrent/Future", nullptr)
 	CancelMethod = GetClassMethod("cancel", "(Z)Z");

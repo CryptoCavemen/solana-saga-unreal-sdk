@@ -3,21 +3,29 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "GameActivity.h"
+#include "Android/GameActivity.h"
 
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
-#include "Android/AndroidApplication.h"
-#include "Android/AndroidPlatform.h"
-#include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
-
-using namespace WalletAdapter;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGameActivity, FJavaClassObjectWrapper, "com/epicgames/unreal/GameActivity", "()V")
+	GetApplicationContextMethod = GetClassMethod("getApplicationContext", "()Landroid/content/Context;");
+	GetApplicationMethod = GetClassMethod("getApplication", "()Landroid/app/Application;");
 	StartActivityMethod = GetClassMethod("startActivity", "(Landroid/content/Intent;)V");
 	StartActivityForResultMethod = GetClassMethod("startActivityForResult", "(Landroid/content/Intent;I)V");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+FJavaClassObjectWrapperRef FGameActivity::GetApplicationContext()
+{
+	jobject JAppContext = CallMethod<jobject>(GetApplicationContextMethod);
+	return FJavaClassObjectWrapperRef(new FJavaClassObjectWrapper(JAppContext));
+}
+
+FJavaClassObjectWrapperRef FGameActivity::GetApplication()
+{
+	jobject JApp = CallMethod<jobject>(GetApplicationMethod);
+	return FJavaClassObjectWrapperRef(new FJavaClassObjectWrapper(JApp));
+}
 
 void FGameActivity::StartActivity(const FJavaClassObjectWrapperRef& Intent, TSharedPtr<FThrowable>* OutException)
 {

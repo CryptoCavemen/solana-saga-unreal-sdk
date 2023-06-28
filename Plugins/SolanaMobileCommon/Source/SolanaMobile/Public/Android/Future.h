@@ -11,9 +11,6 @@
 #include "Android/JavaClassObjectWrapper.h"
 #include "Throwable.h"
 
-namespace WalletAdapter
-{
-	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.scenario.Scenario 
  */
@@ -39,7 +36,5 @@ public:
 	FJavaClassMethod GetMethod;
 	FJavaClassMethod GetWithTimeoutMethod;
 };
-	
-}
 
 #endif

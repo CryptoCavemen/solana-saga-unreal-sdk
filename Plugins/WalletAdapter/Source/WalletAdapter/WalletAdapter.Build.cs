@@ -24,7 +24,8 @@ public class WalletAdapter : ModuleRules
 		
 		PublicDependencyModuleNames.AddRange(new string[]
 			{
-				"Core",				
+				"Core",
+				"SolanaMobile"
 			});
 			
 		
@@ -33,7 +34,7 @@ public class WalletAdapter : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
+				"SlateCore"
 			});
 		
 		

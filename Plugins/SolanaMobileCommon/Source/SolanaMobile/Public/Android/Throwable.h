@@ -7,12 +7,10 @@
 
 #include "Defines.h"
 #include "CoreMinimal.h"
+
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace WalletAdapter
-{
-	
 /**
  * Wrapper for java.lang.Throwable 
  */
@@ -25,6 +23,5 @@ protected:
 	FJavaClassMethod GetMessageMethod;
 };
 	
-}
 
 #endif

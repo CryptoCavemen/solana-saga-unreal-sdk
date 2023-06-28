@@ -7,37 +7,13 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Data.h"
 #include "WalletAdapterClient.generated.h"
 
-// __RESHARPER__ is only defined while in IDE. Used to help editing this file with proper highlighting.
-#ifdef __RESHARPER__
-	#define PLATFORM_ANDROID 1
-	#define USE_ANDROID_JNI 1
-#endif
-
 #if PLATFORM_ANDROID
-namespace WalletAdapter
-{
-	class FMobileWalletAdapterClient;
-	class FSignedMessageWrapper;
-}
+class FMobileWalletAdapterClient;
+class FSignedMessageWrapper;
 #endif
-
-
-/**
- * FByteArray
- */
-USTRUCT(BlueprintType)
-struct FByteArray
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadWrite)
-	TArray<uint8> Data;
-	
-	FByteArray() {}
-	FByteArray(const TArray<uint8>& InData) : Data(InData) {}
-};
 
 
 /**
@@ -58,7 +34,7 @@ struct FSignedMessage
 	FSignedMessage() {}
 	
 #if PLATFORM_ANDROID
-	FSignedMessage(const WalletAdapter::FSignedMessageWrapper& SignedMessage);
+	FSignedMessage(const FSignedMessageWrapper& SignedMessage);
 #endif	
 };
 
@@ -73,7 +49,7 @@ class WALLETADAPTER_API UWalletAdapterClient : public UObject
 	
 public:
 #if PLATFORM_ANDROID
-	void SetClientImpl(const TSharedPtr<WalletAdapter::FMobileWalletAdapterClient>& InClient);
+	void SetClientImpl(const TSharedPtr<FMobileWalletAdapterClient>& InClient);
 #endif
 
 public:
@@ -106,22 +82,22 @@ public:
 public:
 	/** Authorizes a client. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Authorize", ScriptName="Authorize"), Category="Solana")
-	void K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Reauthorizes a client. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Reauthorize", ScriptName="Reauthorize"), Category="Solana")
-	void K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Deauthorizes a client. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Deauthorize", ScriptName="Deauthorize"), Category="Solana")
-	void K2_Deauthorize(FString AuthorizationToken, const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_Deauthorize(FString AuthorizationToken, FSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Signs transactions. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignTransactions", ScriptName="SignTransactions"), Category="Solana")
-	void K2_SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_SignTransactions(const TArray<FByteArray>& Transactions, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Signs and sends transactions. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignAndSendTransactions", ScriptName="SignAndSendTransactions"), Category="Solana")
-	void K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Signs messages. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="SignMessagesDetached", ScriptName="SignMessagesDetached"), Category="Solana")
-	void K2_SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, const FSignMessagesSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);	
+	void K2_SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, FSignMessagesSuccessDynDelegate Success, FFailureDynDelegate Failure);	
 
 public:
 	UPROPERTY(BlueprintReadOnly)
@@ -135,6 +111,6 @@ public:
 	
 protected:
 #if PLATFORM_ANDROID
-	TSharedPtr<WalletAdapter::FMobileWalletAdapterClient> Client;
+	TSharedPtr<FMobileWalletAdapterClient> Client;
 #endif
 };

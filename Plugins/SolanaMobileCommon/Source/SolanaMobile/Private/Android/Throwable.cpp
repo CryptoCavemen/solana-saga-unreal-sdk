@@ -3,15 +3,10 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "Throwable.h"
+#include "Android/Throwable.h"
 
 #if PLATFORM_ANDROID
-#include "Android/AndroidApplication.h"
-#include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
-#include "Android/AndroidJNI.h"
-
-using namespace WalletAdapter;
 
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FThrowable, FJavaClassObjectWrapper, "java/lang/Throwable", "()V")
 	GetMessageMethod = GetClassMethod("getMessage", "()Ljava/lang/String;");

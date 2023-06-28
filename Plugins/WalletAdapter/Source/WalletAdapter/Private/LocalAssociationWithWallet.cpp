@@ -6,14 +6,14 @@
 #include "LocalAssociationWithWallet.h"
 #include "WalletAdapterClient.h"
 #include "WalletAdapter.h"
+
+#if PLATFORM_ANDROID
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationScenario.h"
 #include "Android/LocalAssociationIntentCreator.h"
 #include "Android/MobileWalletAdapterClient.h"
 
-#if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
-using namespace WalletAdapter;
 #endif
 
 #define DEFAULT_CLIENT_TIMEOUT_MS 60000
@@ -46,7 +46,7 @@ void ULocalAssociationWithWallet::Start(const FStartSuccessDelegate& Success, co
 			return;
 		}
 
-		auto NativeClient = FMobileWalletAdapterClient::MakeFromExistingObject(JClient->GetJObject());
+		auto NativeClient = FMobileWalletAdapterClient::CreateFromExisting(JClient->GetJObject());
 		Client = NewObject<UWalletAdapterClient>();
 		Client->SetClientImpl(NativeClient);
 
@@ -97,12 +97,17 @@ bool ULocalAssociationWithWallet::OpenWallet(const FString& UriPrefix)
 #if PLATFORM_ANDROID
 	TSharedPtr<FThrowable> Exception;
 	
-	auto Activity = FGameActivity::MakeFromExistingObject(FAndroidApplication::GetGameActivityThis());
+	auto Activity = FGameActivity::CreateFromExisting(FAndroidApplication::GetGameActivityThis());
 	
-	LocalAssociation = FLocalAssociationScenario::MakeInstance(DEFAULT_CLIENT_TIMEOUT_MS);
+	LocalAssociation = FLocalAssociationScenario::CreateInstance(DEFAULT_CLIENT_TIMEOUT_MS);
 	auto AssociationIntent = FLocalAssociationIntentCreator::CreateAssociationIntent(UriPrefix, LocalAssociation->GetPort(), *LocalAssociation->GetSession());
-
-	Activity->StartActivity(AssociationIntent, &Exception);
+	if (!AssociationIntent.IsValid())
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());
+		return false;
+	}
+	
+	Activity->StartActivity(AssociationIntent.ToSharedRef(), &Exception);
 	if (Exception)
 	{
 		UE_LOG(LogWalletAdapter, Error, TEXT("No Mobile Wallet Adapter-compatible wallet is available: %s"), *Exception->GetMessage());

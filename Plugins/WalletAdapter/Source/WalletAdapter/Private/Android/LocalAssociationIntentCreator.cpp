@@ -5,45 +5,65 @@
 
 #include "LocalAssociationIntentCreator.h"
 
-#include "JavaUtils.h"
-#include "MobileWalletAdapterSession.h"
-#include "WalletAdapter.h"
-
 #if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidPlatform.h"
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-using namespace WalletAdapter;
+#include "Android/JavaUtils.h"
+#include "Android/Throwable.h"
 
-static jclass Class;
-static jmethodID CreateAssociationIntentMethod;
+#include "MobileWalletAdapterSession.h"
+#include "WalletAdapter.h"
 
 
-void FLocalAssociationIntentCreator::StaticConstruct()
+FJavaClassStaticMethod FLocalAssociationIntentCreator::CreateAssociationIntentMethod;
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC(FLocalAssociationIntentCreator, "com/solana/mobilewalletadapter/clientlib/scenario/LocalAssociationIntentCreator")
+	CreateAssociationIntentMethod = GetClassStaticMethod(StaticClass, "createAssociationIntent", "(Landroid/net/Uri;ILcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;)Landroid/content/Intent;");
+END_IMPLEMENT_JAVA_CLASS_OBJECT_STATIC
+
+FJavaClassObjectWrapperPtr FLocalAssociationIntentCreator::CreateAssociationIntent(
+	const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session, TSharedPtr<FThrowable>* OutException)
 {
-	JNIEnv* Env = FAndroidApplication::GetJavaEnv();
+	FJavaClassObjectWrapperPtr Intent;
 	
-	Class = FAndroidApplication::FindJavaClassGlobalRef("com/solana/mobilewalletadapter/clientlib/scenario/LocalAssociationIntentCreator");
-	check(Class);
-	CreateAssociationIntentMethod = Env->GetStaticMethodID(Class, "createAssociationIntent",
-		"(Landroid/net/Uri;ILcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;)Landroid/content/Intent;");
-	check(CreateAssociationIntentMethod);	
-}
-
-FJavaClassObjectWrapperRef FLocalAssociationIntentCreator::CreateAssociationIntent(const FString& EndpointPrefix, int32 Port, const FMobileWalletAdapterSession& Session)
-{
 	UE_LOG(LogWalletAdapter, Verbose, TEXT("Creating Association Intent: EnpointPrefix = '%s'"), *EndpointPrefix);
-	JNIEnv* JEnv = FAndroidApplication::GetJavaEnv();
-	jobject RetVal = JEnv->CallStaticObjectMethod(
-		Class,
-		CreateAssociationIntentMethod,
-		!EndpointPrefix.IsEmpty() ? *FJavaUtils::GetJUri(EndpointPrefix) : nullptr, 
-		Port,
-		Session.GetJObject());
-	AndroidJavaEnv::CheckJavaException();
-	return MakeShared<FJavaClassObjectWrapper>(RetVal);
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
+		
+		jobject JIntent = CallThrowableStaticMethod<jobject>(
+			JThrowable,
+			CreateAssociationIntentMethod,
+			!EndpointPrefix.IsEmpty() ? *FJavaUtils::GetJUri(EndpointPrefix) : nullptr, 
+			Port,
+			Session.GetJObject());
+		
+		if (JThrowable)
+		{
+			*OutException = FThrowable::CreateFromExisting(JThrowable);
+		}
+		else
+		{
+			*OutException = nullptr;
+			Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+		}
+	}
+	else
+	{
+		jobject JIntent = CallStaticMethod<jobject>(
+			CreateAssociationIntentMethod,
+			!EndpointPrefix.IsEmpty() ? *FJavaUtils::GetJUri(EndpointPrefix) : nullptr, 
+			Port,
+			Session.GetJObject());
+		
+		Intent = MakeShareable(new FJavaClassObjectWrapper(JIntent));
+	}
+	
+	return Intent;
 }
 
 #endif

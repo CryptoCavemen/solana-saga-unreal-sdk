@@ -5,17 +5,16 @@
 
 #include "WalletAdapterClient.h"
 #include "WalletAdapter.h"
+
+#if PLATFORM_ANDROID
 #include "Android/GameActivity.h"
 #include "Android/LocalAssociationScenario.h"
 #include "Android/MobileWalletAdapterClient.h"
 
-#if PLATFORM_ANDROID
 #include "Android/AndroidApplication.h"
 #endif
 
 #if PLATFORM_ANDROID
-
-using namespace WalletAdapter;
 
 FSignedMessage::FSignedMessage(const FSignedMessageWrapper& SignedMessage)
 {
@@ -59,7 +58,7 @@ void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FStri
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::CreateFromExisting(JAuthResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Authorized successfully: AuthToken = %s"), *AuthToken);
@@ -102,7 +101,7 @@ void UWalletAdapterClient::Reauthorize(FString IdentityUri, FString IconUri, FSt
 		}
 
 		check(JAuthResult.IsValid());
-		auto AuthResult = FAuthorizationResultWrapper::MakeFromExistingObject(JAuthResult->GetJObject());
+		auto AuthResult = FAuthorizationResultWrapper::CreateFromExisting(JAuthResult->GetJObject());
 	
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Reauthorized successfully"));
@@ -186,7 +185,7 @@ void UWalletAdapterClient::SignTransactions(const TArray<FByteArray>& Transactio
 		}
 
 		check(JSignResult.IsValid());
-		auto SignResult = FSignPayloadsResultWrapper::MakeFromExistingObject(JSignResult->GetJObject());
+		auto SignResult = FSignPayloadsResultWrapper::CreateFromExisting(JSignResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d transaction(s)"), Transactions.Num());
@@ -233,7 +232,7 @@ void UWalletAdapterClient::SignAndSendTransactions(const TArray<FByteArray>& Tra
 		}
 
 		check(JSignAndSendResult.IsValid());
-		auto SignAndSendResult = FSignAndSendTransactionsResultWrapper::MakeFromExistingObject(JSignAndSendResult->GetJObject());
+		auto SignAndSendResult = FSignAndSendTransactionsResultWrapper::CreateFromExisting(JSignAndSendResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed and sent %d transaction(s)"), Transactions.Num());
@@ -296,7 +295,7 @@ void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messag
 		}
 
 		check(JSignMessagesResult.IsValid());
-		auto SignMessagesResult = FSignMessagesResultWrapper::MakeFromExistingObject(JSignMessagesResult->GetJObject());
+		auto SignMessagesResult = FSignMessagesResultWrapper::CreateFromExisting(JSignMessagesResult->GetJObject());
 		
 		// SUCCESS
 		UE_LOG(LogWalletAdapter, Log, TEXT("Signed %d message(s)"), Messages.Num());
@@ -314,7 +313,7 @@ void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messag
 #endif
 }
 
-void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Authorize(IdentityUri, IconUri, IdentityName, Cluster,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
@@ -347,7 +346,7 @@ void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FS
 		}));
 }
 
-void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, const FAuthSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, FString IdentityName, FString AuthorizationToken, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Reauthorize(IdentityUri, IconUri, IdentityName, AuthorizationToken,
 		FAuthSuccessDelegate::CreateLambda([Success](const FString& Token)
@@ -380,7 +379,7 @@ void UWalletAdapterClient::K2_Reauthorize(FString IdentityUri, FString IconUri, 
 		}));	
 }
 
-void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, FSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Deauthorize(AuthorizationToken,
 		FSuccessDelegate::CreateLambda([Success]()
@@ -413,7 +412,7 @@ void UWalletAdapterClient::K2_Deauthorize(FString AuthorizationToken, const FSuc
 		}));	
 }
 
-void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transactions, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transactions, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	SignTransactions(Transactions,
 		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
@@ -446,7 +445,7 @@ void UWalletAdapterClient::K2_SignTransactions(const TArray<FByteArray>& Transac
 		}));
 }
 
-void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, const FSignSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& Transactions, int32 MinContextSlot, FSignSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	SignAndSendTransactions(Transactions, MinContextSlot,
 		FSignSuccessDelegate::CreateLambda([Success](const TArray<FByteArray>& Transactions)
@@ -482,8 +481,8 @@ void UWalletAdapterClient::K2_SignAndSendTransactions(const TArray<FByteArray>& 
 void UWalletAdapterClient::K2_SignMessagesDetached(
 	const TArray<FByteArray>& Messages,
 	const TArray<FByteArray>& Addresses,
-	const FSignMessagesSuccessDynDelegate& Success,
-	const FFailureDynDelegate& Failure)
+	FSignMessagesSuccessDynDelegate Success,
+	FFailureDynDelegate Failure)
 {
 	SignMessagesDetached(Messages, Addresses,
 		FSignMessagesSuccessDelegate::CreateLambda([Success](const TArray<FSignedMessage>& SignedMessages)

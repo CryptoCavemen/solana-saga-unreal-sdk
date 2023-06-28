@@ -11,8 +11,6 @@
 #include "Android/AndroidJavaEnv.h"
 #include "Android/AndroidJNI.h"
 
-using namespace WalletAdapter;
-
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FLocalAssociationScenario, FScenario, "com/solana/mobilewalletadapter/clientlib/scenario/LocalAssociationScenario", "(I)V", int ClientTimeoutMs)
 	GetPortMethod = GetClassMethod("getPort", "()I");
 	GetSessionMethod = GetClassMethod("getSession", "()Lcom/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterSession;");
@@ -28,19 +26,19 @@ int32 FLocalAssociationScenario::GetPort()
 TSharedRef<FMobileWalletAdapterSession> FLocalAssociationScenario::GetSession()
 {
 	jobject JObject = CallMethod<jobject>(GetSessionMethod);
-	return FMobileWalletAdapterSession::MakeFromExistingObject(JObject);
+	return FMobileWalletAdapterSession::CreateFromExisting(JObject);
 }
 
 TSharedRef<FFuture> FLocalAssociationScenario::Start()
 {	
 	jobject RetVal = CallMethod<jobject>(StartMethod);
-	return FFuture::MakeFromExistingObject(RetVal);
+	return FFuture::CreateFromExisting(RetVal);
 }
 
 TSharedRef<FFuture> FLocalAssociationScenario::Close()
 {	
 	jobject RetVal = CallMethod<jobject>(CloseMethod);
-	return FFuture::MakeFromExistingObject(RetVal);
+	return FFuture::CreateFromExisting(RetVal);
 }
 
 #endif

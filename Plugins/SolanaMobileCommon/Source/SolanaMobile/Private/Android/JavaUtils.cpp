@@ -3,16 +3,32 @@
 // Author: Sergey Makovkin (makovkin.s@gmail.com)
 //
 
-#include "JavaUtils.h"
+#include "Android/JavaUtils.h"
+#include "SolanaMobile.h"
 
-#if USE_ANDROID_JNI
-
-using namespace WalletAdapter;
+#if PLATFORM_ANDROID
 
 FScopedJavaObject<jstring> FJavaUtils::GetJString(const FString& String)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	return FJavaHelper::ToJavaString(Env, String);
+}
+
+FScopedJavaObject<jobjectArray> FJavaUtils::GetJStringArray(const TArray<FString>& Strings)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+
+	jclass ArrayClass = Env->FindClass("java/lang/String");
+	jobjectArray JStringsArray = Env->NewObjectArray(Strings.Num(), ArrayClass, nullptr);
+	Env->DeleteLocalRef(ArrayClass);
+
+	for (int32 Index = 0; Index < Strings.Num(); Index++)
+	{
+		Env->SetObjectArrayElement(JStringsArray, Index, *FJavaHelper::ToJavaString(Env, Strings[Index]));
+		VerifyException(Env);
+	}
+
+	return NewScopedJavaObject(Env, JStringsArray);
 }
 
 FScopedJavaObject<jobject> FJavaUtils::GetJUri(const FString& Uri)
@@ -25,7 +41,7 @@ FScopedJavaObject<jobject> FJavaUtils::GetJUri(const FString& Uri)
 	jclass UriClass = Env->FindClass("android/net/Uri");
 	jmethodID UriParseMethod = Env->GetStaticMethodID(UriClass, "parse", "(Ljava/lang/String;)Landroid/net/Uri;");
 	jobject JUri = Env->CallStaticObjectMethod(UriClass, UriParseMethod, *FJavaHelper::ToJavaString(Env, Uri));
-	LogException(Env);
+	VerifyException(Env);
 	return NewScopedJavaObject(Env, JUri);
 }
 
@@ -51,14 +67,15 @@ FScopedJavaObject<jobjectArray> FJavaUtils::GetArrayOfByteArray(const TArray<TAr
 	if (!ByteArray.Num())
 		return FScopedJavaObject<jobjectArray>(Env, nullptr);
 		
-	jclass ArrayElemClass = Env->FindClass("[B");
-	jobjectArray JByteArray = Env->NewObjectArray(ByteArray.Num(), ArrayElemClass, Env->NewByteArray(1));
-	Env->DeleteLocalRef(ArrayElemClass);
+	jclass ArrayClass = Env->FindClass("[B");
+	jobjectArray JByteArray = Env->NewObjectArray(ByteArray.Num(), ArrayClass, Env->NewByteArray(1));
+	Env->DeleteLocalRef(ArrayClass);
 
 	for (int32 Index = 0; Index < ByteArray.Num(); Index++)
 	{   
 		auto JBytes = GetByteArray(ByteArray[Index]);
 		Env->SetObjectArrayElement(JByteArray, Index, *JBytes);
+		VerifyException(Env);
 	}
 
 	return NewScopedJavaObject(Env, JByteArray);	
@@ -78,6 +95,25 @@ FString FJavaUtils::JUriToString(jobject JUri)
 	return FJavaHelper::FStringFromLocalRef(Env, JString);
 }
 
+TArray<uint8> FJavaUtils::JByteArrayToTArray(jbyteArray JByteArray)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
+	jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
+	int32 ArraySize = Env->GetArrayLength(JByteArray);
+
+	TArray<uint8> ByteArray;
+	
+	if (JByteArray != nullptr)
+	{
+		ByteArray.SetNumUninitialized(ArraySize);
+		memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
+		Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
+	}
+	
+	return ByteArray;
+}
+
 void FJavaUtils::VerifyException(JNIEnv* Env)
 {
 	if (Env->ExceptionCheck())
@@ -94,7 +130,7 @@ void FJavaUtils::LogException(JNIEnv* Env)
 	{
 		Env->ExceptionDescribe();
 		Env->ExceptionClear();
-		UE_LOG(LogAndroid, Warning, TEXT("Java JNI call failed with an exception."));
+		UE_LOG(LogSolanaMobile, Warning, TEXT("Java JNI call failed with an exception."));
 	}	
 }
 

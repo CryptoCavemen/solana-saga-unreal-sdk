@@ -5,12 +5,9 @@
 
 #include "Android/JavaClassObjectWrapper.h"
 
-#include "JavaUtils.h"
+#if PLATFORM_ANDROID
+#include "Android/JavaUtils.h"
 #include "Android/AndroidJavaEnv.h"
-
-#if USE_ANDROID_JNI
-
-using namespace WalletAdapter;
 
 FJavaClassObjectWrapper::FJavaClassObjectWrapper()
 	: Object(nullptr)
@@ -90,6 +87,36 @@ FJavaClassField FJavaClassObjectWrapper::GetClassField(const char* FieldName, co
 	Field.Signature = FuncSig;
 	// Is field valid?
 	checkf(Field.Field, TEXT("Unable to find Java Field %s with Signature %s"), UTF8_TO_TCHAR(FieldName), UTF8_TO_TCHAR(FuncSig));
+	return Field;
+}
+
+FJavaClassStaticMethod FJavaClassObjectWrapper::GetClassStaticMethod(jclass StaticClass, const char* MethodName, const char* FuncSig)
+{
+	check(StaticClass);
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
+	FJavaClassStaticMethod Method;
+	Method.Class = StaticClass;
+	Method.Method = Env->GetStaticMethodID(StaticClass, MethodName, FuncSig);
+	Method.Name = MethodName;
+	Method.Signature = FuncSig;
+	// Is method valid?
+	checkf(Method.Method, TEXT("Unable to find Java Method %s with Signature %s"), UTF8_TO_TCHAR(MethodName), UTF8_TO_TCHAR(FuncSig));
+	return Method;
+}
+
+FJavaClassStaticField FJavaClassObjectWrapper::GetClassStaticField(jclass StaticClass, const char* FieldName, const char* FuncSig)
+{
+	check(StaticClass);
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	
+	FJavaClassStaticField Field;
+	Field.Class = StaticClass;
+	Field.Field = Env->GetStaticFieldID(StaticClass, FieldName, FuncSig);
+	Field.Name = FieldName;
+	Field.Signature = FuncSig;
+	// Is field valid?
+	checkf(Field.Field, TEXT("Unable to find Java Field %s with Signature %s"), UTF8_TO_TCHAR(FieldName), UTF8_TO_TCHAR(FuncSig));
 	return Field;	
 }
 
@@ -151,15 +178,39 @@ bool FJavaClassObjectWrapper::CallMethod<bool>(FJavaClassMethod Method, ...)
 }
 
 template<>
-int FJavaClassObjectWrapper::CallMethod<int>(FJavaClassMethod Method, ...)
+int16 FJavaClassObjectWrapper::CallMethod<int16>(FJavaClassMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	va_list Params;
 	va_start(Params, Method);
-	int RetVal = Env->CallIntMethodV(Object, Method.Method, Params);
+	int16 RetVal = Env->CallShortMethodV(Object, Method.Method, Params);
 	va_end(Params);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
+}
+
+template<>
+int32 FJavaClassObjectWrapper::CallMethod<int32>(FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	int32 RetVal = Env->CallIntMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+TArray<uint8> FJavaClassObjectWrapper::CallMethod<TArray<uint8>>(FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jbyteArray val = (jbyteArray)Env->CallObjectMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return FJavaUtils::JByteArrayToTArray(val);
 }
 
 template<>
@@ -216,6 +267,94 @@ FString FJavaClassObjectWrapper::CallMethod<FString>(FJavaClassMethod Method, ..
 }
 
 template<>
+void FJavaClassObjectWrapper::CallStaticMethod<void>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+}
+
+template<>
+bool FJavaClassObjectWrapper::CallStaticMethod<bool>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	bool RetVal = Env->CallStaticBooleanMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+int FJavaClassObjectWrapper::CallStaticMethod<int>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	int RetVal = Env->CallStaticIntMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+jobject FJavaClassObjectWrapper::CallStaticMethod<jobject>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	jobject RetVal = Env->NewGlobalRef(val);
+	Env->DeleteLocalRef(val);
+	return RetVal;
+}
+
+template<>
+jobjectArray FJavaClassObjectWrapper::CallStaticMethod<jobjectArray>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	jobjectArray RetVal = (jobjectArray)Env->NewGlobalRef(val);
+	Env->DeleteLocalRef(val);
+	return RetVal;
+}
+
+template<>
+int64 FJavaClassObjectWrapper::CallStaticMethod<int64>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	int64 RetVal = Env->CallStaticLongMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+template<>
+FString FJavaClassObjectWrapper::CallStaticMethod<FString>(FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jstring RetVal = static_cast<jstring>(Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params));
+	va_end(Params);
+	FJavaUtils::VerifyException(Env);
+	auto Result = FJavaHelper::FStringFromLocalRef(Env, RetVal);
+	return Result;
+}
+
+template<>
 void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, FJavaClassMethod Method, ...)
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
@@ -234,6 +373,29 @@ void FJavaClassObjectWrapper::CallThrowableMethod<void>(jthrowable& Exception, F
 	{
 		Exception = nullptr;
 	}	
+}
+
+template<>
+bool FJavaClassObjectWrapper::CallThrowableMethod<bool>(jthrowable& Exception, FJavaClassMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	bool RetVal = Env->CallBooleanMethodV(Object, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+	
+	return RetVal;
 }
 
 template<>
@@ -261,12 +423,89 @@ jobject FJavaClassObjectWrapper::CallThrowableMethod<jobject>(jthrowable& Except
 	return RetVal;
 }
 
+template<>
+void FJavaClassObjectWrapper::CallThrowableStaticMethod<void>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	Env->CallStaticVoidMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+}
+
+template<>
+bool FJavaClassObjectWrapper::CallThrowableStaticMethod<bool>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	bool RetVal = Env->CallStaticBooleanMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+	
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+
+	return RetVal;
+}
+
+template<>
+jobject FJavaClassObjectWrapper::CallThrowableStaticMethod<jobject>(jthrowable& Exception, FJavaClassStaticMethod Method, ...)
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	va_list Params;
+	va_start(Params, Method);
+	jobject val = Env->CallStaticObjectMethodV(Method.Class, Method.Method, Params);
+	va_end(Params);
+
+	if (Env->ExceptionCheck())
+	{
+		Exception = Env->ExceptionOccurred();		
+		Env->ExceptionDescribe();
+		Env->ExceptionClear();
+	}
+	else
+	{
+		Exception = nullptr;
+	}
+	
+	jobject RetVal = Env->NewGlobalRef(val);
+	Env->DeleteLocalRef(val);
+	return RetVal;
+}
+
 jobject FJavaClassObjectWrapper::GetObjectField(FJavaClassField Field) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	jobject RetVal = Env->GetObjectField(Object, Field.Field);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;		
+}
+
+bool FJavaClassObjectWrapper::GetBooleanField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jboolean RetVal = Env->GetBooleanField(Object, Field.Field);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
 }
 
 FString FJavaClassObjectWrapper::GetStringField(FJavaClassField Field) const
@@ -282,6 +521,14 @@ uint8 FJavaClassObjectWrapper::GetByteField(FJavaClassField Field) const
 {
 	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
 	jbyte RetVal = Env->GetByteField(Object, Field.Field);
+	FJavaUtils::VerifyException(Env);
+	return RetVal;
+}
+
+uint32 FJavaClassObjectWrapper::GetIntField(FJavaClassField Field) const
+{
+	JNIEnv* Env = AndroidJavaEnv::GetJavaEnv();
+	jint RetVal = Env->GetIntField(Object, Field.Field);
 	FJavaUtils::VerifyException(Env);
 	return RetVal;
 }
@@ -314,18 +561,8 @@ TArray<uint8> FJavaClassObjectWrapper::GetByteArrayField(FJavaClassField Field) 
 	jbyteArray JByteArray = static_cast<jbyteArray>(Env->GetObjectField(Object, Field.Field));
 	FJavaUtils::VerifyException(Env);
 	
-	jbyte* ArrayDataPtr = Env->GetByteArrayElements(JByteArray, 0);
-	int32 ArraySize = Env->GetArrayLength(JByteArray);
-
-	TArray<uint8> ByteArray;
-	
-	if (JByteArray != nullptr)
-	{
-		ByteArray.SetNumUninitialized(ArraySize);
-		memcpy(ByteArray.GetData(), ArrayDataPtr, ArraySize);
-		Env->ReleaseByteArrayElements(JByteArray, ArrayDataPtr, JNI_ABORT);
-	}
-	
+	TArray<uint8> ByteArray = FJavaUtils::JByteArrayToTArray(JByteArray);	
+		
 	Env->DeleteLocalRef(JByteArray);
 	
 	return ByteArray;
@@ -373,4 +610,3 @@ FJavaClassObjectWrapper::operator bool() const
 }
 
 #endif
-

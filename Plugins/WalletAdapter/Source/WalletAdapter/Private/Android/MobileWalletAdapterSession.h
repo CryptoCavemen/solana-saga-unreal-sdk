@@ -5,15 +5,12 @@
 
 #pragma once
 
-#include "Defines.h"
+#include "Android/Defines.h"
 #include "CoreMinimal.h"
 #include "MobileWalletAdapterSessionCommon.h"
 #if PLATFORM_ANDROID
 #include "Android/JavaClassObjectWrapper.h"
 
-namespace WalletAdapter
-{
-	
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterSession 
  */
@@ -21,7 +18,5 @@ class FMobileWalletAdapterSession : public FMobileWalletAdapterSessionCommon
 {
 	DECLARE_JAVA_CLASS_OBJECT(FMobileWalletAdapterSession);
 };
-	
-}
 
 #endif
