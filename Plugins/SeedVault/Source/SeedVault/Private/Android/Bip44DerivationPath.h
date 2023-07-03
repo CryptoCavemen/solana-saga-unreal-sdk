@@ -30,7 +30,6 @@ public:
 	TArray<TSharedRef<FBipLevel>> GetLevels();
 	FString ToUri();
 	static TSharedPtr<FBip44DerivationPath> FromUri(const FString& Uri, TSharedPtr<FThrowable>* OutException);
-	FString ToString();
 protected:
 	FJavaClassMethod GetAccountMethod;
 	FJavaClassMethod HasChangeMethod;
@@ -40,7 +39,6 @@ protected:
 	FJavaClassMethod GetLevelsMethod;
 	FJavaClassMethod ToUriMethod;
 	static FJavaClassStaticMethod FromUriMethod;
-	FJavaClassMethod ToStringMethod;
 };
 
 #endif

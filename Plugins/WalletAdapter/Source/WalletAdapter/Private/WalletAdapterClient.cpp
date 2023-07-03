@@ -31,6 +31,54 @@ void UWalletAdapterClient::SetClientImpl(const TSharedPtr<FMobileWalletAdapterCl
 }
 #endif
 
+void UWalletAdapterClient::GetCapabilities(const FCapabilitiesSuccessDelegate& Success, const FFailureDelegate& Failure)
+{
+#if PLATFORM_ANDROID
+	TSharedPtr<FThrowable> Exception;
+
+	auto JCapabilitiesFuture = Client->GetCapabilities(Exception);
+	if (Exception)
+	{
+		UE_LOG(LogWalletAdapter, Error, TEXT("GetCapabilities failed: %s"), *Exception->GetMessage());
+		Failure.ExecuteIfBound(Exception->GetMessage());
+		return;
+	}
+
+	check(JCapabilitiesFuture.IsValid());
+	
+	AsyncTask(ENamedThreads::AnyThread, [this, JCapabilitiesFuture, Success, Failure]
+	{
+		TSharedPtr<FThrowable> FutureGetException;		
+		auto JCapabilitiesResult = JCapabilitiesFuture->Get(&FutureGetException);
+		if (FutureGetException)
+		{
+			UE_LOG(LogWalletAdapter, Error, TEXT("GetCapabilities failed: %s"), *FutureGetException->GetMessage());
+			Failure.ExecuteIfBound(FutureGetException->GetMessage());
+			return;
+		}
+
+		check(JCapabilitiesResult.IsValid());
+		auto CapabilitiesResult = FGetCapabilitiesResultWrapper::CreateFromExisting(JCapabilitiesResult->GetJObject());
+		
+		// SUCCESS
+		UE_LOG(LogWalletAdapter, Log, TEXT("GetCapabilitiesResult: %s"), *CapabilitiesResult->ToString());
+
+		FGetCapabilitiesResult Caps;
+		Caps.bSupportsCloneAuthorization = CapabilitiesResult->GetSupportsCloneAuthorization();
+		Caps.bSupportsSignAndSendTransactions = CapabilitiesResult->GetSupportsSignAndSendTransactions();
+		Caps.MaxMessagesPerSigningRequest = CapabilitiesResult->GetMaxMessagesPerSigningRequestFieldRequest();
+		Caps.MaxTransactionsPerSigningRequest = CapabilitiesResult->GetMaxTransactionsPerSigningRequest();
+		auto SupportedVersions = CapabilitiesResult->GetSupportedTransactionVersions();
+		for (auto SupportedVersion : SupportedVersions)
+			Caps.SupportedTransactionVersions.Add(SupportedVersion->ToString());
+		
+		Success.ExecuteIfBound(Caps);
+	});;
+#else
+	Failure.ExecuteIfBound("Current platform is not supported");	
+#endif
+}
+
 void UWalletAdapterClient::Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure)
 {
 #if PLATFORM_ANDROID
@@ -311,6 +359,39 @@ void UWalletAdapterClient::SignMessagesDetached(const TArray<FByteArray>& Messag
 #else
 	Failure.ExecuteIfBound("Current platform is not supported");	
 #endif
+}
+
+void UWalletAdapterClient::K2_GetCapabilities(FCapabilitiesSuccessDynDelegate Success, FFailureDynDelegate Failure)
+{
+	GetCapabilities(
+		FCapabilitiesSuccessDelegate::CreateLambda([Success](const FGetCapabilitiesResult& Caps)
+		{
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Success, Caps]
+				{			
+					Success.ExecuteIfBound(Caps);
+				});
+			}
+			else
+			{
+				Success.ExecuteIfBound(Caps);
+			}
+		}),
+		FFailureDelegate::CreateLambda([Failure](const FString& ErrorMessage)
+		{
+			if (!IsInGameThread())
+			{
+				AsyncTask(ENamedThreads::GameThread, [Failure, ErrorMessage]
+				{			
+					Failure.ExecuteIfBound(ErrorMessage);
+				});
+			}
+			else
+			{
+				Failure.ExecuteIfBound(ErrorMessage);
+			}			
+		}));	
 }
 
 void UWalletAdapterClient::K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure)

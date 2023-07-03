@@ -23,7 +23,6 @@ BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FBip44DerivationPath, FJavaClassObjectWrapper,
 	GetAddressIndexMethod = GetClassMethod("getAddressIndex", "()Lcom/solanamobile/seedvault/BipLevel;");
 	GetLevelsMethod = GetClassMethod("getLevels", "()Ljava/util/List;");
 	ToUriMethod = GetClassMethod("toUri", "()Landroid/net/Uri;");
-	ToStringMethod = GetClassMethod("toString", "()Ljava/lang/String;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 FJavaClassStaticMethod FBip44DerivationPath::FromUriMethod;
@@ -94,11 +93,6 @@ TSharedPtr<FBip44DerivationPath> FBip44DerivationPath::FromUri(const FString& Ur
 		jobject JBip44DerivationPath = CallStaticMethod<jobject>(FromUriMethod, *FJavaUtils::GetJUri(Uri));
 		return CreateFromExisting(JBip44DerivationPath);
 	}
-}
-
-FString FBip44DerivationPath::ToString()
-{
-	return CallMethod<FString>(ToStringMethod);
 }
 
 #endif

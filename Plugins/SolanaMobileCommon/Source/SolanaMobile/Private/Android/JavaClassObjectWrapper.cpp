@@ -34,6 +34,20 @@ FJavaClassObjectWrapper::~FJavaClassObjectWrapper()
 		Env->DeleteGlobalRef(Class);
 }
 
+FJavaClassObjectWrapper* FJavaClassObjectWrapper::Construct(jobject JObject)
+{
+	check(JObject);
+	FJavaClassObjectWrapper* Object = new FJavaClassObjectWrapper(JObject);	
+	va_list Args;
+	Object->PostConstruct(nullptr, nullptr, Args);
+	return Object;	
+}
+
+TSharedRef<FJavaClassObjectWrapper> FJavaClassObjectWrapper::CreateFromExisting(jobject JObject)
+{
+	return MakeShareable(Construct(JObject));
+}
+
 void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args)
 {
 	if (!CtorSig)
@@ -62,6 +76,8 @@ void FJavaClassObjectWrapper::PostConstruct(const char* ClassName, const char* C
 	
 	// Convert the passed reference to a global one if required and store the pointer.
 	StoreObjectReference(Object);
+
+	ToStringMethod = GetClassMethod("toString", "()Ljava/lang/String;");
 }
 
 FJavaClassMethod FJavaClassObjectWrapper::GetClassMethod(const char* MethodName, const char* FuncSig) const
@@ -601,6 +617,11 @@ TArray<TArray<uint8>> FJavaClassObjectWrapper::GetArrayOfByteArrayField(FJavaCla
 	Env->DeleteLocalRef(JObjectArray);
 	
 	return ArrayOfByteArray;
+}
+
+FString FJavaClassObjectWrapper::ToString()
+{
+	return CallMethod<FString>(ToStringMethod);
 }
 
 FJavaClassObjectWrapper::operator bool() const

@@ -19,11 +19,9 @@ class FBipLevel : public FJavaClassObjectWrapper
 public:
 	int32 GetIndex() const;
 	bool GetHardened() const;
-	FString ToString();
 protected:
 	FJavaClassField IndexField;
-	FJavaClassField HardenedField;
-	FJavaClassMethod ToStringMethod;
+	FJavaClassField HardenedField;	
 };
 
 #endif

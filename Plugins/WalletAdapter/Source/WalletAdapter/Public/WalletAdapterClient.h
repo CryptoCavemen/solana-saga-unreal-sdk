@@ -15,7 +15,34 @@ class FMobileWalletAdapterClient;
 class FSignedMessageWrapper;
 #endif
 
+/**
+ * FGetCapabilitiesResult
+ */
+USTRUCT(BlueprintType)
+struct FGetCapabilitiesResult
+{
+	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bSupportsCloneAuthorization;
+	UPROPERTY(BlueprintReadOnly)
+	bool bSupportsSignAndSendTransactions;
+	UPROPERTY(BlueprintReadOnly)
+	int32 MaxTransactionsPerSigningRequest;
+	UPROPERTY(BlueprintReadOnly)
+	int32 MaxMessagesPerSigningRequest;
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FString> SupportedTransactionVersions;
+
+	FGetCapabilitiesResult()
+		: bSupportsCloneAuthorization(false)
+		, bSupportsSignAndSendTransactions(false)
+		, MaxTransactionsPerSigningRequest(0)
+		, MaxMessagesPerSigningRequest(0)
+	{
+	}
+};
+	
 /**
  * FSignedMessage
  */
@@ -54,18 +81,22 @@ public:
 
 public:
 	DECLARE_DELEGATE(FSuccessDelegate);
+	DECLARE_DELEGATE_OneParam(FCapabilitiesSuccessDelegate, const FGetCapabilitiesResult& Capabilities);
 	DECLARE_DELEGATE_OneParam(FAuthSuccessDelegate, const FString& AuthToken);
 	DECLARE_DELEGATE_OneParam(FSignSuccessDelegate, const TArray<FByteArray>& Transactions);
 	DECLARE_DELEGATE_OneParam(FSignMessagesSuccessDelegate, const TArray<FSignedMessage>& SignedMessages);
 	DECLARE_DELEGATE_OneParam(FFailureDelegate, const FString& ErrorMessage);
 
 	DECLARE_DYNAMIC_DELEGATE(FSuccessDynDelegate);
+	DECLARE_DYNAMIC_DELEGATE_OneParam(FCapabilitiesSuccessDynDelegate, const FGetCapabilitiesResult&, Capabilities);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FAuthSuccessDynDelegate, const FString&, AuthToken);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignSuccessDynDelegate, const TArray<FByteArray>&, Transactions);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FSignMessagesSuccessDynDelegate, const TArray<FSignedMessage>&, SignedMessages);
 	DECLARE_DYNAMIC_DELEGATE_OneParam(FFailureDynDelegate, const FString&, ErrorMessage);
 	
 public:
+	/** Gets capabilities of a client. */
+	void GetCapabilities(const FCapabilitiesSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Authorizes a client. */
 	void Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, const FAuthSuccessDelegate& Success, const FFailureDelegate& Failure);
 	/** Reauthorizes a client. */
@@ -80,6 +111,9 @@ public:
 	void SignMessagesDetached(const TArray<FByteArray>& Messages, const TArray<FByteArray>& Addresses, const FSignMessagesSuccessDelegate& Success, const FFailureDelegate& Failure);	
 
 public:
+	/** Gets capabilities of a client. */
+	UFUNCTION(BlueprintCallable, meta=(DisplayName="GetCapabilities", ScriptName="GetCapabilities"), Category="Solana")
+	void K2_GetCapabilities(FCapabilitiesSuccessDynDelegate Success, FFailureDynDelegate Failure);	
 	/** Authorizes a client. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Authorize", ScriptName="Authorize"), Category="Solana")
 	void K2_Authorize(FString IdentityUri, FString IconUri, FString IdentityName, FString Cluster, FAuthSuccessDynDelegate Success, FFailureDynDelegate Failure);

@@ -75,6 +75,14 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::Deauthorize(const FString& AuthT
 	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();
 }
 
+TSharedPtr<FFuture> FMobileWalletAdapterClient::GetCapabilities(TSharedPtr<FThrowable>& OutException)
+{
+	jthrowable JThrowable;
+	jobject RetVal = CallThrowableMethod<jobject>(JThrowable, GetCapabilitiesMethod);
+	OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+	return RetVal ? FFuture::CreateFromExisting(RetVal) : TSharedPtr<FFuture>();	
+}
+
 TSharedPtr<FFuture> FMobileWalletAdapterClient::SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException)
 {
 	UE_LOG(LogWalletAdapter, Log, TEXT("Signing %d transactions"), Transactions.Num());
@@ -119,7 +127,46 @@ TSharedPtr<FFuture> FMobileWalletAdapterClient::SignMessagesDetached(const TArra
 }
 
 
-BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FGetCapabilitiesResultWrapper, FJavaClassObjectWrapper, "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$GetCapabilitiesResult", "")
+	SupportsCloneAuthorizationField = GetClassField("supportsCloneAuthorization", "Z");
+	SupportsSignAndSendTransactionsField = GetClassField("supportsSignAndSendTransactions", "Z");
+	MaxTransactionsPerSigningRequestField = GetClassField("maxTransactionsPerSigningRequest", "I");
+	MaxMessagesPerSigningRequestField = GetClassField("maxMessagesPerSigningRequest", "I");
+	SupportedTransactionVersionsField = GetClassField("supportedTransactionVersions", "[Ljava/lang/Object;");
+END_IMPLEMENT_JAVA_CLASS_OBJECT
+
+bool FGetCapabilitiesResultWrapper::GetSupportsCloneAuthorization() const
+{
+	return GetBooleanField(SupportsCloneAuthorizationField);
+}
+
+bool FGetCapabilitiesResultWrapper::GetSupportsSignAndSendTransactions() const
+{
+	return GetBooleanField(SupportsSignAndSendTransactionsField);
+}
+
+int32 FGetCapabilitiesResultWrapper::GetMaxTransactionsPerSigningRequest() const
+{
+	return GetIntField(MaxTransactionsPerSigningRequestField);
+}
+
+int32 FGetCapabilitiesResultWrapper::GetMaxMessagesPerSigningRequestFieldRequest() const
+{
+	return GetIntField(MaxMessagesPerSigningRequestField);
+}
+
+TArray<FJavaClassObjectWrapperRef> FGetCapabilitiesResultWrapper::GetSupportedTransactionVersions() const
+{
+	TArray<FJavaClassObjectWrapperRef> RetVal;
+	auto JObjectArray = GetObjectArrayField(SupportedTransactionVersionsField);
+	for (auto JObject : JObjectArray)
+		RetVal.Add(FJavaClassObjectWrapper::CreateFromExisting(JObject));
+	return RetVal;
+}
+
+
+BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FAuthorizationResultWrapper, FJavaClassObjectWrapper,
+                                  "com/solana/mobilewalletadapter/clientlib/protocol/MobileWalletAdapterClient$AuthorizationResult",
                                   "(Ljava/lang/String;[BLjava/lang/String;Landroid/net/Uri;)V",
                                   const FString& AuthToken, const TArray<uint8>& PublicKey, const FString& AccountLabel, const FString& WalletUriBase)
 	AuthTokenField = GetClassField("authToken", "Ljava/lang/String;");

@@ -130,6 +130,8 @@ public:
 	/** Constructs the wrapper for a java object. Both local and global references are accepted.*/
 	FJavaClassObjectWrapper(jobject InObject);
 	virtual ~FJavaClassObjectWrapper();
+	static FJavaClassObjectWrapper* Construct(jobject JObject);
+	static TSharedRef<FJavaClassObjectWrapper> CreateFromExisting(jobject JObject);
 protected:
 	virtual void PostConstruct(const char* ClassName, const char* CtorSig, const va_list Args);
 public:
@@ -160,17 +162,21 @@ public:
 	TArray<uint8> GetByteArrayField(FJavaClassField Field) const;
 	TArray<TArray<uint8>> GetArrayOfByteArrayField(FJavaClassField Field) const;
 
+	FString ToString();
+
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject GetJObject() const { return Object; }
 	/** Returns the underlying JNI pointer */
 	FORCEINLINE jobject operator*() const { return Object; }
-	operator bool() const;
+	operator bool() const;	
 
 protected:
 	/** Native java object */
 	jobject Object;
 	/** The java class of a stored object */
 	jclass Class;
+	
+	FJavaClassMethod ToStringMethod;	
 
 private:
 	FJavaClassObjectWrapper(const FJavaClassObjectWrapper& rhs);

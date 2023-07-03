@@ -120,7 +120,7 @@ bool ULocalAssociationWithWallet::OpenWallet(const FString& UriPrefix)
 #endif
 }
 
-void ULocalAssociationWithWallet::K2_Start(const FStartSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void ULocalAssociationWithWallet::K2_Start(FStartSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Start(
 		FStartSuccessDelegate::CreateLambda([Success](UWalletAdapterClient* InClient)
@@ -153,7 +153,7 @@ void ULocalAssociationWithWallet::K2_Start(const FStartSuccessDynDelegate& Succe
 		}));	
 }
 
-void ULocalAssociationWithWallet::K2_Close(const FCloseSuccessDynDelegate& Success, const FFailureDynDelegate& Failure)
+void ULocalAssociationWithWallet::K2_Close(FCloseSuccessDynDelegate Success, FFailureDynDelegate Failure)
 {
 	Close(
 		FCloseSuccessDelegate::CreateLambda([Success]

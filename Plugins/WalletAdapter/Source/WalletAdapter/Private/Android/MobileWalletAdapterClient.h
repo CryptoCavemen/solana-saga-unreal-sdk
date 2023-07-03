@@ -24,6 +24,8 @@ public:
 	TSharedPtr<FFuture> Reauthorize(const FString& IdentityUri, const FString& IconUri, const FString& IdentityName, const FString& AuthToken, TSharedPtr<FThrowable>& OutException);
 	/** Deauthorizes a client. */
 	TSharedPtr<FFuture> Deauthorize(const FString& AuthToken, TSharedPtr<FThrowable>& OutException);
+	/** Returns capabilities of the device. */
+	TSharedPtr<FFuture> GetCapabilities(TSharedPtr<FThrowable>& OutException);
 	/** Sign transactions. */
 	TSharedPtr<FFuture> SignTransactions(const TArray<TArray<uint8>>& Transactions, TSharedPtr<FThrowable>& OutException);
 	/** Sign and send transactions. MinContextSlot might be null. */
@@ -40,6 +42,27 @@ protected:
 	FJavaClassMethod SignMessagesDetachedMethod;
 	FJavaClassMethod SignAndSendTransactionsMethod;
 };
+
+/**
+ * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$GetCapabilitiesResult
+ */
+class FGetCapabilitiesResultWrapper : public FJavaClassObjectWrapper
+{
+	DECLARE_JAVA_CLASS_OBJECT(FGetCapabilitiesResultWrapper);
+public:
+	bool GetSupportsCloneAuthorization() const;
+	bool GetSupportsSignAndSendTransactions() const;
+	int32 GetMaxTransactionsPerSigningRequest() const;
+	int32 GetMaxMessagesPerSigningRequestFieldRequest() const;
+	TArray<FJavaClassObjectWrapperRef> GetSupportedTransactionVersions() const;
+protected:
+	FJavaClassField SupportsCloneAuthorizationField;
+	FJavaClassField SupportsSignAndSendTransactionsField;
+	FJavaClassField MaxTransactionsPerSigningRequestField;
+	FJavaClassField MaxMessagesPerSigningRequestField;
+	FJavaClassField SupportedTransactionVersionsField;
+};
+
 
 /**
  * Wrapper for com.solana.mobilewalletadapter.clientlib.protocol.MobileWalletAdapterClient$AuthorizationResult

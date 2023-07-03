@@ -43,10 +43,10 @@ public:
 	bool OpenWallet(const FString& UriPrefix);
 	/** Starts a local association with a wallet. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Start", ScriptName="Start"), Category = "Solana")
-	void K2_Start(const FStartSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_Start(FStartSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Closes the local association. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Close", ScriptName="Close"), Category = "Solana")
-	void K2_Close(const FCloseSuccessDynDelegate& Success, const FFailureDynDelegate& Failure);
+	void K2_Close(FCloseSuccessDynDelegate Success, FFailureDynDelegate Failure);
 	/** Returns a mobile wallet adapter client. */
 	UFUNCTION(BlueprintCallable, meta=(DisplayName="Get WalletAdapterClient", ScriptName="GetWalletAdapterClient"), Category = "Solana")
 	UWalletAdapterClient* GetWalletAdapterClient();

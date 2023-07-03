@@ -11,7 +11,6 @@
 BEGIN_IMPLEMENT_JAVA_CLASS_OBJECT(FBipLevel, FJavaClassObjectWrapper, "com/solanamobile/seedvault/BipLevel", "(IZ)V")
 	IndexField = GetClassField("index", "I");
 	HardenedField = GetClassField("hardened", "Z");
-	ToStringMethod = GetClassMethod("toString", "()Ljava/lang/String;");
 END_IMPLEMENT_JAVA_CLASS_OBJECT
 
 int32 FBipLevel::GetIndex() const
@@ -22,11 +21,6 @@ int32 FBipLevel::GetIndex() const
 bool FBipLevel::GetHardened() const
 {
 	return GetBooleanField(HardenedField);
-}
-
-FString FBipLevel::ToString()
-{
-	return CallMethod<FString>(ToStringMethod);
 }
 
 #endif
