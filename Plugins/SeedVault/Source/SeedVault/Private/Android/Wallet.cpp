@@ -277,16 +277,39 @@ void FWallet::UpdateAccountName(FJavaClassObjectWrapperRef Context, int64 AuthTo
 	}
 }
 
-TSharedPtr<FCursor> FWallet::GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection)
+TSharedPtr<FCursor> FWallet::GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException)
 {
-	jobject JCursor = CallStaticMethod<jobject>(
-		GetAuthorizedSeedsMethod,
-		**Context,
-		*FJavaUtils::GetJStringArray(Projection),
-		nullptr,
-		nullptr);
+	TSharedPtr<FCursor> Cursor;
+	
+	if (OutException)
+	{
+		jthrowable JThrowable;
 		
-	return FCursor::CreateFromExisting(JCursor);	
+		jobject JCursor = CallThrowableStaticMethod<jobject>(
+			JThrowable,
+			GetAuthorizedSeedsMethod,
+			**Context,
+			*FJavaUtils::GetJStringArray(Projection),
+			nullptr,
+			nullptr);
+		
+		*OutException = JThrowable ? MakeShareable(FThrowable::Construct(JThrowable)) : nullptr;
+		if (!JThrowable)
+			Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+	else
+	{	
+		jobject JCursor = CallStaticMethod<jobject>(
+			GetAuthorizedSeedsMethod,
+			**Context,
+			*FJavaUtils::GetJStringArray(Projection),
+			nullptr,
+			nullptr);
+		
+		Cursor = FCursor::CreateFromExisting(JCursor);
+	}
+
+	return Cursor;		
 }
 
 TSharedPtr<FCursor> FWallet::GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection, const FString& FilterOnColumn, const FString& Value,

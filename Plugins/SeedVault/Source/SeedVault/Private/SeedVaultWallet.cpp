@@ -447,8 +447,14 @@ TArray<FWalletSeed> USeedVaultWallet::GetAuthorizedSeeds()
 	Columns.Add(AUTHORIZED_SEEDS_AUTH_PURPOSE);
 	Columns.Add(AUTHORIZED_SEEDS_SEED_NAME);
 
-	auto AuthorizedSeedsCursor = FWallet::GetAuthorizedSeeds(AppContext, Columns);
-
+	TSharedPtr<FThrowable> Exception;
+	auto AuthorizedSeedsCursor = FWallet::GetAuthorizedSeeds(AppContext, Columns, &Exception);
+	if (Exception)
+	{
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured in GetAuthorizedSeeds(): %s"), *Exception->GetMessage());
+		return AuthorizedSeeds;
+	}
+	
 	while (AuthorizedSeedsCursor->MoveToNext())
 	{
 		FWalletSeed Seed;
@@ -500,7 +506,7 @@ bool USeedVaultWallet::HasUnauthorizedSeedsForPurpose(EWalletContractV1 Purpose)
 	bool Result = FWallet::HasUnauthorizedSeedsForPurpose(AppContext, (int32)Purpose, &Exception);
 	if (Exception)
 	{
-		UE_LOG(LogSeedVault, Error, TEXT("Exception occured during HasUnauthorizedSeedsForPurpose call: %s"), *Exception->GetMessage());
+		UE_LOG(LogSeedVault, Error, TEXT("Exception occured in HasUnauthorizedSeedsForPurpose(): %s"), *Exception->GetMessage());
 		return false;
 	}
 	return Result;

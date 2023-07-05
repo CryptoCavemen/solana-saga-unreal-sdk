@@ -173,7 +173,7 @@ public:
 	 * @param Projection the set of columns to be present in the returned {@link Cursor}
 	 * @return a {@link FCursor}
 	 */
-	static TSharedPtr<FCursor> GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection);
+	static TSharedPtr<FCursor> GetAuthorizedSeeds(FJavaClassObjectWrapperRef Context, const TArray<FString>& Projection, TSharedPtr<FThrowable>* OutException = nullptr);
 	
 	/**
 	 * Request a {@link FCursor} containing the authorized seeds for the current app which match the
